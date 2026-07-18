@@ -1,0 +1,13 @@
+{
+  "login": "Login",
+  "phoneNumber": "Phone Number",
+  "password": "Password",
+  "forgetPassword": "Forgot Password?",
+  "loginWithSms": "Login with SMS",
+  "enterVerificationCode": "Enter Verification Code",
+  "resendCodeIn": "Resend code in {time}",
+  "resendCode": "Resend Code",
+  "changePassword": "Change Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password"
+}

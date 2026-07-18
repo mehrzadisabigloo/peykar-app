@@ -1,0 +1,12 @@
+{
+  "home": "Home",
+  "activeUsers": "Active Users",
+  "filters": "Filters",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "mobile": "Mobile",
+  "userRole": "User Role",
+  "sorting": "Sorting",
+  "clear": "Clear",
+  "applyFilter": "Apply Filter"
+}
