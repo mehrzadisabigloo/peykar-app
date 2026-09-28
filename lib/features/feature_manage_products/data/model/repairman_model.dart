@@ -18,7 +18,7 @@ List<String>? _toList(dynamic value) {
 }
 
 @freezed
-class RepairmanModel with _$RepairmanModel {
+sealed class RepairmanModel with _$RepairmanModel {
   const factory RepairmanModel({
     @Default('') String id,
     @JsonKey(name: 'first_name') String? firstName,
@@ -30,6 +30,7 @@ class RepairmanModel with _$RepairmanModel {
     @JsonKey(name: 'profile_image_id') String? profileImageId,
     String? ostan,
     String? shahrestan,
+    String? address,
     String? brand,
     @JsonKey(name: 'identity_images', fromJson: _toList) List<String>? identityImages,
     @JsonKey(name: 'business_license_image', fromJson: _toList) List<String>? businessLicenseImage,
@@ -61,6 +62,7 @@ class RepairmanModel with _$RepairmanModel {
         profileImageId: profileImageId,
         ostan: ostan,
         shahrestan: shahrestan,
+        address: address,
         brand: brand,
         identityImages: identityImages,
         businessLicenseImage: businessLicenseImage,
@@ -87,6 +89,7 @@ class RepairmanModel with _$RepairmanModel {
         profileImageId: entity.profileImageId,
         ostan: entity.ostan,
         shahrestan: entity.shahrestan,
+        address: entity.address,
         brand: entity.brand,
         identityImages: entity.identityImages,
         businessLicenseImage: entity.businessLicenseImage,
@@ -104,7 +107,7 @@ class RepairmanModel with _$RepairmanModel {
 }
 
 @freezed
-class LocationModel with _$LocationModel {
+sealed class LocationModel with _$LocationModel {
   const factory LocationModel({
     @JsonKey(fromJson: _anyToDouble) @Default(0.0) double lat,
     @JsonKey(fromJson: _anyToDouble) @Default(0.0) double lng,

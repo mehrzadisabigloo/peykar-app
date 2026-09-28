@@ -34,7 +34,7 @@ List<String>? _toList(dynamic value) {
 }
 
 @freezed
-class RepairmanDetailsModel with _$RepairmanDetailsModel {
+sealed class RepairmanDetailsModel with _$RepairmanDetailsModel {
   const factory RepairmanDetailsModel({
     @Default('') String id,
 
@@ -71,16 +71,10 @@ class RepairmanDetailsModel with _$RepairmanDetailsModel {
     )
     List<String>? businessLicenseImage,
 
-    @JsonKey(name: 'phone_numbers')
-    String? phoneNumbers,
+    @JsonKey(name: 'phone_numbers', fromJson: _toList)
+    List<String>? phoneNumbers,
 
-    @JsonKey(fromJson: _anyToDouble)
-    @Default(0.0)
-    double lat,
-
-    @JsonKey(fromJson: _anyToDouble)
-    @Default(0.0)
-    double lng,
+    Map<String, dynamic>? location,
 
     @JsonKey(
       name: 'shop_images',
@@ -98,6 +92,7 @@ class RepairmanDetailsModel with _$RepairmanDetailsModel {
     String? occupationId,
 
     String? status,
+    String? address,
 
     @JsonKey(
       name: 'referral_count',
@@ -116,6 +111,24 @@ class RepairmanDetailsModel with _$RepairmanDetailsModel {
       fromJson: _anyToBool,
     )
     bool? hasService,
+
+    @JsonKey(
+      name: 'distance_km',
+      fromJson: _anyToDouble,
+    )
+    double? distanceKm,
+
+    @JsonKey(
+      name: 'rating_average',
+      fromJson: _anyToDouble,
+    )
+    double? ratingAverage,
+
+    @JsonKey(
+      name: 'ratings_count',
+      fromJson: _anyToInt,
+    )
+    int? ratingsCount,
   }) = _RepairmanDetailsModel;
 
   const RepairmanDetailsModel._();
@@ -132,12 +145,23 @@ class RepairmanDetailsModel with _$RepairmanDetailsModel {
         : '${firstName ?? ''} ${lastName ?? ''}'.trim(),
     imageUrl:
     shopImages != null && shopImages!.isNotEmpty ? shopImages!.first : '',
-    rating: 0,
-    reviewsCount: 0,
+    rating: ratingAverage ?? 0,
+    reviewsCount: ratingsCount ?? 0,
     distance: 0,
     services: [],
     mobile: mobile,
-    address: '${ostan ?? ''} ${shahrestan ?? ''}'.trim(),
+    address: (address != null && address!.isNotEmpty) ? address : 'آدرس ثبت نشده است',
+    lat: _anyToDouble(location?['lat']),
+    lng: _anyToDouble(location?['lng']),
+    email: email,
+    ostan: ostan,
+    shahrestan: shahrestan,
+    brand: brand,
+    phoneNumbers: phoneNumbers?.join('، '),
+    shopImages: shopImages,
+    status: status,
+    distanceKm: distanceKm,
+    profileImageId: profileImageId,
   );
 
   factory RepairmanDetailsModel.fromEntity(RepairShopEntity entity) {
@@ -148,6 +172,7 @@ class RepairmanDetailsModel with _$RepairmanDetailsModel {
       shopImages: entity.imageUrl.isNotEmpty ? [entity.imageUrl] : null,
       ostan: entity.address?.split(' ').first,
       shahrestan: entity.address?.split(' ').last,
+      location: {'lat': entity.lat, 'lng': entity.lng},
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_client_services_stateful_widget_state.dart';
 import '../bloc/client_services_bloc.dart';
 import '../widget/category_item.dart';
@@ -38,7 +39,7 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       body: BlocBuilder<ClientServicesBloc, ClientServicesState>(
         builder: (context, state) {
           if (state is ClientServicesLoading) {
@@ -84,11 +85,11 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
             height: 50.h,
             width: 50.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(15.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 ),
@@ -96,7 +97,7 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
             ),
             child: Icon(
               Icons.tune_rounded,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
               size: 24.sp,
             ),
           ),
@@ -107,11 +108,11 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
           child: Container(
             height: 50.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(15.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 ),
@@ -122,12 +123,12 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
               decoration: InputDecoration(
                 hintText: 'جستجو در خدمات',
                 hintStyle: TextStyle(
-                  color: Colors.grey.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   fontSize: 14.sp,
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: Colors.grey.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   size: 22.sp,
                 ),
                 border: InputBorder.none,
@@ -137,10 +138,10 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
               ),
               style: TextStyle(
                 fontSize: 14.sp,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
               ),
               textAlignVertical: TextAlignVertical.center,
-              cursorColor: Colors.blue,
+              cursorColor: StatusColors.of(context).info,
             ),
           ),
         ),
@@ -174,7 +175,7 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
           ),
         ),
         GestureDetector(
@@ -182,7 +183,7 @@ class _ScreenClientServicesState extends BaseClientServicesStatefulWidgetState<S
           child: Text(
             'مشاهده همه',
             style: TextStyle(
-              color: Colors.blue,
+              color: StatusColors.of(context).info,
               fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),

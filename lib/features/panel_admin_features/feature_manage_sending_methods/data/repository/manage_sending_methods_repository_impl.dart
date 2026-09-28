@@ -3,6 +3,7 @@ import '../../domain/entity/manage_sending_methods_entity.dart';
 import '../../domain/repository/manage_sending_methods_repository.dart';
 import '../data_source/remote/manage_sending_methods_api_provider.dart';
 import '../model/sending_method_model.dart';
+import '../model/location_model.dart';
 
 class ManageSendingMethodsRepositoryImpl extends ManageSendingMethodsRepository {
   final ManageSendingMethodsApiProvider _apiProvider;
@@ -108,6 +109,38 @@ class ManageSendingMethodsRepositoryImpl extends ManageSendingMethodsRepository 
         } else {
           return DataFailed(response.data['message'] ?? "خطا در تغییر وضعیت روش ارسال");
         }
+      } else {
+        return DataFailed("خطای سرور: ${response.statusCode}");
+      }
+    } catch (e) {
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<List<OstanModel>>> fetchOstans() async {
+    try {
+      final response = await _apiProvider.fetchOstans();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['ostans'];
+        final ostans = data.map((json) => OstanModel.fromJson(json)).toList();
+        return DataSuccess(ostans);
+      } else {
+        return DataFailed("خطای سرور: ${response.statusCode}");
+      }
+    } catch (e) {
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<List<ShahrestanModel>>> fetchShahrestans(int ostanId) async {
+    try {
+      final response = await _apiProvider.fetchShahrestans(ostanId);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['shahrestans'];
+        final shahrestans = data.map((json) => ShahrestanModel.fromJson(json)).toList();
+        return DataSuccess(shahrestans);
       } else {
         return DataFailed("خطای سرور: ${response.statusCode}");
       }

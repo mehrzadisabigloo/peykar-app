@@ -10,7 +10,7 @@ String _anyToString(dynamic value) => value?.toString() ?? '';
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class BankAccountModel with _$BankAccountModel {
+sealed class BankAccountModel with _$BankAccountModel {
   const factory BankAccountModel({
     @JsonKey(fromJson: _anyToString) @Default('') String id,
     @JsonKey(name: 'bank_id', fromJson: _anyToInt) int? bankId,
@@ -21,6 +21,7 @@ class BankAccountModel with _$BankAccountModel {
     @JsonKey(fromJson: _anyToString) String? status,
     @JsonKey(name: 'created_at', fromJson: _anyToString) String? createdAt,
     @JsonKey(name: 'updated_at', fromJson: _anyToString) String? updatedAt,
+    BankModel? bank,
   }) = _BankAccountModel;
 
   const BankAccountModel._();
@@ -38,6 +39,7 @@ class BankAccountModel with _$BankAccountModel {
         status: status,
         createdAt: createdAt,
         updatedAt: updatedAt,
+        bank: bank?.toEntity(),
       );
 
   factory BankAccountModel.fromEntity(BankAccountEntity entity) => BankAccountModel(
@@ -50,23 +52,22 @@ class BankAccountModel with _$BankAccountModel {
         status: entity.status,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
+        bank: entity.bank != null ? BankModel(id: entity.bank!.id, name: entity.bank!.name, logo: entity.bank!.logo) : null,
       );
 }
 
-class BankModel {
-  final int? id;
-  final String? name;
-  final String? logo;
+@freezed
+sealed class BankModel with _$BankModel {
+  const factory BankModel({
+    @JsonKey(fromJson: _anyToInt) int? id,
+    @JsonKey(fromJson: _anyToString) String? name,
+    @JsonKey(fromJson: _anyToString) String? logo,
+  }) = _BankModel;
 
-  BankModel({this.id, this.name, this.logo});
+  const BankModel._();
 
-  factory BankModel.fromJson(Map<String, dynamic> json) {
-    return BankModel(
-      id: _anyToInt(json['id']),
-      name: _anyToString(json['name']),
-      logo: _anyToString(json['logo']),
-    );
-  }
+  factory BankModel.fromJson(Map<String, dynamic> json) =>
+      _$BankModelFromJson(json);
 
   BankEntity toEntity() => BankEntity(
         id: id,

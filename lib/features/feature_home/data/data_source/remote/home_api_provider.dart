@@ -6,4 +6,9 @@ class HomeApiProvider {
     final genericApiService = GenericApiService();
     return genericApiService.post('/auth/users-active', params.toJson());
   }
+
+  Future<dynamic> storeUserLocation(Map<String, dynamic> data) async {
+    final genericApiService = GenericApiService();
+    return genericApiService.post('/user-locations/store', data);
+  }
 }

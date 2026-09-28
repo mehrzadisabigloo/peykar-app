@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../l10n/auth_localizations.dart';
 import '../base/base_auth_stateful_widget_state.dart';
 import '../bloc/authentication_bloc.dart';
@@ -38,12 +39,12 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
       setState(() => _isLoading = true);
     } else if (state is Failed) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
-    } else if (state is AuthSuccess) {
+      CstmSnackBar.showError(context, state.message);
+    } else if (state is AuthSuccess || state is Loaded || state is AuthenticationInitial) {
       setState(() => _isLoading = false);
-      context.goNamed('home');
+      if (state is AuthSuccess) {
+        context.goNamed('home');
+      }
     }
   }
 
@@ -54,12 +55,12 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.sp),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -113,18 +114,18 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
                   minimumSize: Size(double.infinity, 56.h),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colorScheme.surface)
                     : Text(AuthLocalizations.of(context)!.login),
               ),
               SizedBox(height: 30.h),
               Row(
                 children: [
-                  Expanded(child: Divider(color: const Color(0xffEEEEEE), thickness: 1)),
+                  Expanded(child: Divider(color: colorScheme.outlineVariant, thickness: 1)),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Text('یا', style: TextStyle(color: Colors.black26, fontSize: 13.sp)),
+                    child: Text('یا', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.26), fontSize: 13.sp)),
                   ),
-                  Expanded(child: Divider(color: const Color(0xffEEEEEE), thickness: 1)),
+                  Expanded(child: Divider(color: colorScheme.outlineVariant, thickness: 1)),
                 ],
               ),
               SizedBox(height: 30.h),
@@ -153,18 +154,19 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
   }
 
   Widget _inputField(String label, String value, {bool isReadOnly = false}) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13.sp, color: Colors.black54),
+          style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         SizedBox(height: 8.h),
         TextField(
           readOnly: isReadOnly,
           controller: TextEditingController(text: value),
-          style: TextStyle(fontSize: 16.sp, color: isReadOnly ? Colors.black45 : Colors.black),
+          style: TextStyle(fontSize: 16.sp, color: isReadOnly ? theme.colorScheme.onSurface.withValues(alpha: 0.45) : theme.colorScheme.onSurface),
           decoration: const InputDecoration(),
         ),
       ],
@@ -172,12 +174,13 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
   }
 
   Widget _passwordField(String label, TextEditingController controller) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13.sp, color: Colors.black54),
+          style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         SizedBox(height: 8.h),
         TextField(
@@ -188,7 +191,7 @@ class _LoginPasswordPageState extends BaseAuthStatefulWidgetState<LoginPasswordP
             suffixIcon: IconButton(
               icon: Icon(
                 _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: Colors.black26,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.26),
                 size: 22.sp,
               ),
               onPressed: () => setState(() => _obscure = !_obscure),

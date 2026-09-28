@@ -28,19 +28,20 @@ class ManageAddressesBloc extends BaseBloc<ManageAddressesEvent, ManageAddresses
 
   Future<void> _onDeleteAddress(DeleteAddressEvent event, Emitter<ManageAddressesState> emit) async {
     final currentState = state;
-    if (currentState is ManageAddressesLoaded) {
-      emit(ManageAddressesLoaded(currentState.addresses, deletingId: event.id));
-    }
+    if (currentState is! ManageAddressesLoaded) return;
+
+    emit(currentState.copyWith(deletingId: event.id, clearMessages: true));
 
     final dataState = await repository.deleteAddress(event.id);
     
     if (dataState is DataSuccess) {
+      emit(currentState.copyWith(successMessage: "آدرس با موفقیت حذف شد", clearDeletingId: true));
       add(const FetchManageAddressesEvent());
     } else {
-      if (state is ManageAddressesLoaded) {
-        emit(ManageAddressesLoaded((state as ManageAddressesLoaded).addresses));
-      }
-      emit(ManageAddressesError(dataState.error ?? "خطا در حذف"));
+      emit(currentState.copyWith(
+        errorMessage: dataState.error ?? "خطا در حذف آدرس",
+        clearDeletingId: true,
+      ));
     }
   }
 }

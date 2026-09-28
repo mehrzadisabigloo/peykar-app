@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as intl;
+import '../../../../core/themes/theme_main.dart';
 import '../../domain/entity/manage_products_entity.dart';
 
 class ProductCard extends StatelessWidget {
@@ -14,21 +15,21 @@ class ProductCard extends StatelessWidget {
     this.onTap,
   });
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFE8EAF6), // Indigo 50
-            Color(0xFFF5F5F5), // Grey 100
+            Theme.of(context).colorScheme.surfaceContainer, // Indigo 50
+            Theme.of(context).colorScheme.surfaceContainer, // Grey 100
           ],
         ),
       ),
       child: Icon(
         Icons.inventory_2_outlined,
-        color: Colors.indigo.withValues(alpha: 0.3),
+        color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.3),
         size: 30.sp,
       ),
     );
@@ -36,16 +37,17 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = intl.NumberFormat('#,###');
+    final colorScheme = Theme.of(context).colorScheme;
+    final formatter = intl.NumberFormat('#,###', 'fa_IR');
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: colorScheme.onSurface.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -67,7 +69,7 @@ class ProductCard extends StatelessWidget {
                     height: 90.r,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.r),
-                      color: const Color(0xFFF8F9FE),
+                      color: colorScheme.surfaceContainer,
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20.r),
@@ -75,12 +77,12 @@ class ProductCard extends StatelessWidget {
                           ? CachedNetworkImage(
                               imageUrl: product.imageUrl,
                               fit: BoxFit.cover,
-                              errorWidget: (context, error, stackTrace) => _buildPlaceholder(),
+                              errorWidget: (context, error, stackTrace) => _buildPlaceholder(context),
                               placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
+                                color: colorScheme.outlineVariant,
                               ),
                             )
-                          : _buildPlaceholder(),
+                          : _buildPlaceholder(context),
                     ),
                   ),
                   if (product.hasDiscount)
@@ -90,7 +92,7 @@ class ProductCard extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade600,
+                          color: colorScheme.error,
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20.r),
                             bottomLeft: Radius.circular(12.r),
@@ -100,7 +102,7 @@ class ProductCard extends StatelessWidget {
                           '${product.discountPercentage}٪',
                           style: TextStyle(
                             fontSize: 10.sp,
-                            color: Colors.white,
+                            color: colorScheme.surface,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -123,7 +125,7 @@ class ProductCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1C1E),
+                              color: colorScheme.onSurface,
                               letterSpacing: -0.5,
                             ),
                             maxLines: 1,
@@ -131,7 +133,7 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 8.w),
-                        _buildStatusBadge(product.status),
+                        _buildStatusBadge(context, product.status),
                       ],
                     ),
                     SizedBox(height: 4.h),
@@ -139,7 +141,7 @@ class ProductCard extends StatelessWidget {
                       product.description,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: const Color(0xFF74777F),
+                        color: colorScheme.outline,
                         height: 1.4,
                       ),
                       maxLines: 1,
@@ -159,7 +161,7 @@ class ProductCard extends StatelessWidget {
                                 formatter.format(product.price),
                                 style: TextStyle(
                                   fontSize: 11.sp,
-                                  color: const Color(0xFFC4C6CF),
+                                  color: colorScheme.outlineVariant,
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
@@ -172,7 +174,7 @@ class ProductCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.indigo.shade900,
+                                    color: DashboardColors.of(context).adminIndigo,
                                   ),
                                 ),
                                 SizedBox(width: 4.w),
@@ -180,7 +182,7 @@ class ProductCard extends StatelessWidget {
                                   'تومان',
                                   style: TextStyle(
                                     fontSize: 10.sp,
-                                    color: Colors.indigo.shade300,
+                                    color: DashboardColors.of(context).adminIndigo,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -192,7 +194,7 @@ class ProductCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F3FB),
+                            color: colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Row(
@@ -200,7 +202,7 @@ class ProductCard extends StatelessWidget {
                               Icon(
                                 Icons.inventory_2_outlined,
                                 size: 12.sp,
-                                color: Colors.indigo.shade400,
+                                color: DashboardColors.of(context).adminIndigo,
                               ),
                               SizedBox(width: 6.w),
                               Text(
@@ -208,7 +210,7 @@ class ProductCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.indigo.shade700,
+                                  color: DashboardColors.of(context).adminIndigo,
                                 ),
                               ),
                             ],
@@ -226,27 +228,22 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(BuildContext context, String status) {
     final isActive = status == 'Active';
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: (isActive ? Colors.green : Colors.orange).withValues(alpha: 0.1),
+        color: (isActive ? StatusColors.of(context).success : StatusColors.of(context).warning).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.r),
-        // border: Border.all(
-        //   color: (isActive ? Colors.green : Colors.orange).withValues(alpha: 0.3),
-        //   width: 1,
-        // ),
       ),
       child: Text(
         isActive ? 'فعال' : 'غیرفعال',
         style: TextStyle(
           fontSize: 10.sp,
-          color: isActive ? Colors.green.shade700 : Colors.orange.shade800,
+          color: isActive ? StatusColors.of(context).success : StatusColors.of(context).warning,
           fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 }
-

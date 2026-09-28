@@ -60,7 +60,7 @@ class _ScreenAllTopRepairShopsState extends BaseClientServicesStatefulWidgetStat
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(state.message, style: TextStyle(fontSize: 14.sp, color: Colors.red)),
+                  Text(state.message, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.error)),
                   SizedBox(height: 16.h),
                   ElevatedButton(
                     onPressed: () => bloc.add(FetchTopRepairShopsEvent()),
@@ -77,7 +77,7 @@ class _ScreenAllTopRepairShopsState extends BaseClientServicesStatefulWidgetStat
             }
 
             return Container(
-              color: const Color(0xFFF8F9FA),
+              color: Theme.of(context).colorScheme.surfaceContainer,
               child: ListView.builder(
                 controller: _scrollController,
                 padding: EdgeInsets.all(20.r),

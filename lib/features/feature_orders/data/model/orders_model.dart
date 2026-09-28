@@ -39,7 +39,7 @@ OrderStatus _mapStatus(dynamic status) {
 }
 
 @freezed
-class OrdersModel with _$OrdersModel {
+sealed class OrdersModel with _$OrdersModel {
   const factory OrdersModel({
     @JsonKey(fromJson: _anyToString) @Default('') String id,
     @JsonKey(name: 'order_number', fromJson: _anyToString) @Default('') String orderNumber,

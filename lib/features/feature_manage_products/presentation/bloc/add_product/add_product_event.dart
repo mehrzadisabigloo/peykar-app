@@ -7,6 +7,10 @@ abstract class AddProductEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class FetchCategoriesEvent extends AddProductEvent {
+  const FetchCategoriesEvent();
+}
+
 class AddProductSubmitEvent extends AddProductEvent {
   final String title;
   final String description;
@@ -15,6 +19,7 @@ class AddProductSubmitEvent extends AddProductEvent {
   final double price;
   final int stock;
   final int maxPurchaseQuantity;
+  final String? categoryId;
 
   const AddProductSubmitEvent({
     required this.title,
@@ -24,6 +29,7 @@ class AddProductSubmitEvent extends AddProductEvent {
     required this.price,
     required this.stock,
     required this.maxPurchaseQuantity,
+    this.categoryId,
   });
 
   @override
@@ -35,5 +41,6 @@ class AddProductSubmitEvent extends AddProductEvent {
         price,
         stock,
         maxPurchaseQuantity,
+        categoryId,
       ];
 }

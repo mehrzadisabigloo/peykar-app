@@ -7,6 +7,7 @@ class ServicesNearYouSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Padding(
@@ -20,14 +21,14 @@ class ServicesNearYouSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               Text(
                 'مشاهده همه',
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: ThemeMain.primaryColor,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -47,11 +48,11 @@ class ServicesNearYouSection extends StatelessWidget {
                 margin: EdgeInsets.only(left: 15.w),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
-                  color: Colors.white,
-                  border: Border.all(color: ThemeMain.greyBorder.withOpacity(0.5)),
+                  color: theme.colorScheme.surface,
+                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -65,7 +66,7 @@ class ServicesNearYouSection extends StatelessWidget {
                       flex: 3,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: ThemeMain.greyBackground,
+                          color: theme.colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
                           image: const DecorationImage(
                             image: AssetImage('assets/images/temp.jpg'),
@@ -87,6 +88,7 @@ class ServicesNearYouSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
                               ),
                               textAlign: TextAlign.right,
                               maxLines: 1,
@@ -98,14 +100,14 @@ class ServicesNearYouSection extends StatelessWidget {
                               children: [
                                 Text(
                                   '۱.۲ کیلومتر',
-                                  style: TextStyle(fontSize: 11.sp, color: ThemeMain.greyText),
+                                  style: TextStyle(fontSize: 11.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                                 ),
                                 const Spacer(),
                                 Text(
                                   '۴.۸',
-                                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                                 ),
-                                Icon(Icons.star, color: Colors.amber, size: 14.sp),
+                                Icon(Icons.star, color: StatusColors.of(context).warning, size: 14.sp),
                               ],
                             ),
                           ],

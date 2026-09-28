@@ -27,4 +27,12 @@ class ManageAddressesApiProvider {
       'count_item': countItem,
     });
   }
+
+  Future<Response> fetchOstans() async {
+    return await _apiService.get('/location/ostan');
+  }
+
+  Future<Response> fetchShahrestans(int ostanId) async {
+    return await _apiService.get('/location/shahrestan/$ostanId');
+  }
 }

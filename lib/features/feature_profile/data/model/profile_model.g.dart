@@ -6,8 +6,8 @@ part of 'profile_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ProfileModelImpl _$$ProfileModelImplFromJson(Map<String, dynamic> json) =>
-    _$ProfileModelImpl(
+_ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) =>
+    _ProfileModel(
       id: json['id'] as String? ?? '',
       firstName: json['first_name'] as String? ?? '',
       lastName: json['last_name'] as String? ?? '',
@@ -18,9 +18,27 @@ _$ProfileModelImpl _$$ProfileModelImplFromJson(Map<String, dynamic> json) =>
       profileImageId: json['profile_image_id'] as String?,
       subscriptionCode: _anyToString(json['subscription_code']),
       status: json['status'] as String?,
+      productsCount: json['products_count'] == null
+          ? 0
+          : _anyToInt(json['products_count']),
+      servicesCount: json['services_count'] == null
+          ? 0
+          : _anyToInt(json['services_count']),
+      ordersCount: json['orders_count'] == null
+          ? 0
+          : _anyToInt(json['orders_count']),
+      brand: json['brand'] as String?,
+      address: json['address'] as String?,
+      hasProduct: json['has_product'] as bool? ?? false,
+      hasService: json['has_service'] as bool? ?? false,
+      location: json['location'] == null
+          ? null
+          : ReservationLocationModel.fromJson(
+              json['location'] as Map<String, dynamic>,
+            ),
     );
 
-Map<String, dynamic> _$$ProfileModelImplToJson(_$ProfileModelImpl instance) =>
+Map<String, dynamic> _$ProfileModelToJson(_ProfileModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'first_name': instance.firstName,
@@ -32,4 +50,12 @@ Map<String, dynamic> _$$ProfileModelImplToJson(_$ProfileModelImpl instance) =>
       'profile_image_id': instance.profileImageId,
       'subscription_code': instance.subscriptionCode,
       'status': instance.status,
+      'products_count': instance.productsCount,
+      'services_count': instance.servicesCount,
+      'orders_count': instance.ordersCount,
+      'brand': instance.brand,
+      'address': instance.address,
+      'has_product': instance.hasProduct,
+      'has_service': instance.hasService,
+      'location': instance.location,
     };

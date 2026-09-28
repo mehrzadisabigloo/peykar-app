@@ -5,21 +5,41 @@ import '../../../../core/resources/data_state.dart';
 import '../../data/repository/home_repository_impl.dart';
 import '../../domain/entity/user_entity.dart';
 import '../../domain/entity/users_filter_params.dart';
+import '../../../../core/bloc/widget_infinite_list/widget_infinite_list_bloc.dart';
 
 part 'users_event.dart';
 part 'users_state.dart';
 
 class UsersBloc extends BaseBloc<UsersEvent, UsersState> {
   final HomeRepositoryImpl homeRepository;
+  final WidgetInfiniteListBloc listBloc;
 
-  UsersBloc(this.homeRepository) : super(const UsersInitial()) {
+  UsersBloc(this.homeRepository, this.listBloc) : super(const UsersInitial()) {
     on<FetchUsers>(_onFetchUsers);
     on<LoadMoreUsers>(_onLoadMoreUsers);
     on<ClearUsersFilters>(_onClearFilters);
+    on<StoreUserLocation>(_onStoreUserLocation);
+    on<StartLocationPermissionRequest>((event, emit) => emit(LocationPermissionProcessing()));
+    on<LocationPermissionDenied>((event, emit) => emit(LocationStoreFailed(event.message)));
   }
 
   UsersFilterParams _currentFilters = const UsersFilterParams();
   List<UserEntity> _users = [];
+
+  Future<void> _onStoreUserLocation(StoreUserLocation event, Emitter<UsersState> emit) async {
+    emit(LocationStoring());
+    final data = {
+      'latitude': event.latitude,
+      'longitude': event.longitude,
+      if (event.address != null) 'address': event.address,
+    };
+    final result = await homeRepository.storeUserLocation(data);
+    if (result is DataSuccess) {
+      emit(LocationStoredSuccess());
+    } else {
+      emit(LocationStoreFailed(result.error ?? 'خطا در ثبت موقعیت مکانی'));
+    }
+  }
 
   Future<void> _onFetchUsers(FetchUsers event, Emitter<UsersState> emit) async {
     _currentFilters = event.params.copyWith(page: 1);
@@ -54,6 +74,7 @@ class UsersBloc extends BaseBloc<UsersEvent, UsersState> {
 
     _currentFilters = _currentFilters.copyWith(page: _currentFilters.page + 1);
     final result = await homeRepository.fetchActiveUsers(_currentFilters);
+    listBloc.add(WidgetInfiniteListBlocEventHideBottomLoading());
 
     if (result is DataSuccess && result.data != null) {
       _users = [..._users, ...result.data!.users];

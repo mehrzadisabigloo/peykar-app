@@ -7,7 +7,7 @@ String _anyToString(dynamic value) => value?.toString() ?? '';
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class SendingMethodModel with _$SendingMethodModel {
+sealed class SendingMethodModel with _$SendingMethodModel {
   const factory SendingMethodModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(fromJson: _anyToString) String? title,
@@ -28,7 +28,7 @@ class SendingMethodModel with _$SendingMethodModel {
 }
 
 @unfreezed
-class SendingMethodLocationModel with _$SendingMethodLocationModel {
+sealed class SendingMethodLocationModel with _$SendingMethodLocationModel {
   factory SendingMethodLocationModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(name: 'sending_method_id', fromJson: _anyToString) String? sendingMethodId,

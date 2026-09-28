@@ -9,11 +9,13 @@ class ShopBasketEntity {
 }
 
 class BasketShopGroup {
+  final String repairmanId;
   final String shopName;
   final List<BasketItem> items;
   final double groupTotalPrice;
 
   BasketShopGroup({
+    required this.repairmanId,
     required this.shopName,
     required this.items,
     required this.groupTotalPrice,
@@ -22,6 +24,7 @@ class BasketShopGroup {
 
 class BasketItem {
   final String id;
+  final String productId;
   final String title;
   final String imageUrl;
   final double price;
@@ -30,6 +33,7 @@ class BasketItem {
 
   BasketItem({
     required this.id,
+    required this.productId,
     required this.title,
     required this.imageUrl,
     required this.price,

@@ -7,27 +7,35 @@ class ReminderCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15.r),
-        ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: colorScheme.surfaceContainer,
+        highlightColor: colorScheme.surface,
         child: Column(
           children: [
             Row(
               children: [
                 // Image Placeholder
                 Container(
-                  width: 60.r,
-                  height: 60.r,
+                  width: 54.r,
+                  height: 54.r,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(15.r),
                   ),
                 ),
                 const Spacer(),
@@ -37,27 +45,18 @@ class ReminderCardShimmer extends StatelessWidget {
                   children: [
                     Container(
                       width: 120.w,
-                      height: 18.h,
+                      height: 16.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Container(
-                      width: 160.w,
-                      height: 12.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
                     SizedBox(height: 10.h),
                     Container(
-                      width: 80.w,
-                      height: 12.h,
+                      width: 150.w,
+                      height: 11.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
@@ -65,15 +64,37 @@ class ReminderCardShimmer extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 20.h),
             // Progress Bar Placeholder
             Container(
               width: double.infinity,
-              height: 4.h,
+              height: 6.h,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(4.r),
               ),
+            ),
+            SizedBox(height: 12.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 60.w,
+                  height: 10.h,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ),
+                Container(
+                  width: 80.w,
+                  height: 10.h,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

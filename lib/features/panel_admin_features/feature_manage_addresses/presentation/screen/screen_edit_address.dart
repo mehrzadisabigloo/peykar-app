@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/resources/data_state.dart';
 import '../../../../../core/services/locator.dart';
+import '../../../../../core/widgets/cstm_snakbar.dart';
+import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 import '../../domain/repository/manage_addresses_repository.dart';
 import '../../data/model/address_model.dart';
 
@@ -20,18 +22,57 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
   final _pelakController = TextEditingController();
   final _vahedController = TextEditingController();
   final _postalCodeController = TextEditingController();
+  
+  List<OstanModel> _ostans = [];
+  List<ShahrestanModel> _shahrestans = [];
+  int? _selectedOstanId;
+  int? _selectedShahrestanId;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.addressId != null) {
-      _loadAddress();
+    _fetchInitialData();
+  }
+
+  Future<void> _fetchInitialData() async {
+    setState(() => _isLoading = true);
+    try {
+      await _fetchOstans();
+      if (widget.addressId != null) {
+        await _loadAddress();
+      } else {
+        // Default values for new address: Zanjan
+        _selectedOstanId = 14;
+        _selectedShahrestanId = 221;
+        await _fetchShahrestans(14);
+      }
+    } catch (e) {
+      if (mounted) CstmSnackBar.showError(context, 'خطا در دریافت اطلاعات اولیه');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _fetchOstans() async {
+    final repo = locator<ManageAddressesRepository>();
+    final result = await repo.fetchOstans();
+    if (result is DataSuccess) {
+      _ostans = result.data ?? [];
+    }
+  }
+
+  Future<void> _fetchShahrestans(int ostanId) async {
+    final repo = locator<ManageAddressesRepository>();
+    final result = await repo.fetchShahrestans(ostanId);
+    if (result is DataSuccess) {
+      setState(() {
+        _shahrestans = result.data ?? [];
+      });
     }
   }
 
   Future<void> _loadAddress() async {
-    setState(() => _isLoading = true);
     final repo = locator<ManageAddressesRepository>();
     final dataState = await repo.getAddress(widget.addressId!);
     if (dataState is DataSuccess) {
@@ -40,12 +81,22 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
       _pelakController.text = addr.pelak ?? '';
       _vahedController.text = addr.vahed ?? '';
       _postalCodeController.text = addr.postalCode ?? '';
+      _selectedOstanId = addr.ostanId;
+      _selectedShahrestanId = addr.shahrestanId;
+      
+      if (_selectedOstanId != null) {
+        await _fetchShahrestans(_selectedOstanId!);
+      }
     }
-    setState(() => _isLoading = false);
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    if (_selectedOstanId == null || _selectedShahrestanId == null) {
+      CstmSnackBar.showError(context, 'لطفا استان و شهرستان را انتخاب کنید');
+      return;
+    }
 
     setState(() => _isLoading = true);
     final repo = locator<ManageAddressesRepository>();
@@ -54,8 +105,8 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
       pelak: _pelakController.text,
       vahed: _vahedController.text,
       postalCode: _postalCodeController.text,
-      ostanId: 1, // Default values
-      shahrestanId: 15,
+      ostanId: _selectedOstanId,
+      shahrestanId: _selectedShahrestanId,
       latitude: 35.6892,
       longitude: 51.389,
     );
@@ -73,14 +124,7 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
       if (mounted) context.pop(true);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.error ?? 'خطا در ثبت اطلاعات'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-          ),
-        );
+        CstmSnackBar.showError(context, result.error ?? 'خطا در ثبت اطلاعات');
       }
     }
   }
@@ -90,7 +134,7 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
         physics: const BouncingScrollPhysics(),
@@ -116,6 +160,7 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
                           fontSize: 12.sp,
                           color: colorScheme.primary,
                           height: 1.5,
+                          fontFamily: 'BonyadeKoodak',
                         ),
                       ),
                     ),
@@ -131,6 +176,39 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
                   ),
                 )
               else ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildLocationDropdown<int>(
+                        label: 'استان',
+                        value: _selectedOstanId,
+                        items: _ostans.map((o) => DropdownMenuItem(value: o.id, child: Text(o.name ?? '', style: const TextStyle(fontFamily: 'BonyadeKoodak')))).toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _selectedOstanId = v;
+                            _selectedShahrestanId = null;
+                            _shahrestans = [];
+                          });
+                          if (v != null) _fetchShahrestans(v);
+                        },
+                        hint: 'انتخاب استان',
+                        icon: Icons.map_outlined,
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: _buildLocationDropdown<int>(
+                        label: 'شهرستان',
+                        value: _selectedShahrestanId,
+                        items: _shahrestans.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name ?? '', style: const TextStyle(fontFamily: 'BonyadeKoodak')))).toList(),
+                        onChanged: (v) => setState(() => _selectedShahrestanId = v),
+                        hint: 'انتخاب شهرستان',
+                        icon: Icons.location_city_rounded,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
                 _buildField(
                   controller: _fullAddressController,
                   label: 'نشانی دقیق (خیابان، کوچه و ...)',
@@ -173,7 +251,7 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
                     onPressed: _isLoading ? null : _save,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: colorScheme.surface,
                       elevation: 8,
                       shadowColor: colorScheme.primary.withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -182,14 +260,14 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
                         ? SizedBox(
                             width: 24.sp,
                             height: 24.sp,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
+                            child: CircularProgressIndicator(
+                              color: colorScheme.surface,
                               strokeWidth: 2.5,
                             ),
                           )
                         : Text(
                             widget.addressId == null ? 'ثبت آدرس جدید' : 'ذخیره تغییرات',
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'BonyadeKoodak'),
                           ),
                   ),
                 ),
@@ -202,14 +280,16 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
     );
   }
 
-  Widget _buildField({
-    required TextEditingController controller,
+  Widget _buildLocationDropdown<T>({
     required String label,
-    required IconData icon,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required Function(T?) onChanged,
+    String? hint,
+    IconData? icon,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -218,22 +298,85 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 13.sp, 
+              color: colorScheme.onSurface.withValues(alpha: 0.54), 
               fontWeight: FontWeight.bold,
-              color: Colors.black54,
+              fontFamily: 'BonyadeKoodak',
             ),
           ),
         ),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          validator: validator,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+        DropdownButtonFormField<T>(
+          value: items.any((item) => item.value == value) ? value : null,
+          items: items,
+          onChanged: onChanged,
+          hint: hint != null ? Text(hint, style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurface.withValues(alpha: 0.26), fontFamily: 'BonyadeKoodak')) : null,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: colorScheme.primary, size: 20.sp),
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20.sp, color: Colors.black45),
+            prefixIcon: icon != null ? Icon(icon, size: 20.sp, color: colorScheme.onSurface.withValues(alpha: 0.45)) : null,
             filled: true,
-            fillColor: const Color(0xFFF5F6F8),
+            fillColor: colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          ),
+          style: TextStyle(
+            fontSize: 14.sp, 
+            fontWeight: FontWeight.w600, 
+            color: colorScheme.onSurface.withValues(alpha: 0.87), 
+            fontFamily: 'BonyadeKoodak',
+          ),
+          dropdownColor: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+                Padding(
+                  padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface.withValues(alpha: 0.54),
+                      fontFamily: 'BonyadeKoodak',
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  maxLines: maxLines,
+                  validator: validator,
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, fontFamily: 'BonyadeKoodak'),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, size: 20.sp, color: colorScheme.onSurface.withValues(alpha: 0.45)),
+            filled: true,
+            fillColor: colorScheme.surfaceContainer,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
               borderSide: BorderSide.none,
@@ -248,7 +391,7 @@ class _ScreenEditAddressState extends State<ScreenEditAddress> {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderSide: BorderSide(color: colorScheme.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: maxLines > 1 ? 12.h : 16.h),
           ),

@@ -3,11 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resturant_app/core/widgets/empty_state_widget.dart';
-import 'package:resturant_app/core/widgets/list_shimmer.dart';
+import 'package:resturant_app/core/widgets/management_card_shimmer.dart';
 import 'package:resturant_app/core/widgets/stylish_popup.dart';
 import '../../../../../core/bloc/app/app_bloc.dart';
 import '../../../../../core/bloc/error/error_bloc.dart';
 import '../../../../../core/services/locator.dart';
+import '../../../../../../core/widgets/cstm_snakbar.dart';
+import '../../../../../core/widgets/error_state_widget.dart';
+import '../../../../../../core/themes/theme_main.dart';
 import '../base/base_manage_discounts_stateful_widget_state.dart';
 import '../bloc/manage_discounts_bloc.dart';
 
@@ -32,7 +35,7 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: colorScheme.surfaceContainer,
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
@@ -42,26 +45,39 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
           }
         },
         backgroundColor: colorScheme.primary,
-        icon: const Icon(Icons.local_offer_rounded, color: Colors.white),
+        icon: Icon(Icons.local_offer_rounded, color: colorScheme.surface),
         label: Text(
           'ایجاد کد جدید',
           style: TextStyle(
-            color: Colors.white,
+            color: colorScheme.surface,
             fontSize: 14.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: BlocBuilder<ManageDiscountsBloc, ManageDiscountsState>(
+      body: BlocConsumer<ManageDiscountsBloc, ManageDiscountsState>(
+        listener: (context, state) {
+          if (state is ManageDiscountsLoaded) {
+            if (state.errorMessage != null) {
+              CstmSnackBar.showError(context, state.errorMessage!);
+            }
+            if (state.successMessage != null) {
+              CstmSnackBar.showSuccess(context, state.successMessage!);
+            }
+          }
+        },
         builder: (context, state) {
-          if (state is ManageDiscountsLoading) {
-            return const ListShimmer(height: 160);
+          if (state is ManageDiscountsInitial || state is ManageDiscountsLoading) {
+            return ListView.builder(
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
+              itemCount: 5,
+              itemBuilder: (context, index) => const ManagementCardShimmer(height: 160),
+            );
           }
           if (state is ManageDiscountsError) {
-            return EmptyStateWidget(
-              title: 'خطا در بارگذاری',
-              description: state.message,
-              icon: Icons.error_outline_rounded,
+            return ErrorStateWidget(
+              message: state.message,
+              onRetry: () => bloc.add(FetchDiscountsEvent()),
             );
           }
           if (state is ManageDiscountsLoaded) {
@@ -72,24 +88,23 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
                 icon: Icons.confirmation_number_outlined,
               );
             }
-            return RefreshIndicator(
-              onRefresh: () async => bloc.add(FetchDiscountsEvent()),
-              child: ListView.builder(
+            return ListView.builder(
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
                 itemCount: state.discounts.length,
                 itemBuilder: (context, index) {
                   final discount = state.discounts[index];
                   final bool isProcessing = state.processingId == discount.id;
+                  final bool isDeleting = state.isDeleting;
 
                   return Container(
                     margin: EdgeInsets.only(bottom: 16.h),
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(24.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
+                          color: colorScheme.onSurface.withValues(alpha: 0.03),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -135,17 +150,30 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
                                 ],
                               ),
                             ),
-                            Switch(
-                              value: discount.isActive,
-                              onChanged: isProcessing ? null : (val) {
-                                bloc.add(ChangeDiscountStatusEvent(discount.id!));
-                              },
-                              activeColor: colorScheme.primary,
-                            ),
+                            if (isProcessing && !isDeleting)
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                child: SizedBox(
+                                  width: 20.r,
+                                  height: 20.r,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              )
+                            else
+                              Switch(
+                                value: discount.isActive,
+                                onChanged: isProcessing ? null : (val) {
+                                  bloc.add(ChangeDiscountStatusEvent(discount.id!));
+                                },
+                                activeColor: colorScheme.primary,
+                              ),
                           ],
                         ),
                         SizedBox(height: 16.h),
-                        Divider(color: Colors.grey.withValues(alpha: 0.05)),
+                        Divider(color: colorScheme.outlineVariant),
                         SizedBox(height: 12.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,28 +186,32 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            if (isProcessing)
-                              SizedBox(
-                                width: 24.sp,
-                                height: 24.sp,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.error),
-                              )
-                            else
-                              TextButton.icon(
-                                onPressed: () => _showDeleteDialog(context, discount.id!),
-                                icon: Icon(Icons.delete_outline_rounded, size: 18.sp),
-                                label: const Text('حذف'),
-                                style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+                            TextButton.icon(
+                              onPressed: isProcessing ? null : () => _showDeleteDialog(context, discount.id!),
+                              icon: (isProcessing && isDeleting)
+                                  ? SizedBox(
+                                      width: 16.sp,
+                                      height: 16.sp,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: colorScheme.error,
+                                      ),
+                                    )
+                                  : Icon(Icons.delete_outline_rounded, size: 18.sp),
+                              label: Text(isProcessing && isDeleting ? 'حذف...' : 'حذف'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                                disabledForegroundColor: colorScheme.error.withValues(alpha: 0.5),
                               ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   );
                 },
-              ),
-            );
-          }
+              );
+            }
           return const SizedBox.shrink();
         },
       ),
@@ -189,13 +221,13 @@ class _ScreenManageDiscountsState extends BaseManageDiscountsStatefulWidgetState
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14.sp, color: Colors.black38),
+        Icon(icon, size: 14.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
         SizedBox(width: 6.w),
         Text(
           text,
           style: TextStyle(
             fontSize: 11.sp,
-            color: Colors.black54,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
             fontWeight: FontWeight.w600,
           ),
         ),

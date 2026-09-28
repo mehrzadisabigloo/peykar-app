@@ -1,4 +1,4 @@
-class AppException implements Exception {
+class AppException {
   final String? message;
   final String? prefix;
 

@@ -19,6 +19,7 @@ class DashboardStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -27,13 +28,13 @@ class DashboardStatsCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             backgroundColor,
-            Color.lerp(backgroundColor, Colors.white, 0.4)!,
+            Color.lerp(backgroundColor, theme.colorScheme.surface, 0.4)!,
           ],
         ),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: theme.colorScheme.surface.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -45,13 +46,13 @@ class DashboardStatsCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: theme.colorScheme.surface.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
               icon,
               color: iconColor,
-              size: 22.sp,
+              size: 28.sp,
             ),
           ),
           const Spacer(),
@@ -60,7 +61,7 @@ class DashboardStatsCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           SizedBox(height: 2.h),
@@ -68,7 +69,7 @@ class DashboardStatsCard extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 12.sp,
-              color: Colors.black54,
+              color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
             ),
           ),

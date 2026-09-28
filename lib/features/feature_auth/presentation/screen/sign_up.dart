@@ -7,6 +7,8 @@ import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
 import '../../../../core/presentation/screen/map_picker_screen.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../../panel_admin_features/feature_occupation/domain/entity/occupation_entity.dart';
 import '../../../feature_manage_products/presentation/widget/image_upload_slot.dart';
 import '../base/base_auth_stateful_widget_state.dart';
@@ -30,9 +32,8 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   String? _selectedOccupationTitle;
 
   // Image Upload State
-  final List<String?> _identityImageIds = [null, null];
-  String? _licenseImageId;
-  final List<String?> _shopImageIds = [null, null, null];
+  final List<String> _identityImageIds = [];
+  final List<String> _shopImageIds = [];
 
   // User Form Controllers
   final _mobileController = TextEditingController();
@@ -44,6 +45,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   final _repFirstNameController = TextEditingController();
   final _repLastNameController = TextEditingController();
   final _repBrandController = TextEditingController();
+  final _repAddressController = TextEditingController();
   final _repReferralController = TextEditingController();
   final List<TextEditingController> _repPhoneControllers = [TextEditingController()];
 
@@ -51,6 +53,11 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        FocusScope.of(context).unfocus();
+      }
+    });
     _mobileController.text = widget.mobile;
     bloc.add(const FetchOccupations());
   }
@@ -65,6 +72,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
     _repFirstNameController.dispose();
     _repLastNameController.dispose();
     _repBrandController.dispose();
+    _repAddressController.dispose();
     _repReferralController.dispose();
     for (var controller in _repPhoneControllers) {
       controller.dispose();
@@ -80,11 +88,10 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
       setState(() => _isLoading = true);
     } else if (state is Failed) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
+      CstmSnackBar.showError(context, state.message);
     } else if (state is AuthSuccess) {
       setState(() => _isLoading = false);
+      CstmSnackBar.showSuccess(context, 'شماره موردنظر با موفقیت ثبت شد');
       context.go('/');
     }
   }
@@ -99,11 +106,11 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        title: Text('تکمیل ثبت‌نام', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        title: Text('تکمیل ثبت‌نام', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
         centerTitle: true,
       ),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
@@ -116,31 +123,31 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
               child: Container(
                 height: 48.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: theme.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: theme.primaryColor,
+                    color: theme.colorScheme.primary,
                     boxShadow: [
                       BoxShadow(
-                        color: theme.primaryColor.withAlpha((0.3 * 255).toInt()),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.grey,
+                  labelColor: theme.colorScheme.surface,
+                  unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, fontFamily: 'BonyadeKoodak'),
                   unselectedLabelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.normal, fontFamily: 'BonyadeKoodak'),
                   dividerColor: Colors.transparent,
                   indicatorSize: TabBarIndicatorSize.tab,
                   tabs: const [
-                    Tab(text: 'کاربر عادی'),
-                    Tab(text: 'تعمیرکار'),
+                    Tab(text: 'به خدمات نیاز دارم'),
+                    Tab(text: 'خدمات ارائه می‌دهم'),
                   ],
                 ),
               ),
@@ -161,21 +168,42 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   Widget _buildUserForm() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       padding: EdgeInsets.all(24.w),
       child: Column(
         children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: colorScheme.primary, size: 20.sp),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    'اگر می‌خواهید برای خودروی خود خدمات دریافت کنید.',
+                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurface.withValues(alpha: 0.87), fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
           if (widget.mobile.isEmpty) ...[
-            _inputField('شماره موبایل', _mobileController, Icons.phone_android),
+            _inputField('شماره موبایل', _mobileController, Icons.phone_android, hint: 'مثال: 09123456789'),
             SizedBox(height: 16.h),
           ],
-          _inputField('نام', _userFirstNameController, Icons.person_outline),
+          _inputField('نام', _userFirstNameController, Icons.person_outline, hint: 'مثال: علی'),
           SizedBox(height: 16.h),
-          _inputField('نام خانوادگی', _userLastNameController, Icons.person_outline),
+          _inputField('نام خانوادگی', _userLastNameController, Icons.person_outline, hint: 'مثال: احمدی'),
           SizedBox(height: 16.h),
-          _inputField('کد معرف (اختیاری)', _userReferralController, Icons.card_giftcard),
-          SizedBox(height: 24.h),
-          _locationPickerButton(),
+          _inputField('کد معرف (اختیاری)', _userReferralController, Icons.card_giftcard, hint: 'اگر کد معرف دارید وارد کنید'),
           SizedBox(height: 40.h),
           ElevatedButton(
             onPressed: _isLoading ? null : _registerUser,
@@ -184,7 +212,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
             ),
             child: _isLoading 
-                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: colorScheme.surface, strokeWidth: 2)) 
                 : const Text('ثبت‌نام کاربر'),
           ),
         ],
@@ -193,35 +221,60 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   Widget _buildRepairmanForm() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       padding: EdgeInsets.all(24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.business_center_outlined, color: colorScheme.primary, size: 20.sp),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    'اگر اتوسرویس، تعمیرکار، صافکار، مکانیک، برقکار یا متخصص خدمات خودرو هستید.',
+                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurface.withValues(alpha: 0.87), fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
           if (widget.mobile.isEmpty) ...[
-            _inputField('شماره موبایل', _mobileController, Icons.phone_android),
+            _inputField('شماره موبایل', _mobileController, Icons.phone_android, hint: 'مثال: 09123456789'),
             SizedBox(height: 16.h),
           ],
-          _inputField('نام', _repFirstNameController, Icons.person_outline),
+          _inputField('نام*', _repFirstNameController, Icons.person_outline, hint: 'مثال: رضا'),
           SizedBox(height: 16.h),
-          _inputField('نام خانوادگی', _repLastNameController, Icons.person_outline),
+          _inputField('نام خانوادگی*', _repLastNameController, Icons.person_outline, hint: 'مثال: محمدی'),
           SizedBox(height: 16.h),
-          _inputField('نام برند / فروشگاه', _repBrandController, Icons.storefront),
+          _inputField('نام برند / فروشگاه*', _repBrandController, Icons.storefront, hint: 'مثال: اتوسرویس پارس'),
+          SizedBox(height: 16.h),
+          _inputField('آدرس دقیق*', _repAddressController, Icons.location_on_outlined, hint: 'مثال: اصفهان، خیابان چهارباغ، پلاک ۱۲'),
           SizedBox(height: 16.h),
           _occupationSelector(),
           SizedBox(height: 16.h),
-          _inputField('کد معرف (اختیاری)', _repReferralController, Icons.card_giftcard),
-          SizedBox(height: 24.h),
+          _inputField('کد معرف (اختیاری)', _repReferralController, Icons.card_giftcard, hint: 'اگر کد معرف دارید وارد کنید'),
+          SizedBox(height: 16.h),
           _locationPickerButton(),
           SizedBox(height: 24.h),
           _buildRepairmanImagesSection(),
           SizedBox(height: 24.h),
-          Text('شماره‌های تماس ثابت', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+          Text('شماره‌های تماس ثابت', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.87))),
           SizedBox(height: 8.h),
           ..._repPhoneControllers.asMap().entries.map((entry) {
             return Padding(
               padding: EdgeInsets.only(bottom: 8.h),
-              child: _inputField('شماره تماس ثابت ${entry.key + 1}', entry.value, Icons.phone_callback),
+              child: _inputField('شماره تماس ثابت ${entry.key + 1}', entry.value, Icons.phone_callback, hint: 'مثال: 03831234567'),
             );
           }),
           Align(
@@ -230,7 +283,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
               onPressed: () => setState(() => _repPhoneControllers.add(TextEditingController())),
               icon: const Icon(Icons.add_circle_outline, size: 20),
               label: const Text('افزودن شماره تماس'),
-              style: TextButton.styleFrom(foregroundColor: Theme.of(context).primaryColor),
+              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.primary),
             ),
           ),
           SizedBox(height: 40.h),
@@ -241,7 +294,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
             ),
             child: _isLoading 
-                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: colorScheme.surface, strokeWidth: 2)) 
                 : const Text('ثبت‌نام تعمیرکار'),
           ),
         ],
@@ -253,47 +306,59 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildUploadGroup('تصویر جواز کسب', [_licenseImageId], 'profile_image', isSingle: true),
+        _buildDynamicUploadGroup('تصاویر هویتی (کارت ملی / شناسنامه)*', _identityImageIds, 'profile_image'),
         SizedBox(height: 24.h),
-        _buildUploadGroup('تصاویر هویتی (کارت ملی / شناسنامه)', _identityImageIds, 'profile_image', isIdentity: true),
-        SizedBox(height: 24.h),
-        _buildUploadGroup('تصاویر فروشگاه / کارگاه', _shopImageIds, 'profile_image', isShop: true),
+        _buildDynamicUploadGroup('تصاویر فروشگاه / کارگاه', _shopImageIds, 'profile_image'),
       ],
     );
   }
 
-  Widget _buildUploadGroup(String label, List<String?> ids, String type, {bool isSingle = false, bool isIdentity = false, bool isShop = false}) {
+  Widget _buildDynamicUploadGroup(String label, List<String> ids, String type) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+        Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface.withValues(alpha: 0.87))),
         SizedBox(height: 12.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: List.generate(ids.length, (index) {
-              return Padding(
-                padding: EdgeInsets.only(left: 12.w),
-                child: ImageUploadSlot(
-                  index: index,
-                  imageType: type,
-                  initialImageId: ids[index],
-                  onUploadSuccess: (id) {
-                    setState(() {
-                      if (isSingle) {
-                        _licenseImageId = id;
-                      } else {
-                        if (isIdentity) {
-                          _identityImageIds[index] = id;
-                        } else if (isShop) {
-                          _shopImageIds[index] = id;
-                        }
+            children: [
+              ...ids.asMap().entries.map((entry) {
+                return Padding(
+                  padding: EdgeInsets.only(left: 12.w),
+                  child: ImageUploadSlot(
+                    key: ValueKey(entry.value),
+                    index: entry.key,
+                    imageType: type,
+                    initialImageId: entry.value,
+                    onUploadSuccess: (id) {
+                      if (id == null) {
+                        setState(() {
+                          ids.removeAt(entry.key);
+                        });
                       }
-                    });
-                  },
+                    },
+                  ),
+                );
+              }),
+              if (ids.length < 3)
+                Padding(
+                  padding: EdgeInsets.only(left: 12.w),
+                  child: ImageUploadSlot(
+                    key: const ValueKey('plus_box'),
+                    index: ids.length,
+                    imageType: type,
+                    onUploadSuccess: (id) {
+                      if (id != null) {
+                        setState(() {
+                          ids.add(id);
+                        });
+                      }
+                    },
+                  ),
                 ),
-              );
-            }),
+            ],
           ),
         ),
       ],
@@ -301,21 +366,38 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   Widget _occupationSelector() {
+    final theme = Theme.of(context);
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       bloc: bloc,
       buildWhen: (previous, current) => current is OccupationLoading || current is OccupationsLoaded || current is Failed,
       builder: (context, state) {
         List<OccupationEntity> occupations = [];
         bool isLoading = state is OccupationLoading;
+        bool isError = state is Failed;
 
         if (state is OccupationsLoaded) {
           occupations = state.occupations;
         }
 
+        String hintText = 'انتخاب تخصص';
+        if (isLoading) hintText = 'در حال دریافت لیست...';
+        if (isError && occupations.isEmpty) hintText = 'خطا در دریافت لیست (تلاش مجدد)';
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('شناسه رسته شغلی', style: TextStyle(fontSize: 13.sp, color: Colors.black54, fontWeight: FontWeight.w500)),
+            Row(
+              children: [
+                Text(' تخصص شما*', style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontWeight: FontWeight.w500)),
+                if (isError && occupations.isEmpty) ...[
+                  SizedBox(width: 8.w),
+                  GestureDetector(
+                    onTap: () => bloc.add(const FetchOccupations()),
+                    child: Icon(Icons.refresh, size: 18.sp, color: theme.colorScheme.primary),
+                  ),
+                ],
+              ],
+            ),
             SizedBox(height: 8.h),
             SizedBox(
               width: double.infinity,
@@ -325,7 +407,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                   width: 1.sw - 48.w,
                   menuHeight: 300.h,
                   enableSearch: false,
-                  hintText: isLoading ? 'در حال دریافت لیست...' : 'انتخاب رسته شغلی',
+                  hintText: hintText,
                   initialSelection: _selectedOccupationId,
                   onSelected: (String? id) {
                     if (id != null) {
@@ -336,9 +418,9 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                       });
                     }
                   },
-                  textStyle: TextStyle(fontSize: 14.sp, color: Colors.black87),
+                  textStyle: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.87)),
                   menuStyle: MenuStyle(
-                    backgroundColor: WidgetStateProperty.all(Colors.white),
+                    backgroundColor: WidgetStateProperty.all(theme.colorScheme.surface),
                     elevation: WidgetStateProperty.all(15),
                     shape: WidgetStateProperty.all(
                       RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
@@ -346,7 +428,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                   ),
                   inputDecorationTheme: InputDecorationTheme(
                     filled: true,
-                    fillColor: const Color(0xFFF5F6F8),
+                    fillColor: theme.colorScheme.surfaceContainer,
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -356,7 +438,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIconColor: Colors.grey,
+                    prefixIconColor: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   leadingIcon: const Icon(Icons.work_outline, size: 20),
                   dropdownMenuEntries: occupations.map((OccupationEntity occupation) {
@@ -365,7 +447,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                       label: occupation.title ?? '',
                       style: MenuItemButton.styleFrom(
                         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        foregroundColor: Colors.black87,
+                        foregroundColor: theme.colorScheme.onSurface,
                       ),
                     );
                   }).toList(),
@@ -378,17 +460,31 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
     );
   }
 
-  Widget _inputField(String label, TextEditingController controller, IconData icon) {
+  Widget _inputField(String label, dynamic controller, IconData icon, {String? hint}) {
+    final theme = Theme.of(context);
+    final textController = controller is TextEditingController ? controller : TextEditingController(text: controller.toString());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, color: Colors.black54, fontWeight: FontWeight.w500)),
+        Text(label, style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontWeight: FontWeight.w500)),
         SizedBox(height: 8.h),
         TextField(
-          controller: controller,
+          controller: textController,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: Colors.grey),
+            hintText: hint,
+            hintStyle: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.26)),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainer,
+            prefixIcon: Icon(icon, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
       ],
@@ -396,23 +492,24 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   Widget _locationPickerButton() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('موقعیت مکانی', style: TextStyle(fontSize: 13.sp, color: Colors.black54, fontWeight: FontWeight.w500)),
+        Text('موقعیت مکانی*', style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontWeight: FontWeight.w500)),
         SizedBox(height: 8.h),
         InkWell(
           onTap: _pickLocation,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             decoration: BoxDecoration(
-              color: const Color(0xffF8F8F8),
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xffEEEEEE)),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
-                Icon(Icons.map_outlined, color: _selectedLocation != null ? Theme.of(context).primaryColor : Colors.grey),
+                Icon(Icons.map_outlined, color: _selectedLocation != null ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
@@ -421,12 +518,12 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                         : 'مکان انتخاب شد (${_selectedLocation!.latitude.toStringAsFixed(4)}, ${_selectedLocation!.longitude.toStringAsFixed(4)})',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: _selectedLocation != null ? Colors.black : Colors.black38,
+                      color: _selectedLocation != null ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.38),
                     ),
                   ),
                 ),
                 if (_selectedLocation != null)
-                  const Icon(Icons.check_circle, color: Colors.green),
+                  Icon(Icons.check_circle, color: StatusColors.of(context).success),
               ],
             ),
           ),
@@ -449,8 +546,8 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   void _registerUser() {
-    if (_userFirstNameController.text.isEmpty || _userLastNameController.text.isEmpty || _mobileController.text.isEmpty || _selectedLocation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لطفا اطلاعات ستاره‌دار و موقعیت مکانی را تکمیل کنید')));
+    if (_userFirstNameController.text.isEmpty || _userLastNameController.text.isEmpty || _mobileController.text.isEmpty) {
+      CstmSnackBar.showError(context, 'لطفا اطلاعات ستاره‌دار را تکمیل کنید');
       return;
     }
 
@@ -458,15 +555,23 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
       "first_name": _userFirstNameController.text,
       "last_name": _userLastNameController.text,
       "mobile": _mobileController.text,
-      "location": {"lat": _selectedLocation!.latitude, "lng": _selectedLocation!.longitude},
+      if (_selectedLocation != null)
+        "location": {"lat": _selectedLocation!.latitude, "lng": _selectedLocation!.longitude},
       "referral_code": _userReferralController.text,
     };
     bloc.add(RegisterUserEvent(data));
   }
 
   void _registerRepairman() {
-    if (_repFirstNameController.text.isEmpty || _repLastNameController.text.isEmpty || _repBrandController.text.isEmpty || _mobileController.text.isEmpty || _selectedLocation == null || _selectedOccupationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لطفا اطلاعات ستاره‌دار و موقعیت مکانی و رسته شغلی را تکمیل کنید')));
+    if (_repFirstNameController.text.isEmpty || 
+        _repLastNameController.text.isEmpty || 
+        _repBrandController.text.isEmpty || 
+        _repAddressController.text.isEmpty || 
+        _mobileController.text.isEmpty || 
+        _selectedOccupationId == null || 
+        _selectedLocation == null ||
+        _identityImageIds.isEmpty) {
+      CstmSnackBar.showError(context, 'لطفا تمامی موارد ستاره‌دار را تکمیل کنید');
       return;
     }
 
@@ -474,13 +579,13 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
       "first_name": _repFirstNameController.text,
       "last_name": _repLastNameController.text,
       "brand": _repBrandController.text,
-      "identity_images": _identityImageIds.whereType<String>().toList(),
-      "business_license_image": _licenseImageId != null ? [_licenseImageId!] : [],
+      "address": _repAddressController.text,
+      "identity_images": _identityImageIds,
       "mobile": _mobileController.text,
       "location": {"lat": _selectedLocation!.latitude, "lng": _selectedLocation!.longitude},
       "occupation_id": _selectedOccupationId,
       "phone_numbers": _repPhoneControllers.map((c) => c.text).where((t) => t.isNotEmpty).toList(),
-      "shop_images": _shopImageIds.whereType<String>().toList(),
+      "shop_images": _shopImageIds,
       "referral_code": _repReferralController.text,
     };
     bloc.add(RegisterRepairmanEvent(data));

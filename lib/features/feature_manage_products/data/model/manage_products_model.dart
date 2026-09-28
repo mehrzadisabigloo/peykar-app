@@ -53,11 +53,62 @@ List<String> _keywordsFromJson(dynamic json) {
 }
 
 @freezed
-class ManageProductsModel with _$ManageProductsModel {
+sealed class CategoryModel with _$CategoryModel {
+  const factory CategoryModel({
+    @JsonKey(name: 'id', fromJson: _anyToString) required String id,
+    @JsonKey(name: 'title', fromJson: _anyToString) required String title,
+    @JsonKey(name: 'slug', fromJson: _anyToString) String? slug,
+    @JsonKey(name: 'description', fromJson: _anyToString) String? description,
+    @JsonKey(name: 'cover', fromJson: _anyToString) String? cover,
+    @JsonKey(name: 'parent_id', fromJson: _anyToString) String? parentId,
+    @JsonKey(name: 'is_leaf', fromJson: _anyToBool) @Default(false) bool isLeaf,
+    @JsonKey(name: 'is_featured', fromJson: _anyToBool) @Default(false) bool isFeatured,
+    @JsonKey(name: 'sort_order', fromJson: _anyToInt) @Default(0) int sortOrder,
+    @Default([]) List<CategoryModel> parents,
+    @Default([]) List<CategoryModel> children,
+  }) = _CategoryModel;
+
+  const CategoryModel._();
+
+  factory CategoryModel.fromJson(Map<String, dynamic> json) =>
+      _$CategoryModelFromJson(json);
+
+  factory CategoryModel.fromEntity(
+    CategoryEntity entity,
+  ) =>
+      CategoryModel(
+        id: entity.id,
+        title: entity.title,
+        slug: entity.slug,
+        description: entity.description,
+        cover: entity.cover,
+        parentId: entity.parentId,
+        isLeaf: entity.isLeaf,
+        isFeatured: entity.isFeatured,
+        sortOrder: entity.sortOrder,
+        parents: entity.parents.map((e) => CategoryModel.fromEntity(e)).toList(),
+        children: entity.children.map((e) => CategoryModel.fromEntity(e)).toList(),
+      );
+
+  CategoryEntity toEntity() => CategoryEntity(
+        id: id,
+        title: title,
+        slug: slug,
+        description: description,
+        cover: cover,
+        parentId: parentId,
+        isLeaf: isLeaf,
+        isFeatured: isFeatured,
+        sortOrder: sortOrder,
+        parents: parents.map((e) => e.toEntity()).toList(),
+        children: children.map((e) => e.toEntity()).toList(),
+      );
+}
+
+@freezed
+sealed class ManageProductsModel with _$ManageProductsModel {
   const factory ManageProductsModel({
-    @JsonKey(fromJson: _anyToString)
-    @Default('')
-    String id,
+    @JsonKey(fromJson: _anyToString) @Default('') String id,
 
     @JsonKey(
       name: 'repairman_id',
@@ -66,29 +117,24 @@ class ManageProductsModel with _$ManageProductsModel {
     @Default('')
     String repairmanId,
 
-    @JsonKey(fromJson: _anyToString)
-    @Default('')
-    String title,
+    @JsonKey(fromJson: _anyToString) @Default('') String title,
 
-    @JsonKey(fromJson: _anyToString)
-    @Default('')
-    String description,
+    @JsonKey(fromJson: _anyToString) @Default('') String description,
 
-    @JsonKey(fromJson: _imagesFromJson)
-    @Default([])
-    List<String> images,
+    @JsonKey(fromJson: _imagesFromJson) @Default([]) List<String> images,
 
-    @JsonKey(fromJson: _keywordsFromJson)
-    @Default([])
-    List<String> keywords,
+    @JsonKey(fromJson: _keywordsFromJson) @Default([]) List<String> keywords,
 
-    @JsonKey(fromJson: _anyToDouble)
-    @Default(0.0)
-    double price,
+    @JsonKey(fromJson: _anyToDouble) @Default(0.0) double price,
 
-    @JsonKey(fromJson: _anyToInt)
+    @JsonKey(fromJson: _anyToInt) @Default(0) int stock,
+
+    @JsonKey(
+      name: 'min_purchase_quantity',
+      fromJson: _anyToInt,
+    )
     @Default(0)
-    int stock,
+    int minPurchaseQuantity,
 
     @JsonKey(
       name: 'max_purchase_quantity',
@@ -97,9 +143,7 @@ class ManageProductsModel with _$ManageProductsModel {
     @Default(0)
     int maxPurchaseQuantity,
 
-    @JsonKey(fromJson: _anyToString)
-    @Default('')
-    String status,
+    @JsonKey(fromJson: _anyToString) @Default('') String status,
 
     @JsonKey(
       name: 'final_price',
@@ -130,36 +174,49 @@ class ManageProductsModel with _$ManageProductsModel {
     int discountPercentage,
 
     RepairmanModel? repairman,
+
+    RepairmanModel? admin,
+
+    @JsonKey(name: 'owner_type', fromJson: _anyToString) String? ownerType,
+
+    @JsonKey(name: 'category_id', fromJson: _anyToString) String? categoryId,
+
+    CategoryModel? category,
   }) = _ManageProductsModel;
 
   const ManageProductsModel._();
 
   factory ManageProductsModel.fromJson(
-      Map<String, dynamic> json,
-      ) =>
+    Map<String, dynamic> json,
+  ) =>
       _$ManageProductsModelFromJson(json);
 
   ManageProductsEntity toEntity() => ManageProductsEntity(
-    id: id,
-    repairmanId: repairmanId,
-    title: title,
-    description: description,
-    images: images,
-    keywords: keywords,
-    price: price,
-    stock: stock,
-    maxPurchaseQuantity: maxPurchaseQuantity,
-    status: status,
-    finalPrice: finalPrice,
-    hasDiscount: hasDiscount,
-    discountAmount: discountAmount,
-    discountPercentage: discountPercentage,
-    repairman: repairman?.toEntity(),
-  );
+        id: id,
+        repairmanId: repairmanId,
+        title: title,
+        description: description,
+        images: images,
+        keywords: keywords,
+        price: price,
+        stock: stock,
+        minPurchaseQuantity: minPurchaseQuantity,
+        maxPurchaseQuantity: maxPurchaseQuantity,
+        status: status,
+        finalPrice: finalPrice,
+        hasDiscount: hasDiscount,
+        discountAmount: discountAmount,
+        discountPercentage: discountPercentage,
+        repairman: repairman?.toEntity(),
+        admin: admin?.toEntity(),
+        ownerType: ownerType,
+        categoryId: categoryId,
+        category: category?.toEntity(),
+      );
 
   factory ManageProductsModel.fromEntity(
-      ManageProductsEntity entity,
-      ) =>
+    ManageProductsEntity entity,
+  ) =>
       ManageProductsModel(
         id: entity.id,
         repairmanId: entity.repairmanId,
@@ -169,6 +226,7 @@ class ManageProductsModel with _$ManageProductsModel {
         keywords: entity.keywords,
         price: entity.price,
         stock: entity.stock,
+        minPurchaseQuantity: entity.minPurchaseQuantity,
         maxPurchaseQuantity: entity.maxPurchaseQuantity,
         status: entity.status,
         finalPrice: entity.finalPrice,
@@ -177,6 +235,14 @@ class ManageProductsModel with _$ManageProductsModel {
         discountPercentage: entity.discountPercentage,
         repairman: entity.repairman != null
             ? RepairmanModel.fromEntity(entity.repairman!)
+            : null,
+        admin: entity.admin != null
+            ? RepairmanModel.fromEntity(entity.admin!)
+            : null,
+        ownerType: entity.ownerType,
+        categoryId: entity.categoryId,
+        category: entity.category != null
+            ? CategoryModel.fromEntity(entity.category!)
             : null,
       );
 }

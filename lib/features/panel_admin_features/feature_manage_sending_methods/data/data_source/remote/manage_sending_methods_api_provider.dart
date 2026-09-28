@@ -9,7 +9,7 @@ class ManageSendingMethodsApiProvider {
   }
 
   Future<Response> updateSendingMethod(String id, Map<String, dynamic> data) async {
-    return await _apiService.put('/sending-method/update/$id', data);
+    return await _apiService.patch('/sending-method/update/$id', data);
   }
 
   Future<Response> listSendingMethods({int countItem = 10, bool isPaginate = true}) async {
@@ -28,6 +28,14 @@ class ManageSendingMethodsApiProvider {
   }
 
   Future<Response> changeStatus(String id) async {
-    return await _apiService.put('/sending-method/change-status/$id', {});
+    return await _apiService.patch('/sending-method/change-status/$id', {});
+  }
+
+  Future<Response> fetchOstans() async {
+    return await _apiService.get('/location/ostan');
+  }
+
+  Future<Response> fetchShahrestans(int ostanId) async {
+    return await _apiService.get('/location/shahrestan/$ostanId');
   }
 }

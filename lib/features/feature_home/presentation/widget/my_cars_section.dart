@@ -7,6 +7,7 @@ class MyCarsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,7 +18,7 @@ class MyCarsSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -28,21 +29,17 @@ class MyCarsSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             children: [
-
-
-
-
               // Car Card
               Container(
                 width: 220.w,
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: ThemeMain.greyBorder),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -54,7 +51,7 @@ class MyCarsSection extends StatelessWidget {
                       width: 80.w,
                       height: 60.h,
                       decoration: BoxDecoration(
-                        color: ThemeMain.greyBackground,
+                        color: theme.colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(15.r),
                         image: const DecorationImage(
                           image: AssetImage('assets/images/temp.jpg'),
@@ -73,6 +70,7 @@ class MyCarsSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         SizedBox(height: 5.h),
@@ -80,7 +78,7 @@ class MyCarsSection extends StatelessWidget {
                           'ایران ۱۱',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: ThemeMain.greyText,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -94,12 +92,12 @@ class MyCarsSection extends StatelessWidget {
               Container(
                 width: 90.w,
                 decoration: BoxDecoration(
-                  color: ThemeMain.greyBackground,
+                  color: theme.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: ThemeMain.greyBorder.withOpacity(0.5)),
+                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -109,7 +107,7 @@ class MyCarsSection extends StatelessWidget {
                   child: Icon(
                     Icons.add,
                     size: 30.sp,
-                    color: ThemeMain.primaryColor,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),

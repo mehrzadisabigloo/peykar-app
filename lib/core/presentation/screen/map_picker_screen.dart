@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:latlong2/latlong.dart';
+import '../../themes/theme_main.dart';
+import '../../widgets/cstm_snakbar.dart';
 
 class MapPickerScreen extends StatefulWidget {
   final LatLng? initialLocation;
@@ -39,9 +41,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('سرویس مکان‌یابی غیرفعال است')),
-        );
+        CstmSnackBar.showError(context, 'سرویس مکان‌یابی غیرفعال است');
       }
       setState(() => _isLoading = false);
       return;
@@ -52,9 +52,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('دسترسی به مکان داده نشد')),
-          );
+          CstmSnackBar.showError(context, 'دسترسی به مکان داده نشد');
         }
         setState(() => _isLoading = false);
         return;
@@ -63,9 +61,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('دسترسی به مکان برای همیشه رد شده است')),
-        );
+        CstmSnackBar.showError(context, 'دسترسی به مکان برای همیشه رد شده است');
       }
       setState(() => _isLoading = false);
       return;
@@ -102,7 +98,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           if (_selectedLocation != null)
             TextButton(
               onPressed: () => Navigator.pop(context, _selectedLocation),
-              child: const Text('تایید', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+              child: Text('تایید', style: TextStyle(color: StatusColors.of(context).info, fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -139,7 +135,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         point: _selectedLocation!,
                         width: 80.w,
                         height: 80.h,
-                        child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                        child: Icon(Icons.location_on, color: Theme.of(context).colorScheme.error, size: 40),
                       ),
                     ],
                   ),

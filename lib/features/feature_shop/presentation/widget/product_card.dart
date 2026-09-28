@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/themes/theme_main.dart';
+import '../../../../core/utils/extensions.dart';
 import '../../domain/entity/shop_entity.dart';
 
 class ProductCard extends StatelessWidget {
@@ -10,94 +14,175 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final formatter = NumberFormat('#,###');
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Image Section
-          Container(
-            width: 100.w,
-            height: 100.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.r),
-              color: Colors.grey[50],
+    return GestureDetector(
+      onTap: () => context.pushNamed('product_detail', pathParameters: {'productId': product.id}),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(12.r),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
-            child: Center(
-              child: Icon(Icons.shopping_bag_outlined, color: Colors.blue[600], size: 40.sp),
-              // Image.asset(product.imageUrl, fit: BoxFit.contain) // When assets are available
-            ),
-          ),
-          SizedBox(width: 16.w),
-          // Info Section
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.05)),
+        ),
+        child: Row(
+          children: [
+            // 1. Image Section with Discount Badge
+            Stack(
               children: [
-                Text(
-                  product.title,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Container(
+                  width: 110.r,
+                  height: 110.r,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20.r),
+                    child: product.imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: product.imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2)),
+                            errorWidget: (context, url, error) => Icon(Icons.image_not_supported_outlined, color: colorScheme.outline),
+                          )
+                        : Icon(Icons.shopping_bag_outlined, color: colorScheme.primary, size: 40.sp),
+                  ),
                 ),
-                SizedBox(height: 12.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${formatter.format(product.price)} تومان',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue[700],
-                          ),
+                if (product.hasDiscount && product.discountPercentage != null)
+                  Positioned(
+                    top: 8.r,
+                    right: 8.r,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: colorScheme.error,
+                        borderRadius: BorderRadius.circular(8.r),
+                        boxShadow: [
+                          BoxShadow(color: colorScheme.error.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2)),
+                        ],
+                      ),
+                      child: Text(
+                        '${product.discountPercentage!.toInt().toString().toPersianDigit}٪',
+                        style: TextStyle(
+                          color: colorScheme.onError,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'BonyadeKoodak',
                         ),
-                        SizedBox(height: 4.h),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            
+            SizedBox(width: 16.w),
+
+            // 2. Info Section
+            Expanded(
+              child: SizedBox(
+                height: 110.r,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      product.title,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w900,
+                        color: colorScheme.onSurface,
+                        fontFamily: 'BonyadeKoodak',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    SizedBox(height: 6.h),
+                    
+                    // Stock Status
+                    Row(
+                      children: [
+                        Icon(
+                          product.isAvailable ? Icons.inventory_2_rounded : Icons.history_rounded,
+                          size: 14.sp,
+                          color: product.isAvailable ? StatusColors.of(context).success : colorScheme.error, // Semantic green for available
+                        ),
+                        SizedBox(width: 4.w),
                         Text(
-                          product.isAvailable ? 'موجود' : 'ناموجود',
+                          product.isAvailable 
+                            ? 'موجودی: ${product.stock.toString().toPersianDigit} عدد' 
+                            : 'ناموجود',
                           style: TextStyle(
-                            fontSize: 12.sp,
-                            color: product.isAvailable ? Colors.green[600] : Colors.red[600],
-                            fontWeight: FontWeight.w500,
+                            fontSize: 11.sp,
+                            color: product.isAvailable ? StatusColors.of(context).success : colorScheme.error,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'BonyadeKoodak',
                           ),
                         ),
                       ],
                     ),
-                    // Add to cart button
-                    Container(
-                      padding: EdgeInsets.all(8.r),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Icon(Icons.add_shopping_cart_rounded, color: Colors.blue[700], size: 20.sp),
+                    
+                    const Spacer(),
+
+                    // Price Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (product.hasDiscount && product.finalPrice != null) ...[
+                              Text(
+                                '${formatter.format(product.price).toPersianDigit} تومان',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                  decoration: TextDecoration.lineThrough,
+                                  fontFamily: 'BonyadeKoodak',
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                '${formatter.format(product.finalPrice).toPersianDigit} تومان',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: colorScheme.primary,
+                                  fontFamily: 'BonyadeKoodak',
+                                ),
+                              ),
+                            ] else
+                              Text(
+                                '${formatter.format(product.price).toPersianDigit} تومان',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: colorScheme.primary,
+                                  fontFamily: 'BonyadeKoodak',
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

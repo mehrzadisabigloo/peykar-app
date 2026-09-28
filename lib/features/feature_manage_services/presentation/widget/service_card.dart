@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as intl;
+import '../../../../core/themes/theme_main.dart';
 import '../../domain/entity/manage_services_entity.dart';
 
 class ServiceCard extends StatelessWidget {
@@ -14,21 +15,21 @@ class ServiceCard extends StatelessWidget {
     this.onTap,
   });
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFE8EAF6), // Indigo 50
-            Color(0xFFF5F5F5), // Grey 100
+            Theme.of(context).colorScheme.surfaceContainer,
+            Theme.of(context).colorScheme.surfaceContainer,
           ],
         ),
       ),
       child: Icon(
         Icons.build_circle_outlined,
-        color: Colors.indigo.withValues(alpha: 0.3),
+        color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.3),
         size: 30.sp,
       ),
     );
@@ -36,16 +37,17 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = intl.NumberFormat('#,###');
+    final formatter = intl.NumberFormat.decimalPattern();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: colorScheme.onSurface.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -65,7 +67,7 @@ class ServiceCard extends StatelessWidget {
                 height: 90.r,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
-                  color: const Color(0xFFF8F9FE),
+                  color: colorScheme.surfaceContainer,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20.r),
@@ -73,12 +75,12 @@ class ServiceCard extends StatelessWidget {
                       ? CachedNetworkImage(
                           imageUrl: service.imageUrl,
                           fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => _buildPlaceholder(),
+                          errorWidget: (context, url, error) => _buildPlaceholder(context),
                           placeholder: (context, url) => Container(
-                            color: Colors.grey[200],
+                            color: colorScheme.outlineVariant,
                           ),
                         )
-                      : _buildPlaceholder(),
+                      : _buildPlaceholder(context),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -96,7 +98,7 @@ class ServiceCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 17.sp,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF1A1C1E),
+                              color: colorScheme.onSurface,
                               letterSpacing: -0.5,
                             ),
                             maxLines: 1,
@@ -104,7 +106,7 @@ class ServiceCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 8.w),
-                        _buildStatusBadge(service.status),
+                        _buildStatusBadge(context, service.status),
                       ],
                     ),
                     SizedBox(height: 2.h),
@@ -112,7 +114,7 @@ class ServiceCard extends StatelessWidget {
                       service.description,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: const Color(0xFF74777F).withValues(alpha: 0.8),
+                        color: colorScheme.outline.withValues(alpha: 0.8),
                         height: 1.3,
                       ),
                       maxLines: 1,
@@ -132,7 +134,7 @@ class ServiceCard extends StatelessWidget {
                                 'محدوده قیمت:',
                                 style: TextStyle(
                                   fontSize: 9.sp,
-                                  color: const Color(0xFFC4C6CF),
+                                  color: colorScheme.outlineVariant,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.5,
                                 ),
@@ -151,7 +153,7 @@ class ServiceCard extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w900,
-                                          color: Colors.indigo.shade900,
+                                          color: DashboardColors.of(context).adminIndigo,
                                         ),
                                       ),
                                       SizedBox(width: 15.w),
@@ -159,12 +161,12 @@ class ServiceCard extends StatelessWidget {
                                         width: 8.r,
                                         height: 8.r,
                                         decoration: BoxDecoration(
-                                          color: Colors.indigo.shade300,
+                                          color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.5),
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 1.5),
+                                          border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1.5),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.indigo.withValues(alpha: 0.2),
+                                              color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.2),
                                               blurRadius: 4,
                                             ),
                                           ],
@@ -180,8 +182,8 @@ class ServiceCard extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          Colors.indigo.shade200,
-                                          Colors.indigo.shade50,
+                                          DashboardColors.of(context).adminIndigo.withValues(alpha: 0.5),
+                                          DashboardColors.of(context).adminIndigo.withValues(alpha: 0.1),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(1.r),
@@ -195,12 +197,12 @@ class ServiceCard extends StatelessWidget {
                                         width: 8.r,
                                         height: 8.r,
                                         decoration: BoxDecoration(
-                                          color: Colors.indigo.shade300,
+                                          color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.5),
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 1.5),
+                                          border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1.5),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.indigo.withValues(alpha: 0.2),
+                                              color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.2),
                                               blurRadius: 4,
                                             ),
                                           ],
@@ -212,7 +214,7 @@ class ServiceCard extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w900,
-                                          color: Colors.indigo.shade900,
+                                          color: DashboardColors.of(context).adminIndigo,
                                         ),
                                       ),
                                       SizedBox(width: 6.w),
@@ -221,7 +223,7 @@ class ServiceCard extends StatelessWidget {
                                         'تومان',
                                         style: TextStyle(
                                           fontSize: 9.sp,
-                                          color: Colors.indigo.shade400,
+                                          color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.7),
                                           fontWeight: FontWeight.w800,
                                         ),
                                       ),
@@ -244,19 +246,19 @@ class ServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(BuildContext context, String status) {
     final isActive = status == 'Active';
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: (isActive ? Colors.green : Colors.orange).withValues(alpha: 0.1),
+        color: (isActive ? StatusColors.of(context).success : StatusColors.of(context).warning).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         isActive ? 'فعال' : 'غیرفعال',
         style: TextStyle(
           fontSize: 10.sp,
-          color: isActive ? Colors.green.shade700 : Colors.orange.shade800,
+          color: isActive ? StatusColors.of(context).success : StatusColors.of(context).warning,
           fontWeight: FontWeight.w700,
         ),
       ),

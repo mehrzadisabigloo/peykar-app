@@ -48,34 +48,22 @@ class MainBottomNav extends StatelessWidget {
   List<Widget> _buildUserItems() {
     return [
       _NavItem(
-        icon: Icons.home_outlined,
+        icon: Icons.home_rounded,
         label: 'خانه',
         isSelected: currentIndex == 4,
         onTap: () => onTap(4),
       ),
       _NavItem(
-        icon: Icons.design_services_outlined,
-        label: 'خدمات مشتری',
+        icon: Icons.calendar_month_rounded,
+        label: 'رزروهای من',
         isSelected: currentIndex == 3,
         onTap: () => onTap(3),
       ),
       _NavItem(
-        icon: Icons.storefront,
-        label: 'فروشگاه',
-        isSelected: currentIndex == 2,
-        onTap: () => onTap(2),
-      ),
-      _NavItem(
-        icon: Icons.notifications_none,
+        icon: Icons.notifications_rounded,
         label: 'یادآورها',
         isSelected: currentIndex == 1,
         onTap: () => onTap(1),
-      ),
-      _NavItem(
-        icon: Icons.person_outline,
-        label: 'پروفایل',
-        isSelected: currentIndex == 0,
-        onTap: () => onTap(0),
       ),
     ];
   }
@@ -83,32 +71,26 @@ class MainBottomNav extends StatelessWidget {
   List<Widget> _buildRepairmanItems() {
     return [
       _NavItem(
-        icon: Icons.dashboard_outlined,
-        label: 'داشبورد',
-        isSelected: currentIndex == 4,
-        onTap: () => onTap(4),
-      ),
-      _NavItem(
-        icon: Icons.manage_accounts_outlined,
-        label: 'مدیریت خدمات',
-        isSelected: currentIndex == 3,
-        onTap: () => onTap(3),
-      ),
-      _NavItem(
-        icon: Icons.calendar_month_outlined,
-        label: 'نوبت‌ها',
+        icon: Icons.home_rounded,
+        label: 'خانه',
         isSelected: currentIndex == 2,
         onTap: () => onTap(2),
       ),
       _NavItem(
-        icon: Icons.add_shopping_cart_sharp,
-        label: 'محصولات',
+        icon: Icons.calendar_today_rounded,
+        label: 'زمان‌بندی',
+        isSelected: currentIndex == 3,
+        onTap: () => onTap(3),
+      ),
+      _NavItem(
+        icon: Icons.shopping_bag_rounded,
+        label: 'سفارشات',
         isSelected: currentIndex == 1,
         onTap: () => onTap(1),
       ),
       _NavItem(
-        icon: Icons.shopping_bag_outlined,
-        label: 'سفارشات',
+        icon: Icons.person_rounded,
+        label: 'پروفایل',
         isSelected: currentIndex == 0,
         onTap: () => onTap(0),
       ),

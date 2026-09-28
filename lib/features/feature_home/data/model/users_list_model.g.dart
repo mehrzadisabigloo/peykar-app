@@ -6,8 +6,8 @@ part of 'users_list_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UsersListModelImpl _$$UsersListModelImplFromJson(Map<String, dynamic> json) =>
-    _$UsersListModelImpl(
+_UsersListModel _$UsersListModelFromJson(Map<String, dynamic> json) =>
+    _UsersListModel(
       users:
           (json['users'] as List<dynamic>?)
               ?.map((e) => UserModel.fromJson(e as Map<String, dynamic>))
@@ -20,11 +20,10 @@ _$UsersListModelImpl _$$UsersListModelImplFromJson(Map<String, dynamic> json) =>
       total: json['total'] == null ? 0 : _anyToInt(json['total']),
     );
 
-Map<String, dynamic> _$$UsersListModelImplToJson(
-  _$UsersListModelImpl instance,
-) => <String, dynamic>{
-  'users': instance.users,
-  'current_page': instance.currentPage,
-  'last_page': instance.lastPage,
-  'total': instance.total,
-};
+Map<String, dynamic> _$UsersListModelToJson(_UsersListModel instance) =>
+    <String, dynamic>{
+      'users': instance.users,
+      'current_page': instance.currentPage,
+      'last_page': instance.lastPage,
+      'total': instance.total,
+    };

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../base/base_auth_stateful_widget_state.dart';
 import '../bloc/authentication_bloc.dart';
 
@@ -67,9 +68,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
       setState(() => _isLoading = true);
     } else if (state is Failed) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
+      CstmSnackBar.showError(context, state.message);
     } else if (state is AuthSuccess) {
       setState(() => _isLoading = false);
       if (widget.hasPass) {
@@ -82,9 +81,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
     } else if (state is Loaded) {
        setState(() => _isLoading = false);
        // Resend success or other intermediate loaded state
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('کد مجددا ارسال شد')),
-      );
+       CstmSnackBar.showSuccess(context, 'کد تایید پیامک شد');
     }
   }
 
@@ -127,12 +124,12 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.sp),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -158,7 +155,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: textTheme.bodyMedium?.copyWith(
-                          color: Colors.black54,
+                          color: colorScheme.onSurface.withValues(alpha: 0.54),
                           fontSize: 14.sp,
                           height: 1.5,
                         ),
@@ -167,7 +164,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
                           TextSpan(
                             text: widget.phoneNumber,
                             style: TextStyle(
-                              color: Colors.black,
+                              color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
                               fontSize: 15.sp,
                             ),
@@ -181,9 +178,12 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
                         padding: EdgeInsets.only(bottom: 20.h),
                         child: const CircularProgressIndicator(),
                       ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(4, (index) => _otpBox(index)),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(4, (index) => _otpBox(index)),
+                      ),
                     ),
                     SizedBox(height: 30.h),
                     _timerSeconds > 0
@@ -232,10 +232,10 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
       width: 55.w,
       height: 60.h,
       decoration: BoxDecoration(
-        color: const Color(0xffF8F8F8),
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(
-          color: isFocused ? colorScheme.primary : const Color(0xffE8E8E8),
+          color: isFocused ? colorScheme.primary : colorScheme.outlineVariant,
           width: isFocused ? 2 : 1,
         ),
       ),
@@ -245,7 +245,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
           style: TextStyle(
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: colorScheme.onSurface,
           ),
         ),
       ),
@@ -255,7 +255,7 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
   Widget _numericKeypad(ThemeData theme) {
     return Container(
       padding: EdgeInsets.only(bottom: 30.h, left: 24.w, right: 24.w),
-      color: Colors.white,
+      color: theme.colorScheme.surface,
       child: Column(
         children: [
           Row(
@@ -293,13 +293,13 @@ class _AuthVerifyPageState extends BaseAuthStatefulWidgetState<AuthVerifyPage, A
           height: 70.h,
           alignment: Alignment.center,
           child: isIcon
-              ? Icon(Icons.backspace_outlined, color: Colors.black, size: 22.sp)
+              ? Icon(Icons.backspace_outlined, color: theme.colorScheme.onSurface, size: 22.sp)
               : Text(
                   val,
                   style: TextStyle(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
         ),

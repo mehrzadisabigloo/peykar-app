@@ -44,6 +44,48 @@ class ManageServicesRepositoryImpl extends ManageServicesRepository {
   }
 
   @override
+  Future<DataState<List<ManageServicesEntity>>> fetchActiveServices({
+    bool isPaginate = true,
+    int countItem = 10,
+    String? title,
+  }) async {
+    try {
+      final Response response = await _apiProvider.getActiveServices(
+        isPaginate: isPaginate,
+        countItem: countItem,
+        title: title,
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic rootData = response.data;
+        List<dynamic> rawList = [];
+
+        if (rootData is Map<String, dynamic>) {
+          final data = rootData['data'];
+          if (data is List) {
+            rawList = data;
+          } else if (data is Map && data['data'] is List) {
+            rawList = data['data'];
+          }
+        } else if (rootData is List) {
+          rawList = rootData;
+        }
+
+        final List<ManageServicesEntity> services = rawList
+            .whereType<Map<String, dynamic>>()
+            .map((json) => ManageServicesModel.fromJson(json).toEntity())
+            .toList();
+
+        return DataSuccess(services);
+      } else {
+        return DataFailed(response.data is Map ? (response.data['message'] ?? "Error") : "Error");
+      }
+    } catch (e) {
+      return const DataFailed('پاسخی دریافت نشد');
+    }
+  }
+
+  @override
   Future<DataState<dynamic>> addService({
     required String title,
     required String description,

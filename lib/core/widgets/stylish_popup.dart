@@ -64,11 +64,11 @@ class ConfirmationPopup extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(24.r),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(32.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: colorScheme.onSurface.withValues(alpha: 0.1),
               blurRadius: 40,
               offset: const Offset(0, 20),
             ),
@@ -96,7 +96,7 @@ class ConfirmationPopup extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w900,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 12.h),
@@ -105,7 +105,7 @@ class ConfirmationPopup extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,
-                color: Colors.black54,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.6,
               ),
             ),
@@ -129,7 +129,7 @@ class ConfirmationPopup extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black38,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -143,7 +143,7 @@ class ConfirmationPopup extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: confirmColor ?? colorScheme.error,
-                      foregroundColor: Colors.white,
+                      foregroundColor: colorScheme.surface,
                       elevation: 0,
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                       minimumSize: Size.zero, // Override global theme
@@ -166,5 +166,6 @@ class ConfirmationPopup extends StatelessWidget {
         ),
       ),
     );
+
   }
 }

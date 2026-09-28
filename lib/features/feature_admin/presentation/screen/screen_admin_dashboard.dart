@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_admin_stateful_widget_state.dart';
 import '../bloc/admin_bloc.dart';
 import '../../../../features/feature_dashboard/presentation/widget/dashboard_stats_card.dart';
@@ -23,7 +25,7 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      color: const Color(0xFFF8F9FB),
+      color: colorScheme.surfaceContainer,
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -62,11 +64,11 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
                       Container(
                         padding: EdgeInsets.all(10.r),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(12.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
+                              color: colorScheme.onSurface.withValues(alpha: 0.03),
                               blurRadius: 10,
                             ),
                           ],
@@ -82,7 +84,7 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
           SliverPadding(
             padding: EdgeInsets.all(20.w),
             sliver: SliverToBoxAdapter(
-              child: _buildAdminStatsGrid(),
+              child: _buildAdminStatsGrid(context),
             ),
           ),
           SliverToBoxAdapter(
@@ -97,12 +99,12 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
               child: Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A237E),
+                  color: DashboardColors.of(context).adminAccent,
                   borderRadius: BorderRadius.circular(24.r),
                   image: DecorationImage(
-                    image: const NetworkImage('https://www.transparenttextures.com/patterns/cubes.png'),
+                    image: const CachedNetworkImageProvider('https://www.transparenttextures.com/patterns/cubes.png'),
                     opacity: 0.1,
-                    colorFilter: ColorFilter.mode(Colors.white.withValues(alpha: 0.1), BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(colorScheme.surface.withValues(alpha: 0.1), BlendMode.srcIn),
                   ),
                 ),
                 child: Row(
@@ -113,7 +115,7 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
                         Text(
                           'گزارش جامع سالانه',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: colorScheme.surface,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -122,7 +124,7 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
                         Text(
                           'تحلیل دقیق روند رشد زینو در سال جاری',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: colorScheme.surface.withValues(alpha: 0.7),
                             fontSize: 11.sp,
                           ),
                         ),
@@ -132,8 +134,8 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF1A237E),
+                        backgroundColor: colorScheme.surface,
+                        foregroundColor: DashboardColors.of(context).adminAccent,
                         minimumSize: Size(80.w, 40.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                         elevation: 0,
@@ -151,7 +153,7 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
     );
   }
 
-  Widget _buildAdminStatsGrid() {
+  Widget _buildAdminStatsGrid(BuildContext context) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -159,34 +161,34 @@ class _ScreenAdminDashboardState extends BaseAdminStatefulWidgetState<ScreenAdmi
       crossAxisSpacing: 16.w,
       mainAxisSpacing: 16.h,
       childAspectRatio: 1.2,
-      children: const [
+      children: [
         DashboardStatsCard(
           title: 'خدمات دهندگان',
           value: '۱,۲۸۰',
           icon: Icons.storefront_rounded,
-          iconColor: Color(0xFF3F51B5),
-          backgroundColor: Colors.white,
+          iconColor: DashboardColors.of(context).adminIndigo,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         DashboardStatsCard(
           title: 'کل کاربران',
           value: '۱۲,۵۶۰',
           icon: Icons.people_alt_rounded,
-          iconColor: Color(0xFF00897B),
-          backgroundColor: Colors.white,
+          iconColor: DashboardColors.of(context).adminTeal,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         DashboardStatsCard(
           title: 'نوبت های امروز',
           value: '۹۲',
           icon: Icons.event_available_rounded,
-          iconColor: Color(0xFFE64A19),
-          backgroundColor: Colors.white,
+          iconColor: DashboardColors.of(context).adminOrange,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         DashboardStatsCard(
           title: 'سفارشات امروز',
           value: '۴۸۶',
           icon: Icons.shopping_bag_rounded,
-          iconColor: Color(0xFFF9A825),
-          backgroundColor: Colors.white,
+          iconColor: DashboardColors.of(context).adminYellow,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
       ],
     );

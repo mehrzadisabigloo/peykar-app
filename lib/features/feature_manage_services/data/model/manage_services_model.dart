@@ -40,7 +40,7 @@ List<String> _keywordsFromJson(dynamic json) {
 }
 
 @freezed
-class ManageServicesModel with _$ManageServicesModel {
+sealed class ManageServicesModel with _$ManageServicesModel {
   const factory ManageServicesModel({
     @JsonKey(fromJson: _anyToString)
     @Default('')

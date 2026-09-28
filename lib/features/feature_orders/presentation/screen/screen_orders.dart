@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../domain/entity/orders_entity.dart';
 import '../base/base_orders_stateful_widget_state.dart';
 import '../bloc/orders_bloc.dart';
@@ -30,8 +31,10 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
 
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      color: const Color(0xFFF8F9FB),
+      color: colorScheme.surfaceContainer,
       child: SafeArea(
         child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
@@ -39,7 +42,7 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
               return Column(
                 children: [
                   SizedBox(height: 20.h),
-                  _buildTabsPlaceholder(),
+                  _buildTabsPlaceholder(context),
                   Expanded(
                     child: ListView.builder(
                       padding: EdgeInsets.all(20.r),
@@ -62,7 +65,7 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
               return Column(
                 children: [
                   SizedBox(height: 20.h),
-                  _buildTabs(state),
+                  _buildTabs(context, state),
                   Expanded(
                     child: state.filteredOrders.isEmpty
                         ? const EmptyStateWidget(
@@ -88,7 +91,8 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
     );
   }
 
-  Widget _buildTabsPlaceholder() {
+  Widget _buildTabsPlaceholder(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       reverse: true,
@@ -101,7 +105,7 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
             width: 80.w,
             height: 36.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(20.r),
             ),
           ),
@@ -110,30 +114,31 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
     );
   }
 
-  Widget _buildTabs(OrdersLoaded state) {
+  Widget _buildTabs(BuildContext context, OrdersLoaded state) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       reverse: true, // RTL support
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Row(
         children: [
-          _buildTabItem('لغو شده', OrderStatus.canceled, state.currentStatus == OrderStatus.canceled),
-          _buildTabItem('تکمیل شده', OrderStatus.completed, state.currentStatus == OrderStatus.completed),
-          _buildTabItem('در حال پردازش', OrderStatus.inProgress, state.currentStatus == OrderStatus.inProgress),
-          _buildTabItem('همه', null, state.currentStatus == null),
+          _buildTabItem(context, 'لغو شده', OrderStatus.canceled, state.currentStatus == OrderStatus.canceled),
+          _buildTabItem(context, 'تکمیل شده', OrderStatus.completed, state.currentStatus == OrderStatus.completed),
+          _buildTabItem(context, 'در حال پردازش', OrderStatus.inProgress, state.currentStatus == OrderStatus.inProgress),
+          _buildTabItem(context, 'همه', null, state.currentStatus == null),
         ],
       ),
     );
   }
 
-  Widget _buildTabItem(String title, OrderStatus? status, bool isSelected) {
+  Widget _buildTabItem(BuildContext context, String title, OrderStatus? status, bool isSelected) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () => bloc.add(FilterOrdersEvent(status)),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8.w),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.transparent : Colors.white,
+          color: isSelected ? Colors.transparent : colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Column(
@@ -141,7 +146,7 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
             Text(
               title,
               style: TextStyle(
-                color: isSelected ? const Color(0xFF3F51B5) : Colors.grey,
+                color: isSelected ? DashboardColors.of(context).adminIndigo : colorScheme.outline,
                 fontSize: 14.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontFamily: 'BonyadeKoodak',
@@ -152,7 +157,7 @@ class _ScreenOrdersState extends BaseOrdersStatefulWidgetState<ScreenOrders, Ord
                 margin: EdgeInsets.only(top: 4.h),
                 height: 2.h,
                 width: 20.w,
-                color: const Color(0xFF3F51B5),
+                color: DashboardColors.of(context).adminIndigo,
               ),
           ],
         ),

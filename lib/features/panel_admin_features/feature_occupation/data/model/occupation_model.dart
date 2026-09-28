@@ -8,7 +8,7 @@ String _anyToString(dynamic value) => value?.toString() ?? '';
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class OccupationModel with _$OccupationModel {
+sealed class OccupationModel with _$OccupationModel {
   const factory OccupationModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(fromJson: _anyToString) String? title,
@@ -16,6 +16,8 @@ class OccupationModel with _$OccupationModel {
     @JsonKey(name: 'sort_order', fromJson: _anyToInt) int? sortOrder,
     @JsonKey(name: 'created_at', fromJson: _anyToString) String? createdAt,
     @JsonKey(name: 'updated_at', fromJson: _anyToString) String? updatedAt,
+    @JsonKey(name: 'image_id', fromJson: _anyToString) String? imageId,
+    @JsonKey(fromJson: _anyToString) String? color,
   }) = _OccupationModel;
 
   const OccupationModel._();
@@ -30,5 +32,7 @@ class OccupationModel with _$OccupationModel {
     sortOrder: sortOrder,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    imageId: imageId,
+    color: color,
   );
 }

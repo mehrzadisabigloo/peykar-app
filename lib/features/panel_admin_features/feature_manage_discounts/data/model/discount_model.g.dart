@@ -6,8 +6,8 @@ part of 'discount_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$DiscountModelImpl _$$DiscountModelImplFromJson(Map<String, dynamic> json) =>
-    _$DiscountModelImpl(
+_DiscountModel _$DiscountModelFromJson(Map<String, dynamic> json) =>
+    _DiscountModel(
       id: _anyToString(json['id']),
       discountCode: _anyToString(json['discount_code']),
       discountCodeExpiresAt: _anyToString(json['discount_code_expires_at']),
@@ -26,7 +26,7 @@ _$DiscountModelImpl _$$DiscountModelImplFromJson(Map<String, dynamic> json) =>
       updatedAt: _anyToString(json['updated_at']),
     );
 
-Map<String, dynamic> _$$DiscountModelImplToJson(_$DiscountModelImpl instance) =>
+Map<String, dynamic> _$DiscountModelToJson(_DiscountModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'discount_code': instance.discountCode,

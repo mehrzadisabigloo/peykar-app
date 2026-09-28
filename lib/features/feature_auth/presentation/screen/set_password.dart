@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
 import '../base/base_auth_stateful_widget_state.dart';
 import '../bloc/authentication_bloc.dart';
+import '../../../../core/themes/theme_main.dart';
 
 class SetPasswordPage extends StatefulWidget {
   final String phoneNumber;
@@ -28,6 +30,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
   bool _isMin8 = false;
   bool _hasMixed = false;
   bool _hasUpper = false;
+  bool _passwordsMatch = false;
 
   @override
   void initState() {
@@ -45,10 +48,12 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
 
   void _validatePassword() {
     final val = _passController.text;
+    final confirmVal = _confirmPassController.text;
     setState(() {
       _isMin8 = val.length >= 8;
       _hasMixed = RegExp(r'(?=.*[a-zA-Z])(?=.*[0-9])').hasMatch(val);
       _hasUpper = RegExp(r'(?=.*[A-Z])').hasMatch(val);
+      _passwordsMatch = val.isNotEmpty && val == confirmVal;
     });
   }
 
@@ -60,9 +65,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
       setState(() => _isLoading = true);
     } else if (state is Failed) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
+      CstmSnackBar.showError(context, state.message);
     } else if (state is AuthSuccess) {
       setState(() => _isLoading = false);
       context.goNamed('home');
@@ -76,12 +79,12 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.sp),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -104,7 +107,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
               Text(
                 'لطفا رمز عبور خود را تعیین کنید',
                 style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.black54,
+                  color: colorScheme.onSurface.withValues(alpha: 0.54),
                   fontSize: 14.sp,
                 ),
               ),
@@ -126,6 +129,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
               _requirementRow('حداقل ۸ کاراکتر', _isMin8),
               _requirementRow('شامل عدد و حروف انگلیسی', _hasMixed),
               _requirementRow('شامل حرف بزرگ', _hasUpper),
+              _requirementRow('تطابق رمز عبور', _passwordsMatch),
               SizedBox(height: 50.h),
               ElevatedButton(
                 onPressed: (_isMin8 &&
@@ -133,15 +137,10 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
                         _hasUpper &&
                         _passController.text.isNotEmpty &&
                         _confirmPassController.text.isNotEmpty &&
+                        _passController.text == _confirmPassController.text &&
                         !_isLoading)
                     ? () {
-                        if (_passController.text == _confirmPassController.text) {
-                          bloc.add(SetPasswordEvent(_passController.text, _confirmPassController.text));
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('رمز عبور و تکرار آن مطابقت ندارند')),
-                          );
-                        }
+                        bloc.add(SetPasswordEvent(_passController.text, _confirmPassController.text));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
@@ -149,13 +148,14 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
                           _hasMixed &&
                           _hasUpper &&
                           _passController.text.isNotEmpty &&
-                          _confirmPassController.text.isNotEmpty)
+                          _confirmPassController.text.isNotEmpty &&
+                          _passController.text == _confirmPassController.text)
                       ? colorScheme.primary
-                      : const Color(0xffEEEEEE),
+                      : colorScheme.outlineVariant,
                   minimumSize: Size(double.infinity, 56.h),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colorScheme.surface)
                     : const Text('ثبت و ادامه'),
               ),
               SizedBox(height: 30.h),
@@ -167,12 +167,13 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
   }
 
   Widget _passwordField(String label, bool obscure, Function(bool) onToggle, TextEditingController controller) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13.sp, color: Colors.black54),
+          style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         SizedBox(height: 8.h),
         TextField(
@@ -183,7 +184,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
             suffixIcon: IconButton(
               icon: Icon(
                 obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: Colors.black26,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.26),
                 size: 22.sp,
               ),
               onPressed: () => onToggle(!obscure),
@@ -195,13 +196,14 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
   }
 
   Widget _requirementRow(String text, bool isMet) {
+    final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
         children: [
           Icon(
             Icons.check_circle,
-            color: isMet ? const Color(0xff4CAF50) : const Color(0xffE0E0E0),
+            color: isMet ? StatusColors.of(context).success : theme.colorScheme.outlineVariant,
             size: 20.sp,
           ),
           SizedBox(width: 12.w),
@@ -209,7 +211,7 @@ class _SetPasswordPageState extends BaseAuthStatefulWidgetState<SetPasswordPage,
             text,
             style: TextStyle(
               fontSize: 13.sp,
-              color: isMet ? Colors.black87 : Colors.black26,
+              color: isMet ? theme.colorScheme.onSurface.withValues(alpha: 0.87) : theme.colorScheme.onSurface.withValues(alpha: 0.26),
             ),
           ),
         ],

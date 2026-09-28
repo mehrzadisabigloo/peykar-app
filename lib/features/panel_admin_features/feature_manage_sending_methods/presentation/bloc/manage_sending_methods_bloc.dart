@@ -30,36 +30,54 @@ class ManageSendingMethodsBloc extends BaseBloc<ManageSendingMethodsEvent, Manag
   Future<void> _onDeleteSendingMethod(DeleteSendingMethodEvent event, Emitter<ManageSendingMethodsState> emit) async {
     final currentState = state;
     if (currentState is ManageSendingMethodsLoaded) {
-      emit(ManageSendingMethodsLoaded(currentState.methods, processingId: event.id));
+      emit(currentState.copyWith(processingId: event.id, isDeleting: true, clearMessages: true));
     }
 
     final dataState = await repository.deleteSendingMethod(event.id);
     
     if (dataState is DataSuccess) {
-      add(const FetchSendingMethodsEvent());
+      final updatedMethods = (state as ManageSendingMethodsLoaded).methods.where((m) => m.id != event.id).toList();
+      emit(ManageSendingMethodsLoaded(updatedMethods, successMessage: 'روش ارسال با موفقیت حذف شد'));
     } else {
       if (state is ManageSendingMethodsLoaded) {
-        emit(ManageSendingMethodsLoaded((state as ManageSendingMethodsLoaded).methods));
+        emit((state as ManageSendingMethodsLoaded).copyWith(
+          processingId: null,
+          isDeleting: false,
+          errorMessage: dataState.error ?? "خطا در حذف",
+        ));
+      } else {
+        emit(ManageSendingMethodsError(dataState.error ?? "خطا در حذف"));
       }
-      emit(ManageSendingMethodsError(dataState.error ?? "خطا در حذف"));
     }
   }
 
   Future<void> _onChangeSendingMethodStatus(ChangeSendingMethodStatusEvent event, Emitter<ManageSendingMethodsState> emit) async {
     final currentState = state;
     if (currentState is ManageSendingMethodsLoaded) {
-      emit(ManageSendingMethodsLoaded(currentState.methods, processingId: event.id));
+      emit(currentState.copyWith(processingId: event.id, isDeleting: false, clearMessages: true));
     }
 
     final dataState = await repository.changeStatus(event.id);
     
     if (dataState is DataSuccess) {
-      add(const FetchSendingMethodsEvent());
+      final updatedMethods = (state as ManageSendingMethodsLoaded).methods.map((m) {
+        if (m.id == event.id) {
+          final newStatus = (m.isActive) ? 'Deactive' : 'Active';
+          return m.copyWith(status: newStatus);
+        }
+        return m;
+      }).toList();
+      emit(ManageSendingMethodsLoaded(updatedMethods, successMessage: 'وضعیت روش ارسال تغییر کرد'));
     } else {
       if (state is ManageSendingMethodsLoaded) {
-        emit(ManageSendingMethodsLoaded((state as ManageSendingMethodsLoaded).methods));
+        emit((state as ManageSendingMethodsLoaded).copyWith(
+          processingId: null,
+          isDeleting: false,
+          errorMessage: dataState.error ?? "خطا در تغییر وضعیت",
+        ));
+      } else {
+        emit(ManageSendingMethodsError(dataState.error ?? "خطا در تغییر وضعیت"));
       }
-      emit(ManageSendingMethodsError(dataState.error ?? "خطا در تغییر وضعیت"));
     }
   }
 }

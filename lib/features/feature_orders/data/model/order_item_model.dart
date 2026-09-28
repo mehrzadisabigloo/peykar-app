@@ -12,7 +12,7 @@ double _anyToDouble(dynamic value) => double.tryParse(value?.toString() ?? '0.0'
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class OrderItemModel with _$OrderItemModel {
+sealed class OrderItemModel with _$OrderItemModel {
   const factory OrderItemModel({
     @JsonKey(fromJson: _anyToString) @Default('') String id,
     @JsonKey(fromJson: _anyToInt) @Default(0) int quantity,

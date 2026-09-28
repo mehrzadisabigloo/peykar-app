@@ -9,6 +9,7 @@ class RepairmanEntity {
   final String? profileImageId;
   final String? ostan;
   final String? shahrestan;
+  final String? address;
   final String? brand;
   final List<String>? identityImages;
   final List<String>? businessLicenseImage;
@@ -34,6 +35,7 @@ class RepairmanEntity {
     this.profileImageId,
     this.ostan,
     this.shahrestan,
+    this.address,
     this.brand,
     this.identityImages,
     this.businessLicenseImage,

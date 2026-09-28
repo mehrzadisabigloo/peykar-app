@@ -18,10 +18,37 @@ class ManageDiscountsLoading extends ManageDiscountsState {
 class ManageDiscountsLoaded extends ManageDiscountsState {
   final List<DiscountModel> discounts;
   final String? processingId;
-  const ManageDiscountsLoaded(this.discounts, {this.processingId});
+  final bool isDeleting;
+  final String? errorMessage;
+  final String? successMessage;
+
+  const ManageDiscountsLoaded(
+    this.discounts, {
+    this.processingId,
+    this.isDeleting = false,
+    this.errorMessage,
+    this.successMessage,
+  });
+
+  ManageDiscountsLoaded copyWith({
+    List<DiscountModel>? discounts,
+    String? processingId,
+    bool? isDeleting,
+    String? errorMessage,
+    String? successMessage,
+    bool clearMessages = false,
+  }) {
+    return ManageDiscountsLoaded(
+      discounts ?? this.discounts,
+      processingId: processingId ?? this.processingId,
+      isDeleting: isDeleting ?? this.isDeleting,
+      errorMessage: errorMessage ?? (clearMessages ? null : this.errorMessage),
+      successMessage: successMessage ?? (clearMessages ? null : this.successMessage),
+    );
+  }
 
   @override
-  List<Object?> get props => [discounts, processingId];
+  List<Object?> get props => [discounts, processingId, isDeleting, errorMessage, successMessage];
 }
 
 class ManageDiscountsError extends ManageDiscountsState {

@@ -6,8 +6,8 @@ part of 'order_item_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OrderItemModelImpl _$$OrderItemModelImplFromJson(Map<String, dynamic> json) =>
-    _$OrderItemModelImpl(
+_OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
+    _OrderItemModel(
       id: json['id'] == null ? '' : _anyToString(json['id']),
       quantity: json['quantity'] == null ? 0 : _anyToInt(json['quantity']),
       originalPrice: json['original_price'] == null
@@ -23,12 +23,11 @@ _$OrderItemModelImpl _$$OrderItemModelImplFromJson(Map<String, dynamic> json) =>
             ),
     );
 
-Map<String, dynamic> _$$OrderItemModelImplToJson(
-  _$OrderItemModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'quantity': instance.quantity,
-  'original_price': instance.originalPrice,
-  'final_price': instance.finalPrice,
-  'product': instance.product,
-};
+Map<String, dynamic> _$OrderItemModelToJson(_OrderItemModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'quantity': instance.quantity,
+      'original_price': instance.originalPrice,
+      'final_price': instance.finalPrice,
+      'product': instance.product,
+    };

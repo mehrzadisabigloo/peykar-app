@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../domain/entity/orders_entity.dart';
 import 'package:intl/intl.dart';
 
@@ -11,21 +13,22 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.decimalPattern();
+    final colorScheme = Theme.of(context).colorScheme;
     
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: colorScheme.onSurface.withValues(alpha: 0.04),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +36,7 @@ class OrderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatusBadge(order.status, order.statusLabel),
+              _buildStatusBadge(context, order.status, order.statusLabel),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -42,7 +45,7 @@ class OrderCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface.withValues(alpha: 0.87),
                       fontFamily: 'BonyadeKoodak',
                     ),
                   ),
@@ -53,19 +56,19 @@ class OrderCard extends StatelessWidget {
                         order.date,
                         style: TextStyle(
                           fontSize: 11.sp,
-                          color: Colors.grey,
+                          color: colorScheme.outline,
                           fontFamily: 'BonyadeKoodak',
                         ),
                       ),
                       SizedBox(width: 4.w),
-                      Icon(Icons.calendar_today_outlined, size: 10.sp, color: Colors.grey),
+                      Icon(Icons.calendar_today_outlined, size: 10.sp, color: colorScheme.outline),
                     ],
                   ),
                 ],
               ),
             ],
           ),
-          Divider(height: 24.h, color: Colors.grey.withValues(alpha: 0.1)),
+          Divider(height: 24.h, color: colorScheme.outlineVariant),
           if (order.items.isNotEmpty) ...[
             Row(
               children: [
@@ -78,7 +81,7 @@ class OrderCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: colorScheme.onSurface.withValues(alpha: 0.87),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -89,7 +92,7 @@ class OrderCard extends StatelessWidget {
                           'و ${order.items.length - 1} مورد دیگر',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Colors.grey,
+                            color: colorScheme.outline,
                           ),
                         ),
                     ],
@@ -100,20 +103,21 @@ class OrderCard extends StatelessWidget {
                   width: 50.w,
                   height: 50.w,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.05),
+                    color: colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: order.items.first.product?.images.isNotEmpty == true
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10.r),
-                          child: Image.network(
-                            order.items.first.product!.images.first,
+                          child: CachedNetworkImage(
+                            imageUrl: order.items.first.product!.images.first,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                            placeholder: (context, url) => Container(color: colorScheme.surfaceContainer),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.image_not_supported_outlined, color: colorScheme.outline),
                           ),
                         )
-                      : const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                      : Icon(Icons.shopping_bag_outlined, color: colorScheme.outline),
                 ),
               ],
             ),
@@ -128,7 +132,7 @@ class OrderCard extends StatelessWidget {
                     'تومان',
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: Colors.grey,
+                      color: colorScheme.outline,
                       fontFamily: 'BonyadeKoodak',
                     ),
                   ),
@@ -138,7 +142,7 @@ class OrderCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF3F51B5),
+                      color: DashboardColors.of(context).adminIndigo,
                       fontFamily: 'BonyadeKoodak',
                     ),
                   ),
@@ -151,30 +155,34 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(OrderStatus status, String label) {
+  Widget _buildStatusBadge(BuildContext context, OrderStatus status, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusColors = StatusColors.of(context);
+    final dashboardColors = DashboardColors.of(context);
+    
     Color bgColor;
     Color textColor;
 
     switch (status) {
       case OrderStatus.paid:
-        bgColor = const Color(0xFFE8F5E9);
-        textColor = const Color(0xFF2E7D32);
+        textColor = statusColors.success;
+        bgColor = textColor.withValues(alpha: 0.1);
         break;
       case OrderStatus.inProgress:
-        bgColor = const Color(0xFFFFF3E0);
-        textColor = const Color(0xFFEF6C00);
+        textColor = statusColors.warning;
+        bgColor = textColor.withValues(alpha: 0.1);
         break;
       case OrderStatus.sent:
-        bgColor = const Color(0xFFE3F2FD);
-        textColor = const Color(0xFF1565C0);
+        textColor = statusColors.info;
+        bgColor = textColor.withValues(alpha: 0.1);
         break;
       case OrderStatus.completed:
-        bgColor = const Color(0xFFE0F2F1);
-        textColor = const Color(0xFF00695C);
+        textColor = dashboardColors.adminTeal;
+        bgColor = textColor.withValues(alpha: 0.1);
         break;
       case OrderStatus.canceled:
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFC62828);
+        textColor = colorScheme.error;
+        bgColor = textColor.withValues(alpha: 0.1);
         break;
     }
 

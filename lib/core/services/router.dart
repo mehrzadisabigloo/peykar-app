@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resturant_app/core/presentation/screen/splash_screen.dart';
+import 'package:resturant_app/core/presentation/screen/screen_about_us.dart';
 import 'package:resturant_app/core/presentation/widget/main_shell.dart';
 import 'package:resturant_app/core/services/locator.dart';
 import 'package:resturant_app/features/feature_auth/presentation/router/auth_router.dart';
@@ -18,6 +19,7 @@ import 'package:resturant_app/features/feature_repair_shop/presentation/router/r
 import 'package:resturant_app/features/feature_profile/presentation/router/profile_router.dart';
 import 'package:resturant_app/features/feature_shop/presentation/router/shop_router.dart';
 import 'package:resturant_app/features/feature_shop_basket/presentation/router/shop_basket_router.dart';
+import 'package:resturant_app/features/feature_create_time_slot/presentation/router/create_time_slot_router.dart';
 import 'package:resturant_app/features/panel_admin_features/feature_panel_admin/presentation/router/panel_admin_router.dart';
 
 final GoRouter router = GoRouter(
@@ -34,7 +36,7 @@ final GoRouter router = GoRouter(
           create: (context) => locator<MainHomePageBloc>()
             ..add(AppBarAlarms())
             ..add(GetRole()),
-          child: MainShell(appUri: state.uri, child: child),
+          child: MainShell(appUri: state.uri, extra: state.extra, child: child),
         );
       },
       routes: [
@@ -51,7 +53,13 @@ final GoRouter router = GoRouter(
         ...ProfileRouter().routes,
         ...ShopRouter().routes,
         ...ShopBasketRouter().routes,
+        ...CreateTimeSlotRouter().routes,
         ...PanelAdminRouter().routes,
+        GoRoute(
+          name: 'about_us',
+          path: '/about_us',
+          builder: (context, state) => const ScreenAboutUs(),
+        ),
       ],
     ),
   ],

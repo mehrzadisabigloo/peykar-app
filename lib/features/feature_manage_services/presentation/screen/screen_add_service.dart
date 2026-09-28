@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_manage_services_stateful_widget_state.dart';
 import '../bloc/add_service/add_service_bloc.dart';
 import 'package:resturant_app/features/feature_manage_products/presentation/widget/image_upload_slot.dart';
@@ -56,19 +58,15 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       body: BlocConsumer<AddServiceBloc, AddServiceState>(
         bloc: bloc,
         listener: (context, state) {
           if (state is AddServiceSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('خدمت با موفقیت اضافه شد'), backgroundColor: Colors.green),
-            );
+            CstmSnackBar.showSuccess(context, 'خدمت با موفقیت اضافه شد');
             context.pop(true);
           } else if (state is AddServiceError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
+            CstmSnackBar.showError(context, state.message);
           }
         },
         builder: (context, state) {
@@ -173,7 +171,7 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
       style: TextStyle(
         fontSize: 16.sp,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF3F51B5),
+        color: DashboardColors.of(context).adminIndigo,
       ),
     );
   }
@@ -189,11 +187,11 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -207,11 +205,11 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF3F51B5), size: 20.sp),
+          prefixIcon: Icon(icon, color: DashboardColors.of(context).adminIndigo, size: 20.sp),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          labelStyle: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-          hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
+          labelStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          hintStyle: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.outline),
         ),
       ),
     );
@@ -220,11 +218,11 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
   Widget _buildKeywordField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -235,14 +233,14 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
         onFieldSubmitted: _addKeyword,
         decoration: InputDecoration(
           hintText: 'کلمه کلیدی را تایپ کرده و اینتر بزنید',
-          prefixIcon: Icon(Icons.tag, color: const Color(0xFF3F51B5), size: 20.sp),
+          prefixIcon: Icon(Icons.tag, color: DashboardColors.of(context).adminIndigo, size: 20.sp),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.add_circle, color: Color(0xFF3F51B5)),
+            icon: Icon(Icons.add_circle, color: DashboardColors.of(context).adminIndigo),
             onPressed: () => _addKeyword(_keywordsController.text),
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
+          hintStyle: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.outline),
         ),
       ),
     );
@@ -252,10 +250,10 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
     return Chip(
       label: Text(
         label,
-        style: TextStyle(fontSize: 12.sp, color: Colors.white),
+        style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.surface),
       ),
-      backgroundColor: const Color(0xFF3F51B5),
-      deleteIcon: Icon(Icons.close, size: 14.sp, color: Colors.white),
+      backgroundColor: DashboardColors.of(context).adminIndigo,
+      deleteIcon: Icon(Icons.close, size: 14.sp, color: Theme.of(context).colorScheme.surface),
       onDeleted: () {
         setState(() {
           keywords.remove(label);
@@ -286,18 +284,18 @@ class _ScreenAddServiceState extends BaseManageServicesStatefulWidgetState<Scree
                 }
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3F51B5),
+          backgroundColor: DashboardColors.of(context).adminIndigo,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
           elevation: 0,
         ),
         child: state is AddServiceLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
             : Text(
                 'ثبت خدمت',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
       ),

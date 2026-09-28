@@ -18,16 +18,16 @@ abstract class BaseStatelessWidget extends StatelessWidget {
   SizedBox get largeHorizontalGap => SizedBox(width: 24.r);
 
   Color primaryColor(BuildContext context) => Theme.of(context).colorScheme.primary;
-  Color primaryColorLight(BuildContext context) => const Color(0xffc6c6c6);
+  Color primaryColorLight(BuildContext context) => Theme.of(context).colorScheme.primaryContainer;
   Color secondaryColor(BuildContext context) => Theme.of(context).colorScheme.secondary;
   Color canvasColor(BuildContext context) => Theme.of(context).canvasColor;
   Color colorDivider(BuildContext context) => Theme.of(context).dividerColor;
   Color colorOnPrimary(BuildContext context) => Theme.of(context).colorScheme.onPrimaryContainer;
   Color colorError(BuildContext context) => Theme.of(context).colorScheme.error;
-  Color get colorGreyText => const Color(0xff707070);
-  Color get colorGreyOutline => const Color(0xffeeeeee);
-  Color get colorGreyTextDark => const Color(0xff555555);
-  Color get colorGreyTextLight => const Color(0xffaaaaaa);
+  Color colorGreyText(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color colorGreyOutline(BuildContext context) => Theme.of(context).colorScheme.outlineVariant;
+  Color colorGreyTextDark(BuildContext context) => Theme.of(context).colorScheme.onSurface;
+  Color colorGreyTextLight(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
   double get fontSizeSmall => 11.r;
   double get fontSizeMedium => 14.r;

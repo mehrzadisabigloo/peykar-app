@@ -4,4 +4,5 @@ import '../entity/users_list_entity.dart';
 
 abstract class HomeRepository {
   Future<DataState<UsersListEntity>> fetchActiveUsers(UsersFilterParams params);
+  Future<DataState<bool>> storeUserLocation(Map<String, dynamic> data);
 }

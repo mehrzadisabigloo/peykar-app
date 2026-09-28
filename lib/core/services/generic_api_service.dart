@@ -16,6 +16,7 @@ class LoggingInterceptor extends Interceptor {
     options.headers.addAll({
       "Content-Type": "application/json",
       'Cache-Control': 'no-cache',
+      'X-API-KEY': '3702a7421bd806813b6f8bc937ba805d96ce9e429ed1f6fb6beac4408452c42a'
     });
 
     if (token != null) {
@@ -50,7 +51,8 @@ class LoggingInterceptor extends Interceptor {
   Future<void> removeToken() async {
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'token');
-    print('Token removed');
+    await storage.delete(key: 'status');
+    print('Auth storage cleared');
   }
 }
 
@@ -127,6 +129,20 @@ class GenericApiService {
         return response;
       } else {
 
+        return response;
+      }
+    }
+  }
+
+  Future<dynamic> patch(String url, Map<String, dynamic> params) async {
+    try {
+      final response = await dio.patch(url, data: params);
+      return response;
+    } on DioException catch (e) {
+      final response = e.response;
+      if (response != null) {
+        return response;
+      } else {
         return response;
       }
     }

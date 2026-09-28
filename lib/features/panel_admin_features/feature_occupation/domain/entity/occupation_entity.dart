@@ -7,6 +7,8 @@ class OccupationEntity extends Equatable {
   final int? sortOrder;
   final String? createdAt;
   final String? updatedAt;
+  final String? imageId;
+  final String? color;
 
   const OccupationEntity({
     this.id,
@@ -15,12 +17,14 @@ class OccupationEntity extends Equatable {
     this.sortOrder,
     this.createdAt,
     this.updatedAt,
+    this.imageId,
+    this.color,
   });
 
   bool get isActive => status?.toLowerCase() == 'active';
 
   @override
-  List<Object?> get props => [id, title, status, sortOrder, createdAt, updatedAt];
+  List<Object?> get props => [id, title, status, sortOrder, createdAt, updatedAt, imageId, color];
 }
 
 class OccupationFilterParams {

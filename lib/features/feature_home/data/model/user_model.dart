@@ -13,8 +13,20 @@ String? _roleFromJson(dynamic json) {
 
 String? _anyToString(dynamic json) => json?.toString();
 
+double? _toDouble(dynamic json) {
+  if (json == null) return null;
+  if (json is num) return json.toDouble();
+  return double.tryParse(json.toString());
+}
+
+int? _toInt(dynamic json) {
+  if (json == null) return null;
+  if (json is num) return json.toInt();
+  return int.tryParse(json.toString());
+}
+
 @freezed
-class UserModel with _$UserModel {
+sealed class UserModel with _$UserModel {
   const factory UserModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(name: 'first_name', fromJson: _anyToString) String? firstName,
@@ -23,6 +35,12 @@ class UserModel with _$UserModel {
     @JsonKey(fromJson: _roleFromJson) String? role,
     @JsonKey(fromJson: _anyToString) String? status,
     @JsonKey(fromJson: _anyToString) String? brand,
+    @JsonKey(fromJson: _anyToString) String? ostan,
+    @JsonKey(fromJson: _anyToString) String? shahrestan,
+    @JsonKey(fromJson: _anyToString) String? address,
+    @JsonKey(name: 'profile_image_id', fromJson: _anyToString) String? profileImageId,
+    @JsonKey(name: 'rating_average', fromJson: _toDouble) double? ratingAverage,
+    @JsonKey(name: 'ratings_count', fromJson: _toInt) int? ratingsCount,
   }) = _UserModel;
 
   const UserModel._();
@@ -38,5 +56,11 @@ class UserModel with _$UserModel {
         role: role,
         status: status?.toLowerCase(),
         brand: brand,
+        ostan: ostan,
+        shahrestan: shahrestan,
+        address: address,
+        profileImageId: profileImageId,
+        ratingAverage: ratingAverage,
+        ratingsCount: ratingsCount,
       );
 }

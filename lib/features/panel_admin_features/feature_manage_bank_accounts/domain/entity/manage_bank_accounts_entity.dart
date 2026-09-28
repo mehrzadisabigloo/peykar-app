@@ -20,6 +20,7 @@ class BankAccountEntity {
   final String? status;
   final String? createdAt;
   final String? updatedAt;
+  final BankEntity? bank;
 
   const BankAccountEntity({
     this.id,
@@ -31,6 +32,7 @@ class BankAccountEntity {
     this.status,
     this.createdAt,
     this.updatedAt,
+    this.bank,
   });
 
   bool get isActive => status?.toLowerCase() == 'active';

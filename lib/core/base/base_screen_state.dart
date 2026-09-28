@@ -6,6 +6,7 @@ import '../bloc/base/base_bloc.dart';
 import '../bloc/error/error_bloc.dart';
 import '../error/app_exception.dart';
 import '../services/locator.dart';
+import '../widgets/cstm_snakbar.dart';
 import 'base_widget_state.dart';
 
 abstract class BaseScreenState<T extends StatefulWidget, S extends BaseBloc> extends BaseWidgetState<T> {
@@ -42,14 +43,7 @@ abstract class BaseScreenState<T extends StatefulWidget, S extends BaseBloc> ext
       retry(exception: state.exception);
     }
     if (state is ErrorStateDisplaySnackBar) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(state.message, style: const TextStyle(color: Colors.white)),
-        padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 32.r),
-        backgroundColor: Colors.red,
-        showCloseIcon: true,
-        duration: const Duration(seconds: 5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.r))),
-      ));
+      CstmSnackBar.showError(context, state.message);
     }
   }
 

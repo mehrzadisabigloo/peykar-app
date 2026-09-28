@@ -15,9 +15,23 @@ class JwtDecoder{
   Future<String> getRule() async {
 
     final String token = await getToken();
+    if (token.isEmpty) return 'user';
 
     Map<String, dynamic> payload = Jwt.parseJwt(token);
-    return payload['scopes'][0];
+    String role = payload['scopes'][0] ?? 'user';
+
+    // Check stored status for override
+    final status = await getStatus();
+    if (status == 'Draft') {
+      return 'repairman';
+    }
+
+    return role;
+  }
+
+  Future<String?> getStatus() async {
+    final storage = locator<FlutterSecureStorage>();
+    return await storage.read(key: 'status');
   }
 
 

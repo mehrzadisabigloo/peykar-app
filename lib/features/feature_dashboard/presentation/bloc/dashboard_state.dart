@@ -16,7 +16,11 @@ class DashboardLoading extends DashboardState {
 }
 
 class DashboardLoaded extends DashboardState {
-  const DashboardLoaded();
+  final List<BannerEntity> banners;
+  const DashboardLoaded({this.banners = const []});
+
+  @override
+  List<Object?> get props => [banners];
 }
 
 class DashboardError extends DashboardState {

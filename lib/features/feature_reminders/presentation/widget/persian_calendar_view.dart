@@ -28,6 +28,17 @@ class _PersianCalendarViewState extends State<PersianCalendarView> {
   }
 
   @override
+  void didUpdateWidget(covariant PersianCalendarView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDate != oldWidget.initialDate) {
+      setState(() {
+        _selectedDate = widget.initialDate;
+        _viewDate = Jalali(_selectedDate.year, _selectedDate.month, 1);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
@@ -41,18 +52,18 @@ class _PersianCalendarViewState extends State<PersianCalendarView> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +129,7 @@ class _PersianCalendarViewState extends State<PersianCalendarView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
-                .map((d) => Text(d, style: TextStyle(color: Colors.grey, fontSize: 13.sp, fontFamily: 'BonyadeKoodak')))
+                .map((d) => Text(d, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13.sp, fontFamily: 'BonyadeKoodak')))
                 .toList(),
           ),
           SizedBox(height: 12.h),
@@ -133,11 +144,11 @@ class _PersianCalendarViewState extends State<PersianCalendarView> {
             itemCount: startPadding + daysInMonth,
             itemBuilder: (context, index) {
               if (index < startPadding) return const SizedBox.shrink();
-              
+
               final day = index - startPadding + 1;
               final currentJalali = Jalali(_viewDate.year, _viewDate.month, day);
               final isSelected = _selectedDate == currentJalali;
-              
+
               return InkWell(
                 onTap: () {
                   setState(() {
@@ -158,7 +169,7 @@ class _PersianCalendarViewState extends State<PersianCalendarView> {
                     child: Text(
                       _toPersianDigit(day.toString()),
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
+                        color: isSelected ? theme.colorScheme.surface : theme.colorScheme.onSurface.withValues(alpha: 0.87),
                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                         fontSize: 13.sp,
                         fontFamily: 'BonyadeKoodak',

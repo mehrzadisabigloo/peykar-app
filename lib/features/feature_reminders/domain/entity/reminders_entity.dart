@@ -9,6 +9,7 @@ class RemindersEntity {
   final String id;
   final String? userId;
   final String title;
+  final String? reminderTypeTitle;
   final String description;
   final String remainingText;
   final double progress; // 0.0 to 1.0
@@ -17,7 +18,11 @@ class RemindersEntity {
   final Color progressColor;
   final List<KilometerLog>? kilometerLogs;
   final List<TimeLog>? timeLogs;
+  final List<KilometerLog>? kilometerLogsJalali;
+  final List<TimeLog>? timeLogsJalali;
   final String? serviceProviderId;
+  final String? reminderTypeId;
+  final List<String>? selectedSubItemIds;
   final String? createdAt;
   final String? updatedAt;
 
@@ -25,6 +30,7 @@ class RemindersEntity {
     required this.id,
     this.userId,
     required this.title,
+    this.reminderTypeTitle,
     required this.description,
     required this.remainingText,
     required this.progress,
@@ -33,7 +39,11 @@ class RemindersEntity {
     required this.progressColor,
     this.kilometerLogs,
     this.timeLogs,
+    this.kilometerLogsJalali,
+    this.timeLogsJalali,
     this.serviceProviderId,
+    this.reminderTypeId,
+    this.selectedSubItemIds,
     this.createdAt,
     this.updatedAt,
   });

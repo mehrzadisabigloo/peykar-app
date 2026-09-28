@@ -17,8 +17,22 @@ class HomeRepositoryImpl extends HomeRepository {
     try {
       final Response response = await _apiProvider.fetchActiveUsers(params);
       if (response.statusCode == 200) {
-        final UsersListEntity usersList = UsersListModel.fromJson(Map<String, dynamic>.from(response.data)).toEntity();
+        final UsersListEntity usersList = UsersListModel.fromApiResponse(response.data).toEntity();
         return DataSuccess(usersList);
+      } else {
+        return DataFailed(response.data['message'] ?? "خطایی رخ داد");
+      }
+    } catch (e) {
+      return const DataFailed('پاسخی دریافت نشد');
+    }
+  }
+
+  @override
+  Future<DataState<bool>> storeUserLocation(Map<String, dynamic> data) async {
+    try {
+      final Response response = await _apiProvider.storeUserLocation(data);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const DataSuccess(true);
       } else {
         return DataFailed(response.data['message'] ?? "خطایی رخ داد");
       }

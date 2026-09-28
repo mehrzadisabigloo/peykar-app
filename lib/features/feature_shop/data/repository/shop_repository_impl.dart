@@ -1,46 +1,60 @@
+import 'package:dio/dio.dart';
 import '../../../../core/resources/data_state.dart';
-import '../../domain/entity/shop_entity.dart';
+import '../../../panel_admin_features/feature_manage_shop_products/data/model/admin_product_list_model.dart';
+import '../../../panel_admin_features/feature_manage_shop_products/domain/entity/admin_product_filter_params.dart';
+import '../../../panel_admin_features/feature_manage_shop_products/domain/entity/admin_product_list_entity.dart';
 import '../../domain/repository/shop_repository.dart';
 import '../data_source/remote/shop_api_provider.dart';
+import '../../../feature_manage_products/data/model/manage_products_model.dart';
+import '../../../feature_manage_products/domain/entity/manage_products_entity.dart';
 
 class ShopRepositoryImpl extends ShopRepository {
   final ShopApiProvider _apiProvider;
   ShopRepositoryImpl(this._apiProvider);
 
   @override
-  Future<DataState<ShopEntity>> fetchShopData() async {
+  Future<DataState<AdminProductListEntity>> fetchShopData(AdminProductFilterParams params) async {
     try {
-      // Mock data based on design
-      final products = [
-        ShopProduct(
-          id: '1',
-          title: 'روغن موتور ایرانول SM 5W-40',
-          imageUrl: 'assets/images/oil1.png',
-          price: 880000,
-          isAvailable: true,
-          category: 'روغن موتور',
-        ),
-        ShopProduct(
-          id: '2',
-          title: 'فیلتر روغن مان',
-          imageUrl: 'assets/images/filter1.png',
-          price: 240000,
-          isAvailable: true,
-          category: 'فیلتر',
-        ),
-        ShopProduct(
-          id: '3',
-          title: 'شمع NGK',
-          imageUrl: 'assets/images/sparkplug1.png',
-          price: 320000,
-          isAvailable: true,
-          category: 'قطعات یدکی',
-        ),
-      ];
+      final Response response = await _apiProvider.getShopData(params.toJson());
 
-      return DataSuccess(ShopEntity(products: products));
+      if (response.statusCode == 200) {
+        final listModel = AdminProductListModel.fromJson(response.data['data']);
+        return DataSuccess(listModel.toEntity());
+      } else {
+        return DataFailed(response.data['message'] ?? "خطایی رخ داد");
+      }
     } catch (e) {
-      return DataFailed(e.toString());
+      return const DataFailed('پاسخی دریافت نشد');
+    }
+  }
+
+  @override
+  Future<DataState<List<CategoryEntity>>> fetchCategories() async {
+    try {
+      final Response response = await _apiProvider.fetchCategories();
+      if (response.statusCode == 200) {
+        final dynamic rootData = response.data;
+        List<dynamic> rawList = [];
+        if (rootData is Map<String, dynamic>) {
+          final data = rootData['data'];
+          if (data is List) {
+            rawList = data;
+          } else if (data is Map && data['data'] is List) {
+            rawList = data['data'];
+          }
+        }
+        final categories = rawList
+            .whereType<Map<String, dynamic>>()
+            .map((json) => CategoryModel.fromJson(json).toEntity())
+            .toList();
+        return DataSuccess(categories);
+      } else {
+        return DataFailed(response.data is Map
+            ? (response.data['message'] ?? "خطایی رخ داد")
+            : "خطایی رخ داد");
+      }
+    } catch (e) {
+      return const DataFailed('پاسخی دریافت نشد');
     }
   }
 }

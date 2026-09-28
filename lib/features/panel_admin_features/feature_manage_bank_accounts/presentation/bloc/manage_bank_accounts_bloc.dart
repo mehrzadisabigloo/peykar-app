@@ -42,42 +42,100 @@ class ManageBankAccountsBloc extends BaseBloc<ManageBankAccountsEvent, ManageBan
   }
 
   Future<void> _onAddBankAccount(AddBankAccountEvent event, Emitter<ManageBankAccountsState> emit) async {
-    emit(ManageBankAccountsLoading());
+    final currentState = state;
+    if (currentState is BankAccountsLoaded) {
+      emit(currentState.copyWith(isActionLoading: true, clearMessages: true));
+    } else if (currentState is BanksLoaded) {
+      emit(currentState.copyWith(isActionLoading: true));
+    } else if (currentState is ManageBankAccountsError) {
+      emit(currentState.copyWith(isActionLoading: true));
+    }
+    
     final dataState = await _repository.addBankAccount(event.account);
+    final nextState = state;
+    
     if (dataState is DataSuccess) {
-      emit(const BankAccountActionSuccess("حساب بانکی با موفقیت ثبت شد"));
+      if (nextState is BankAccountsLoaded) {
+        emit(nextState.copyWith(isActionLoading: false, successMessage: "حساب بانکی با موفقیت ثبت شد"));
+      } else if (nextState is BanksLoaded) {
+        emit(nextState.copyWith(isActionLoading: false));
+        emit(const BankAccountActionSuccess("حساب بانکی با موفقیت ثبت شد"));
+      } else {
+        emit(const BankAccountActionSuccess("حساب بانکی با موفقیت ثبت شد"));
+      }
     } else {
-      emit(ManageBankAccountsError(dataState.error ?? "خطا در ثبت حساب"));
+      if (nextState is BankAccountsLoaded) {
+        emit(nextState.copyWith(isActionLoading: false, errorMessage: dataState.error ?? "خطا در ثبت حساب"));
+      } else if (nextState is BanksLoaded) {
+        emit(nextState.copyWith(isActionLoading: false));
+        emit(ManageBankAccountsError(dataState.error ?? "خطا در ثبت حساب"));
+      } else {
+        emit(ManageBankAccountsError(dataState.error ?? "خطا در ثبت حساب"));
+      }
     }
   }
 
   Future<void> _onUpdateBankAccount(UpdateBankAccountEvent event, Emitter<ManageBankAccountsState> emit) async {
-    emit(ManageBankAccountsLoading());
+    final currentState = state;
+    if (currentState is BankAccountsLoaded) {
+      emit(currentState.copyWith(isActionLoading: true, clearMessages: true));
+    } else if (currentState is BanksLoaded) {
+      emit(currentState.copyWith(isActionLoading: true));
+    } else if (currentState is ManageBankAccountsError) {
+      emit(currentState.copyWith(isActionLoading: true));
+    }
+    
     final dataState = await _repository.updateBankAccount(event.id, event.account);
+    final nextState = state;
+    
     if (dataState is DataSuccess) {
-      emit(const BankAccountActionSuccess("حساب بانکی با موفقیت بروزرسانی شد"));
+      if (nextState is BankAccountsLoaded) {
+        emit(nextState.copyWith(isActionLoading: false, successMessage: "حساب بانکی با موفقیت بروزرسانی شد"));
+      } else if (nextState is BanksLoaded) {
+        emit(nextState.copyWith(isActionLoading: false));
+        emit(const BankAccountActionSuccess("حساب بانکی با موفقیت بروزرسانی شد"));
+      } else {
+        emit(const BankAccountActionSuccess("حساب بانکی با موفقیت بروزرسانی شد"));
+      }
     } else {
-      emit(ManageBankAccountsError(dataState.error ?? "خطا در بروزرسانی"));
+      if (nextState is BankAccountsLoaded) {
+        emit(nextState.copyWith(isActionLoading: false, errorMessage: dataState.error ?? "خطا در بروزرسانی"));
+      } else if (nextState is BanksLoaded) {
+        emit(nextState.copyWith(isActionLoading: false));
+        emit(ManageBankAccountsError(dataState.error ?? "خطا در بروزرسانی"));
+      } else {
+        emit(ManageBankAccountsError(dataState.error ?? "خطا در بروزرسانی"));
+      }
     }
   }
 
   Future<void> _onDeleteBankAccount(DeleteBankAccountEvent event, Emitter<ManageBankAccountsState> emit) async {
-    emit(ManageBankAccountsLoading());
+    final currentState = state;
+    if (currentState is! BankAccountsLoaded) return;
+    
+    emit(currentState.copyWith(processingId: event.id, isDeleting: true, clearMessages: true));
+    
     final dataState = await _repository.deleteBankAccount(event.id);
     if (dataState is DataSuccess) {
-      emit(const BankAccountActionSuccess("حساب بانکی با موفقیت حذف شد"));
+      emit(currentState.copyWith(successMessage: "حساب بانکی با موفقیت حذف شد", clearProcessingId: true));
+      add(const FetchBankAccounts());
     } else {
-      emit(ManageBankAccountsError(dataState.error ?? "خطا در حذف"));
+      emit(currentState.copyWith(errorMessage: dataState.error ?? "خطا در حذف", clearProcessingId: true));
     }
   }
 
   Future<void> _onChangeStatus(ChangeBankAccountStatusEvent event, Emitter<ManageBankAccountsState> emit) async {
-    emit(ManageBankAccountsLoading());
+    final currentState = state;
+    if (currentState is! BankAccountsLoaded) return;
+
+    emit(currentState.copyWith(processingId: event.id, isDeleting: false, clearMessages: true));
+    
     final dataState = await _repository.changeBankAccountStatus(event.id);
     if (dataState is DataSuccess) {
-      emit(const BankAccountActionSuccess("وضعیت با موفقیت تغییر یافت"));
+      emit(currentState.copyWith(successMessage: "وضعیت با موفقیت تغییر یافت", clearProcessingId: true));
+      add(const FetchBankAccounts());
     } else {
-      emit(ManageBankAccountsError(dataState.error ?? "خطا در تغییر وضعیت"));
+      emit(currentState.copyWith(errorMessage: dataState.error ?? "خطا در تغییر وضعیت", clearProcessingId: true));
     }
   }
 }

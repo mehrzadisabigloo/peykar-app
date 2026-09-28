@@ -3,6 +3,7 @@ import '../../../../core/services/feature_router.dart';
 import '../screen/screen_manage_products.dart';
 import '../screen/screen_add_product.dart';
 import '../screen/screen_product_detail.dart';
+import '../screen/screen_all_comments.dart';
 
 class ManageProductsRouter implements FeatureRouter {
   @override
@@ -21,6 +22,13 @@ class ManageProductsRouter implements FeatureRouter {
           name: 'product_detail',
           path: '/product_detail/:productId',
           builder: (context, state) => ScreenProductDetail(
+            productId: state.pathParameters['productId'] ?? '',
+          ),
+        ),
+        GoRoute(
+          name: 'product_all_comments',
+          path: '/product_all_comments/:productId',
+          builder: (context, state) => ScreenAllComments(
             productId: state.pathParameters['productId'] ?? '',
           ),
         ),

@@ -3,18 +3,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resturant_app/core/services/locator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../features/feature_home/presentation/bloc/main_home_page_bloc.dart';
+import '../../../features/feature_profile/domain/entity/profile_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:resturant_app/core/themes/theme_main.dart';
+import '../../resources/consts.dart';
 
 class AppDrawer extends StatelessWidget {
   final String role;
   const AppDrawer({super.key, required this.role});
 
-  // Safety amber accent from the mechanic palette.
-  static const Color _amber = Color(0xFFFFB300);
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final bool isAdmin = role == 'admin';
+    final bool isRepairman = role == 'repairman';
 
     return Drawer(
       width: 285.w,
@@ -22,8 +26,8 @@ class AppDrawer extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30.r),
-          bottomLeft: Radius.circular(30.r),
+          topLeft: Radius.circular(12.r),
+          bottomLeft: Radius.circular(12.r),
         ),
       ),
       child: Column(
@@ -83,18 +87,49 @@ class AppDrawer extends StatelessWidget {
                         context.pushNamed('admin_settlements');
                       },
                     ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.notifications_active_outlined,
+                      title: 'مدیریت انواع یادآور',
+                      onTap: () {
+                        context.pop();
+                        context.pushNamed('manage_reminder_types');
+                      },
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.payments_rounded,
+                      title: 'روش های پرداخت من',
+                      onTap: () {
+                        context.pop();
+                        context.pushNamed('repairman_payment_type');
+                      },
+                    ),
+                    SizedBox(height: 14.h),
+                  ],
+                  if (isRepairman) ...[
+                    _buildSectionLabel(context, 'مدیریت تعمیرگاه'),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.payments_rounded,
+                      title: 'روش های پرداخت',
+                      onTap: () {
+                        context.pop();
+                        context.pushNamed('repairman_payment_type');
+                      },
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.local_offer_rounded,
+                      title: 'کد تخفیف',
+                      onTap: () {
+                        context.pop();
+                        // No navigation for now as requested
+                      },
+                    ),
                     SizedBox(height: 14.h),
                   ],
                   _buildSectionLabel(context, 'حساب کاربری'),
-                  _buildDrawerItem(
-                    context,
-                    icon: Icons.person_outline_rounded,
-                    title: 'پروفایل کاربری',
-                    onTap: () {
-                      context.pop();
-                      context.pushNamed('profile');
-                    },
-                  ),
                   _buildDrawerItem(
                     context,
                     icon: Icons.history_rounded,
@@ -104,7 +139,7 @@ class AppDrawer extends StatelessWidget {
                   _buildDrawerItem(
                     context,
                     icon: Icons.favorite_border_rounded,
-                    title: 'علاقه‌مندی‌ها',
+                    title: 'سرگرمی',
                     onTap: () {},
                   ),
                   SizedBox(height: 14.h),
@@ -119,7 +154,10 @@ class AppDrawer extends StatelessWidget {
                     context,
                     icon: Icons.info_outline_rounded,
                     title: 'درباره ما',
-                    onTap: () {},
+                    onTap: () {
+                      context.pop();
+                      context.pushNamed('about_us');
+                    },
                   ),
                 ],
               ),
@@ -135,101 +173,148 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bool isRepairman = role == 'repairman';
-    final bool isAdmin = role == 'admin';
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            colorScheme.primary,
-            Color.lerp(colorScheme.primary, Colors.black, 0.30)!,
-          ],
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30.r),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.w, 58.h, 24.w, 26.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(3.r),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.5),
-                  ),
-                  child: CircleAvatar(
-                    radius: 32.r,
-                    backgroundColor: colorScheme.surface,
-                    child: Icon(
-                      Icons.person_rounded,
-                      size: 38.sp,
-                      color: colorScheme.primary,
-                    ),
-                  ),
+    return BlocBuilder<MainHomePageBloc, MainHomePageState>(
+      builder: (context, state) {
+        final ProfileEntity? profile = state.profile;
+
+        final bool isRepairman = (profile?.role ?? role) == 'repairman';
+        final bool isAdmin = (profile?.role ?? role) == 'admin';
+        final String displayName = profile?.fullName ?? (isAdmin ? 'مدیر سیستم' : 'کاربر زینو');
+
+        return InkWell(
+          onTap: () {
+            context.pop();
+            context.pushNamed('profile');
+          },
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  colorScheme.primary,
+                  Color.lerp(colorScheme.primary, colorScheme.onSurface, 0.25)!,
+                ],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12.r),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
-                const Spacer(),
               ],
             ),
-            SizedBox(height: 16.h),
-            Text(
-              isAdmin ? 'مدیر سیستم' : 'کاربر زینو',
-              style: TextStyle(
-                color: colorScheme.onPrimary,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: _amber.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 60.h, 20.w, 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    isAdmin
-                        ? Icons.admin_panel_settings_rounded
-                        : (isRepairman ? Icons.build_rounded : Icons.verified_user_rounded),
-                    size: 14.sp,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    isAdmin
-                        ? 'ادمین زینو'
-                        : (isRepairman ? 'تعمیرکار متخصص' : 'مشتری عزیز'),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(2.r),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: colorScheme.onPrimary.withValues(alpha: 0.8), width: 2),
+                            ),
+                            child: CircleAvatar(
+                              radius: 30.r,
+                              backgroundColor: colorScheme.surface,
+                              backgroundImage: (profile?.profileImageId != null && profile!.profileImageId!.isNotEmpty)
+                                  ? CachedNetworkImageProvider('${Consts.baseFileUrl}${profile.profileImageId}')
+                                  : null,
+                              child: (profile?.profileImageId == null || profile!.profileImageId!.isEmpty)
+                                  ? Icon(
+                                      Icons.person_rounded,
+                                      size: 32.sp,
+                                      color: colorScheme.primary,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(4.r),
+                              decoration: BoxDecoration(
+                                color: StatusColors.of(context).warning,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: colorScheme.surface, width: 1.5),
+                              ),
+                              child: Icon(
+                                isAdmin
+                                    ? Icons.admin_panel_settings_rounded
+                                    : (isRepairman ? Icons.build_rounded : Icons.verified_user_rounded),
+                                size: 10.sp,
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'BonyadeKoodak',
+                              ),
+                            ),
+                            if (profile?.mobile != null) ...[
+                              SizedBox(height: 2.h),
+                              Text(
+                                _toPersianDigit(profile!.mobile),
+                                style: TextStyle(
+                                  color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'BonyadeKoodak',
+                                ),
+                              ),
+                            ],
+                            SizedBox(height: 4.h),
+                            Row(
+                              children: [
+                                Text(
+                                  'مشاهده پروفایل',
+                                  style: TextStyle(
+                                    color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                                    fontSize: 11.sp,
+                                    fontFamily: 'BonyadeKoodak',
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right_rounded, color: colorScheme.onPrimary.withValues(alpha: 0.7), size: 14.sp),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+
+          ),
+        );
+      },
     );
   }
 
@@ -314,6 +399,7 @@ class AppDrawer extends StatelessWidget {
           onTap: () async {
             final storage = locator<FlutterSecureStorage>();
             await storage.delete(key: 'token');
+            await storage.delete(key: 'status');
             if (context.mounted) {
               context.go('/');
             }
@@ -356,5 +442,14 @@ class AppDrawer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _toPersianDigit(String input) {
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    for (int i = 0; i < english.length; i++) {
+      input = input.replaceAll(english[i], persian[i]);
+    }
+    return input;
   }
 }

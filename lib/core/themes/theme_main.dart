@@ -20,6 +20,9 @@ class ThemeMain {
           onSurface: Colors.black,
           outline: greyBorder,
           surfaceContainerHighest: greyBackground,
+          surfaceContainer: Color(0xFFF8F9FB),
+          onSurfaceVariant: greyText,
+          outlineVariant: Color(0xffeeeeee),
         ),
         scaffoldBackgroundColor: Colors.white,
         textTheme: const TextTheme(
@@ -46,7 +49,7 @@ class ThemeMain {
         inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: greyBackground,
-            hintStyle: const TextStyle(fontSize: 14, color: Color(0xffCCCCCC)),
+            hintStyle: const TextStyle(fontSize: 14, color: Color(0xff9E9E9E)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -88,8 +91,146 @@ class ThemeMain {
             ),
           ),
         ),
+        extensions: [
+          const ReminderColors(
+            timeColor: Colors.blue,
+            kilometerColor: Color(0xFFE65100),
+            timeColorLight: Color(0xFFE3F2FD),
+            kilometerColorLight: Color(0xFFFFF3E0),
+          ),
+          const StatusColors(
+            success: Color(0xFF4CAF50),
+            warning: Color(0xFFFFA000),
+            info: Color(0xFF2196F3),
+          ),
+          const DashboardColors(
+            adminAccent: Color(0xFF1A237E),
+            adminTeal: Color(0xFF00897B),
+            adminOrange: Color(0xFFE64A19),
+            adminYellow: Color(0xFFF9A825),
+            adminIndigo: Color(0xFF3F51B5),
+          ),
+        ],
+    );
+  }
+}
+
+class StatusColors extends ThemeExtension<StatusColors> {
+  final Color success;
+  final Color warning;
+  final Color info;
+
+  const StatusColors({
+    required this.success,
+    required this.warning,
+    required this.info,
+  });
+
+  static StatusColors of(BuildContext context) => Theme.of(context).extension<StatusColors>()!;
+
+  @override
+  StatusColors copyWith({Color? success, Color? warning, Color? info}) {
+    return StatusColors(
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      info: info ?? this.info,
     );
   }
 
+  @override
+  StatusColors lerp(ThemeExtension<StatusColors>? other, double t) {
+    if (other is! StatusColors) return this;
+    return StatusColors(
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      info: Color.lerp(info, other.info, t)!,
+    );
+  }
+}
 
+class DashboardColors extends ThemeExtension<DashboardColors> {
+  final Color adminAccent;
+  final Color adminTeal;
+  final Color adminOrange;
+  final Color adminYellow;
+  final Color adminIndigo;
+
+  const DashboardColors({
+    required this.adminAccent,
+    required this.adminTeal,
+    required this.adminOrange,
+    required this.adminYellow,
+    required this.adminIndigo,
+  });
+
+  static DashboardColors of(BuildContext context) => Theme.of(context).extension<DashboardColors>()!;
+
+  @override
+  DashboardColors copyWith({
+    Color? adminAccent,
+    Color? adminTeal,
+    Color? adminOrange,
+    Color? adminYellow,
+    Color? adminIndigo,
+  }) {
+    return DashboardColors(
+      adminAccent: adminAccent ?? this.adminAccent,
+      adminTeal: adminTeal ?? this.adminTeal,
+      adminOrange: adminOrange ?? this.adminOrange,
+      adminYellow: adminYellow ?? this.adminYellow,
+      adminIndigo: adminIndigo ?? this.adminIndigo,
+    );
+  }
+
+  @override
+  DashboardColors lerp(ThemeExtension<DashboardColors>? other, double t) {
+    if (other is! DashboardColors) return this;
+    return DashboardColors(
+      adminAccent: Color.lerp(adminAccent, other.adminAccent, t)!,
+      adminTeal: Color.lerp(adminTeal, other.adminTeal, t)!,
+      adminOrange: Color.lerp(adminOrange, other.adminOrange, t)!,
+      adminYellow: Color.lerp(adminYellow, other.adminYellow, t)!,
+      adminIndigo: Color.lerp(adminIndigo, other.adminIndigo, t)!,
+    );
+  }
+}
+
+class ReminderColors extends ThemeExtension<ReminderColors> {
+  final Color timeColor;
+  final Color kilometerColor;
+  final Color timeColorLight;
+  final Color kilometerColorLight;
+
+  const ReminderColors({
+    required this.timeColor,
+    required this.kilometerColor,
+    required this.timeColorLight,
+    required this.kilometerColorLight,
+  });
+
+  @override
+  ReminderColors copyWith({
+    Color? timeColor,
+    Color? kilometerColor,
+    Color? timeColorLight,
+    Color? kilometerColorLight,
+  }) {
+    return ReminderColors(
+      timeColor: timeColor ?? this.timeColor,
+      kilometerColor: kilometerColor ?? this.kilometerColor,
+      timeColorLight: timeColorLight ?? this.timeColorLight,
+      kilometerColorLight: kilometerColorLight ?? this.kilometerColorLight,
+    );
+  }
+
+  @override
+  ReminderColors lerp(ThemeExtension<ReminderColors>? other, double t) {
+    if (other is! ReminderColors) return this;
+    return ReminderColors(
+      timeColor: Color.lerp(timeColor, other.timeColor, t)!,
+      kilometerColor: Color.lerp(kilometerColor, other.kilometerColor, t)!,
+      timeColorLight: Color.lerp(timeColorLight, other.timeColorLight, t)!,
+      kilometerColorLight: Color.lerp(kilometerColorLight, other.kilometerColorLight, t)!,
+    );
+  }
 }

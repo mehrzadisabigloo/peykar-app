@@ -1,4 +1,5 @@
 import '../../../../../core/resources/data_state.dart';
+import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 import '../entity/manage_addresses_entity.dart';
 import '../../data/model/address_model.dart';
 
@@ -8,4 +9,6 @@ abstract class ManageAddressesRepository {
   Future<DataState<bool>> editAddress(String id, AddressModel address);
   Future<DataState<bool>> deleteAddress(String id);
   Future<DataState<AddressModel>> getAddress(String id);
+  Future<DataState<List<OstanModel>>> fetchOstans();
+  Future<DataState<List<ShahrestanModel>>> fetchShahrestans(int ostanId);
 }

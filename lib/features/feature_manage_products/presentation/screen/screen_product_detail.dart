@@ -1,20 +1,49 @@
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
+import '../../../../core/resources/consts.dart';
 import '../../../../core/services/locator.dart';
 import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../domain/entity/manage_products_entity.dart';
 import '../../domain/entity/repairman_entity.dart';
 import '../base/base_manage_products_stateful_widget_state.dart';
 import '../bloc/product_detail/product_detail_bloc.dart';
 import '../widget/product_detail_shimmer.dart';
+
+/// ============================================================================
+///  PRODUCT DETAIL SCREEN  —  صفحه جزئیات محصول
+/// ----------------------------------------------------------------------------
+///  Professional design strictly following the project's theme and patterns.
+/// ============================================================================
+
+class PersianFormatter {
+  PersianFormatter._();
+  static const List<String> _fa = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  static String digits(String input) {
+    final buffer = StringBuffer();
+    for (final rune in input.runes) {
+      final char = String.fromCharCode(rune);
+      final digit = int.tryParse(char);
+      buffer.write(digit != null ? _fa[digit] : char);
+    }
+    return buffer.toString();
+  }
+  static String price(num value) {
+    final raw = value.toInt().toString();
+    final grouped = raw.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (m) => ',',
+    );
+    return digits(grouped);
+  }
+}
 
 class ScreenProductDetail extends StatefulWidget {
   final String productId;
@@ -33,8 +62,6 @@ class _ScreenProductDetailState
   _ScreenProductDetailState() : super(locator<ProductDetailBloc>());
 
   final PageController _pageController = PageController();
-  double _slideValue = 0.0;
-  int _selectedTabIndex = 0;
   ManageProductsEntity? _loadedProduct;
 
   @override
@@ -53,31 +80,14 @@ class _ScreenProductDetailState
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
     return BlocListener<ProductDetailBloc, ProductDetailState>(
       listener: (context, state) {
         if (state is AddToCartSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            CstmSnackBar().snackBar(
-              state.message,
-              colorScheme.primary,
-            ),
-          );
-          setState(() {
-            _slideValue = 0.0;
-          });
+          CstmSnackBar.showInfo(context, state.message);
         }
         if (state is AddToCartError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            CstmSnackBar().snackBar(
-              state.message,
-              colorScheme.error,
-            ),
-          );
-          setState(() {
-            _slideValue = 0.0;
-          });
+          CstmSnackBar.showError(context, state.message);
         }
       },
       child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
@@ -87,10 +97,7 @@ class _ScreenProductDetailState
           }
 
           if (state is ProductDetailLoading && _loadedProduct == null) {
-            return Scaffold(
-              backgroundColor: colorScheme.surface,
-              body: const ProductDetailShimmer(),
-            );
+            return const ProductDetailShimmer();
           }
           if (state is ProductDetailError && _loadedProduct == null) {
             return Scaffold(
@@ -101,755 +108,810 @@ class _ScreenProductDetailState
               ),
             );
           }
-          
+
           final product = _loadedProduct;
           if (product != null) {
-            final formatter = intl.NumberFormat('#,###');
-
-            return Stack(
-              children: [
-                // 1. Background Image Layer (PageView)
-                SizedBox(
-                  height: 300.h,
-                  width: double.infinity,
-                  child: Stack(
-                    children: [
-                      product.images.isNotEmpty
-                          ? PageView.builder(
-                        controller: _pageController,
-                        itemCount: product.images.length,
-                        itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: product.images[index],
-                            fit: BoxFit.contain,
-                            errorWidget: (_, _, _) => _buildDetailPlaceholder(colorScheme),
-                            placeholder: (_, _) => const ProductDetailShimmer(),
-                          );
-                        },
-                      )
-                          : _buildDetailPlaceholder(colorScheme),
-                      if (product.images.length > 1)
-                        Positioned(
-                          top: 35.h,
-                          right: 25.w,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: product.images.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              return AnimatedBuilder(
-                                animation: _pageController,
-                                builder: (context, child) {
-                                  double selectedness = 0.0;
-                                  if (_pageController.hasClients && _pageController.page != null) {
-                                    selectedness = (1.0 - (index - _pageController.page!).abs()).clamp(0.0, 1.0);
-                                  } else if (index == 0) {
-                                    selectedness = 1.0;
-                                  }
-
-                                  return Container(
-                                    width: 8.w + (8.w * selectedness),
-                                    height: 8.h,
-                                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4.r),
-                                      color: colorScheme.primary.withValues(alpha: 0.2 + (0.8 * selectedness)),
-                                    ),
-                                  );
-                                },
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // 2. Top Navigation Bar (Floating)
-                Positioned(
-                  top:  20.h,
-                  left: 20.w,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // _buildCircleButton(Icons.arrow_back_ios_new_rounded, theme, () => Navigator.pop(context)),
-                      Row(
-                        children: [
-                          _buildCircleButton(Icons.favorite_border_rounded, theme, () {}),
-                          SizedBox(width: 12.w),
-                          _buildCircleButton(
-                            Icons.call_rounded,
-                            theme,
-                                () async {
-                              final phoneNumber = product.repairman?.mobile ??
-                                  (product.repairman?.phoneNumbers?.isNotEmpty == true
-                                      ? product.repairman!.phoneNumbers!.first
-                                      : null);
-                              if (phoneNumber != null) {
-                                final Uri launchUri = Uri(
-                                  scheme: 'tel',
-                                  path: phoneNumber,
-                                );
-                                try {
-                                  // For Android 11+, package visibility is handled in AndroidManifest.xml
-                                  // We use launchUrl directly to attempt opening the dialer.
-                                  await launchUrl(launchUri);
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      CstmSnackBar().snackBar(
-                                        'خطا در برقراری تماس',
-                                        colorScheme.error,
-                                      ),
-                                    );
-                                  }
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  CstmSnackBar().snackBar(
-                                    'شماره تماس یافت نشد',
-                                    colorScheme.error,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-
-                // 3. Floating Glassmorphism Title Pill
-                Positioned(
-                  top: 200.h,
-                  left: 24.w,
-                  right: 24.w,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30.r),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(30.r),
-                          border: Border.all(color: colorScheme.surface.withValues(alpha: 0.2), width: 1),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                product.title,
-                                style: TextStyle(
-                                  color: colorScheme.onSurface,
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  product.hasDiscount ? 'قیمت با تخفیف' : 'قیمت فعلی',
-                                  style: TextStyle(
-                                    color: colorScheme.onSurface.withValues(alpha: 0.6),
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Row(
-                                  children: [
-                                    if (product.hasDiscount) ...[
-                                      Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(8.r),
-                                        ),
-                                        child: Text(
-                                          '${product.discountPercentage}٪',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                    ],
-                                    Text(
-                                      '${formatter.format(product.hasDiscount ? product.finalPrice : product.price)} تومان',
-                                      style: TextStyle(
-                                        color: colorScheme.onSurface,
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (product.hasDiscount)
-                                  Text(
-                                    formatter.format(product.price),
-                                    style: TextStyle(
-                                      color: colorScheme.onSurface.withValues(alpha: 0.4),
-                                      fontSize: 12.sp,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(
+                backgroundColor: colorScheme.surface,
+                body: Stack(
+                  children: [
+                    // 1. Hero Image Background
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 420.h,
+                      child: _buildHeroImages(context, product),
                     ),
-                  ),
-                ),
 
-                // 4. Overlapping Bottom Sheet Content (Draggable)
-                DraggableScrollableSheet(
-                  initialChildSize: 0.61,
-                  minChildSize: 0.61,
-                  maxChildSize: 0.9,
-                  builder: (context, scrollController) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(36.r)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.shadowColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.5 : 0.1),
-                            blurRadius: 30,
-                            offset: const Offset(0, -10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          // Pull Tab Indicator
-                          Container(
-                            margin: EdgeInsets.only(top: 12.h, bottom: 16.h),
-                            width: 36.w,
-                            height: 4.h,
-                            decoration: BoxDecoration(
-                              color: colorScheme.onSurface.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(2.r),
-                            ),
-                          ),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              controller: scrollController,
-                              physics: const BouncingScrollPhysics(),
-                              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 120.h),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildCreatorRow(product.repairman, theme),
-                                  SizedBox(height: 24.h),
-
-                                  // Stats Container
-                                  _buildStatsBox(product, theme),
-                                  SizedBox(height: 20.h),
-
-                                  // Tabs
-                                  _buildTabsSection(theme),
-                                  SizedBox(height: 20.h),
-
-                                  // Tab Content
-                                  if (_selectedTabIndex == 0)
-                                  // Description Text
-                                    Text(
-                                      product.description.isNotEmpty
-                                          ? product.description
-                                          : 'توضیحات محصول به زودی اضافه خواهد شد. این محصول از بهترین کیفیت برخوردار است.',
-                                      style: TextStyle(
-                                        color: textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant,
-                                        fontSize: 13.sp,
-                                        height: 1.6,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  else if (_selectedTabIndex == 1)
-                                  // Specifications Placeholder
-                                    Column(
-                                      children: [
-                                        _buildSpecItem('ابعاد', '۱۰x۲۰x۳۰ سانتی‌متر', theme),
-                                        _buildSpecItem('وزن', '۵۰۰ گرم', theme),
-                                        _buildSpecItem('جنس', 'پلاستیک فشرده', theme),
-                                        _buildSpecItem('گارانتی', '۱۲ ماهه زینو', theme),
-                                      ],
-                                    )
-                                  else
-                                  // Reviews Placeholder
-                                    Column(
-                                      children: [
-                                        _buildReviewItem('علی محمدی', 'واقعا عالی بود، پیشنهاد می‌کنم.', 5, theme),
-                                        _buildReviewItem('مریم رضایی', 'کیفیت ساخت بالایی داره.', 4, theme),
-                                      ],
-                                    ),
-
-                                  SizedBox(height: 20.h),
-
-                                  // Bids List Item
-                                  _buildInfoListItem(theme),
-                                ],
+                    // 2. Main Content
+                    DraggableScrollableSheet(
+                      initialChildSize: 0.6,
+                      minChildSize: 0.6,
+                      maxChildSize: 0.95,
+                      builder: (context, scrollController) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(36.r)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.onSurface.withValues(alpha: 0.05),
+                                blurRadius: 30,
+                                offset: const Offset(0, -10),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                          child: Column(
+                            children: [
+                              _buildModalHandle(context),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  controller: scrollController,
+                                  physics: const BouncingScrollPhysics(),
+                                  padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 120.h),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildHeader(context, product, theme),
+                                      SizedBox(height: 24.h),
+                                      _buildCreatorTile(product.repairman ?? product.admin, theme),
+                                      SizedBox(height: 32.h),
+                                      _buildDescription(product, theme),
+                                      if (product.keywords.isNotEmpty) ...[
+                                        SizedBox(height: 24.h),
+                                        _buildKeywords(product.keywords, colorScheme),
+                                      ],
+                                      SizedBox(height: 32.h),
+                                      _buildAttributesGrid(context, product, colorScheme),
+                                      SizedBox(height: 32.h),
+                                      _buildCommentsSection(context, product, theme),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
 
-                // 5. Floating Bottom Action Bar
-                Positioned(
-                  bottom: 30.h,
-                  left: 24.w,
-                  right: 24.w,
-                  child: _buildFloatingActionBar(theme, product),
+                    // 3. Navigation
+                    // _buildNavButtons(context),
+
+                    // 4. Fixed Action Bar
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: _buildBottomBar(product, state, colorScheme),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           }
-          return const SizedBox();
+          return const SizedBox.shrink();
         },
       ),
     );
   }
 
-  // --- WIDGET BUILDERS ---
+  // ───────────────────────────────────────────────────────────────────────────
+  //  1) VISUAL COMPONENTS
+  // ───────────────────────────────────────────────────────────────────────────
 
-  Widget _buildDetailPlaceholder(ColorScheme colorScheme) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFFE8EAF6), // Light indigo
-            colorScheme.surfaceContainerHighest,
-          ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.inventory_2_outlined,
-          color: Colors.indigo.withValues(alpha: 0.15),
-          size: 64.sp,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCircleButton(IconData icon, ThemeData theme, VoidCallback onTap) {
-    final colorScheme = theme.colorScheme;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24.r),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            width: 48.r,
-            height: 48.r,
+  Widget _buildHeroImages(BuildContext context, ManageProductsEntity product) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        product.images.isNotEmpty
+            ? PageView.builder(
+                controller: _pageController,
+                itemCount: product.images.length,
+                itemBuilder: (context, index) => Hero(
+                  tag: 'prod_img_${product.id}_$index',
+                  child: CachedNetworkImage(
+                    imageUrl: product.images[index],
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => _buildPlaceholder(context),
+                  ),
+                ),
+              )
+            : _buildPlaceholder(context),
+        // Gradient Scrim
+        Positioned.fill(
+          child: DecoratedBox(
             decoration: BoxDecoration(
-              color: colorScheme.surface.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(
-                color: colorScheme.surface.withValues(alpha: 0.2),
-                width: 1,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [colorScheme.onSurface.withValues(alpha: 0.4), Colors.transparent],
+                stops: const [0.0, 0.25],
               ),
             ),
-            child: Icon(icon, color: colorScheme.onSurface, size: 20.sp),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCreatorRow(RepairmanEntity? repairman, ThemeData theme) {
-    final title = repairman?.fullName.isNotEmpty == true ? repairman!.fullName : 'نام فروشگاه';
-    final subtitle = repairman?.brand?.isNotEmpty == true ? repairman!.brand! : 'توضیحات کوتاه';
-    final colorScheme = theme.colorScheme;
-
-    return Row(
-      children: [
-        Container(
-          width: 44.r,
-          height: 44.r,
-          decoration: BoxDecoration(
-            color: colorScheme.primary,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.storefront_outlined, color: colorScheme.surface, size: 20.sp),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+        // Page Indicator
+        if (product.images.length > 1)
+          Positioned(
+            bottom: 50.h,
+            right: 24.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              SizedBox(height: 4.h),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant,
-                  fontSize: 12.sp,
-                ),
+              child: ListenableBuilder(
+                listenable: _pageController,
+                builder: (context, child) {
+                  int currentPage = _pageController.hasClients ? (_pageController.page?.round() ?? 0) : 0;
+                  return Text(
+                    PersianFormatter.digits('${currentPage + 1} از ${product.images.length}'),
+                    style: TextStyle(color: colorScheme.surface, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                  );
+                },
               ),
-            ],
+            ),
           ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.favorite, color: colorScheme.primary, size: 14.sp),
-              SizedBox(width: 6.w),
-              Text(
-                '۲.۴ هزار',
-                style: TextStyle(color: colorScheme.primary, fontSize: 12.sp, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        )
       ],
     );
   }
 
-  Widget _buildStatsBox(dynamic product, ThemeData theme) {
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildModalHandle(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20.h),
+      margin: EdgeInsets.only(top: 14.h, bottom: 18.h),
+      width: 40.w,
+      height: 4.h,
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(24.r),
+        color: Theme.of(context).colorScheme.outlineVariant,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ManageProductsEntity product, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (product.status.toLowerCase() == 'active')
+                    Container(
+                      margin: EdgeInsets.only(bottom: 8.h),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: StatusColors.of(context).success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        'موجود در انبار',
+                        style: TextStyle(color: StatusColors.of(context).success, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  Text(
+                    product.title,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.onSurface.withValues(alpha: 0.9),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16.w),
+            _buildRatingBadge(context),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            if (product.hasDiscount) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: colorScheme.error,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  '${PersianFormatter.digits(product.discountPercentage.toString())}% تخفیف',
+                  style: TextStyle(color: colorScheme.surface, fontSize: 11.sp, fontWeight: FontWeight.w900),
+                ),
+              ),
+              SizedBox(width: 12.w),
+            ],
+            Icon(Icons.category_rounded, size: 14.sp, color: theme.colorScheme.primary.withValues(alpha: 0.6)),
+            SizedBox(width: 6.w),
+            Text(
+              product.category?.title ?? 'دسته‌بندی نشده',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 16.w),
+            Icon(Icons.branding_watermark_rounded, size: 14.sp, color: colorScheme.outline),
+            SizedBox(width: 6.w),
+            Text(
+              'برند: ${product.repairman?.brand ?? "زینو"}',
+              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRatingBadge(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: StatusColors.of(context).warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  'موجودی',
-                  style: TextStyle(color: theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant, fontSize: 12.sp),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  '${product.stock} عدد',
-                  style: TextStyle(color: colorScheme.onSurface, fontSize: 18.sp, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 40.h,
-            color: colorScheme.onSurface.withValues(alpha: 0.1),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  'وضعیت',
-                  style: TextStyle(color: theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant, fontSize: 12.sp),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  product.status == 'active' ? 'موجود' : 'ناموجود',
-                  style: TextStyle(
-                      color: product.status == 'active' ? Colors.green : Colors.red,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+          Icon(Icons.star_rounded, color: StatusColors.of(context).warning, size: 18.sp),
+          SizedBox(width: 4.w),
+          Text(
+            PersianFormatter.digits('4.8'),
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabsSection(ThemeData theme) {
-    final tabs = ['توضیحات', 'مشخصات', 'نظرات'];
+  Widget _buildCreatorTile(RepairmanEntity? creator, ThemeData theme) {
     final colorScheme = theme.colorScheme;
+    final String? avatar = creator?.profileImageId != null
+        ? '${Consts.baseFileUrl}${creator!.profileImageId}'
+        : null;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: tabs.asMap().entries.map((entry) {
-        final index = entry.key;
-        final tab = entry.value;
-        final isActive = _selectedTabIndex == index;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedTabIndex = index),
-          child: Container(
-            margin: EdgeInsets.only(left: 12.w),
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(2.r),
             decoration: BoxDecoration(
-              color: isActive ? colorScheme.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(20.r),
+              shape: BoxShape.circle,
+              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 2),
             ),
-            child: Text(
-              tab,
-              style: TextStyle(
-                color: isActive ? colorScheme.surface : (theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant),
-                fontSize: 14.sp,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            child: CircleAvatar(
+              radius: 24.r,
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.05),
+              backgroundImage: avatar != null ? CachedNetworkImageProvider(avatar) : null,
+              child: avatar == null ? Icon(Icons.storefront_rounded, color: colorScheme.primary, size: 24.sp) : null,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      creator?.fullName ?? 'تامین‌کننده تایید شده',
+                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900, fontSize: 14.sp),
+                    ),
+                    // SizedBox(width: 6.w),
+                    // Icon(Icons.verified_rounded, size: 14.sp, color: Colors.blue.shade600),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    Icon(Icons.phone_android, size: 16.sp, color: colorScheme.primary),
+                    SizedBox(width: 6.w),
+                    Text(
+                      creator?.mobile ?? '',
+                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 11.sp),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Material(
+            color: colorScheme.primary.withValues(alpha: 0.1),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+            child: InkWell(
+              onTap: () => _makeCall(creator?.mobile),
+              borderRadius: BorderRadius.circular(14.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                child: Row(
+                  children: [
+                    Icon(Icons.call_rounded, size: 16.sp, color: colorScheme.primary),
+                    SizedBox(width: 6.w),
+                    Text('تماس', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 12.sp)),
+                  ],
+                ),
               ),
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildSpecItem(String label, String value, ThemeData theme) {
-    final colorScheme = theme.colorScheme;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13.sp)),
-          Text(value, style: TextStyle(color: colorScheme.onSurface, fontSize: 13.sp, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
-  Widget _buildReviewItem(String name, String comment, int rating, ThemeData theme) {
+  Widget _buildDescription(ManageProductsEntity product, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('توضیحات کالا', style: theme.textTheme.headlineSmall?.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+        SizedBox(height: 12.h),
+        Text(
+          product.description.isNotEmpty ? product.description : 'توضیحات تکمیلی برای این محصول ثبت نشده است.',
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.7),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKeywords(List<String> keywords, ColorScheme colorScheme) {
+    return Wrap(
+      spacing: 10.w,
+      runSpacing: 10.h,
+      children: keywords.map((k) => Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: colorScheme.primary.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Text(
+          k,
+          style: TextStyle(color: colorScheme.primary, fontSize: 11.sp, fontWeight: FontWeight.w900),
+        ),
+      )).toList(),
+    );
+  }
+
+  Widget _buildAttributesGrid(BuildContext context, ManageProductsEntity product, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('مشخصات فنی', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+        SizedBox(height: 16.h),
+        Container(
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(24.r),
+          ),
+          child: Column(
+            children: [
+              // _buildAttrRow(Icons.access_time_filled_rounded, 'زمان تحویل', 'فوری (حدود ۳۰ دقیقه)', colorScheme),
+              // _buildDivider(context),
+              // _buildAttrRow(Icons.verified_user_rounded, 'گارانتی و ضمانت', 'تضمین اصالت کالا توسط زینو', colorScheme),
+              // _buildDivider(context),
+              _buildAttrRow(Icons.shopping_bag_rounded, 'حداقل خرید', '${PersianFormatter.digits(product.minPurchaseQuantity.toString())} عدد', colorScheme),
+              _buildDivider(context),
+              _buildAttrRow(Icons.shopping_bag_outlined, 'حداکثر خرید', '${PersianFormatter.digits(product.maxPurchaseQuantity.toString())} عدد', colorScheme),
+              _buildDivider(context),
+              _buildAttrRow(Icons.inventory_2_rounded, 'موجودی انبار', '${PersianFormatter.digits(product.stock.toString())} عدد', colorScheme),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttrRow(IconData icon, String label, String value, ColorScheme colorScheme) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        children: [
+          Icon(icon, size: 20.sp, color: colorScheme.primary.withValues(alpha: 0.7)),
+          SizedBox(width: 12.w),
+          Text(label, style: TextStyle(fontSize: 13.sp, color: colorScheme.outline)),
+          const Spacer(),
+          Text(value, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.87))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider(BuildContext context) => Divider(height: 20.h, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05), thickness: 1);
+
+  Widget _buildCommentsSection(BuildContext context, ManageProductsEntity product, ThemeData theme) {
     final colorScheme = theme.colorScheme;
+    final List<Map<String, dynamic>> mockComments = [
+      {
+        'name': 'علی محمدی',
+        'date': '۱۴۰۲/۰۶/۱۲',
+        'rating': 5.0,
+        'comment': 'واقعا محصول با کیفیتی بود، پیشنهاد می‌کنم حتما بخرید. ارسال هم خیلی سریع انجام شد.',
+        'verified': true,
+      },
+      {
+        'name': 'مریم رضایی',
+        'date': '۱۴۰۲/۰۶/۱۰',
+        'rating': 4.0,
+        'comment': 'بسیار کاربردی و عالی. فقط کاش بسته‌بندی کمی محکم‌تر بود.',
+        'verified': true,
+      },
+      {
+        'name': 'رضا علوی',
+        'date': '۱۴۰۲/۰۶/۰۸',
+        'rating': 5.0,
+        'comment': 'عالی بود، دقیقاً همانی که در تصاویر می‌بینید. ممنون از تیم زینو.',
+        'verified': false,
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('نظرات کاربران', style: theme.textTheme.headlineSmall?.copyWith(fontSize: 18.sp, fontWeight: FontWeight.w900)),
+                SizedBox(height: 2.h),
+                Row(
+                  children: [
+                    Icon(Icons.star_rounded, color: StatusColors.of(context).warning, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(
+                      PersianFormatter.digits('۴.۸ از ۵'),
+                      style: TextStyle(fontSize: 12.sp, color: colorScheme.outline, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '(${PersianFormatter.digits('۱۲۴')} نظر)',
+                      style: TextStyle(fontSize: 11.sp, color: colorScheme.outline),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            TextButton(
+              onPressed: () => context.pushNamed('product_all_comments', pathParameters: {'productId': product.id}),
+              child: Text('مشاهده همه', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w900)),
+            ),
+          ],
+        ),
+        SizedBox(height: 18.h),
+        if (mockComments.isEmpty)
+          _buildEmptyComments(colorScheme)
+        else
+          SizedBox(
+            height: 185.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              itemCount: mockComments.length,
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              separatorBuilder: (context, index) => SizedBox(width: 16.w),
+              itemBuilder: (context, index) => SizedBox(
+                width: 300.w,
+                child: _buildCommentItem(context, mockComments[index], theme),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyComments(ColorScheme colorScheme) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      padding: EdgeInsets.all(12.r),
+      width: double.infinity,
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16.r),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.chat_bubble_outline_rounded, size: 40.sp, color: colorScheme.outlineVariant),
+          SizedBox(height: 12.h),
+          Text(
+            'هنوز نظری برای این محصول ثبت نشده است.',
+            style: TextStyle(color: colorScheme.outline, fontSize: 13.sp),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'شما می‌توانید اولین نفر باشید!',
+            style: TextStyle(color: colorScheme.primary, fontSize: 12.sp, fontWeight: FontWeight.w900),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentItem(BuildContext context, Map<String, dynamic> data, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    final bool isVerified = data['verified'] ?? false;
+    final double rating = data['rating'] ?? 0.0;
+
+    return Container(
+      padding: EdgeInsets.all(18.r),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.02),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(name, style: TextStyle(color: colorScheme.onSurface, fontSize: 14.sp, fontWeight: FontWeight.bold)),
-              Row(
-                children: List.generate(5, (index) => Icon(
-                  index < rating ? Icons.star_rounded : Icons.star_outline_rounded,
-                  color: Colors.amber,
-                  size: 16.sp,
-                )),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1), width: 1.5),
+                ),
+                padding: EdgeInsets.all(2.r),
+                child: CircleAvatar(
+                  radius: 18.r,
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.05),
+                  child: Text(
+                    data['name'].substring(0, 1),
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: colorScheme.primary),
+                  ),
+                ),
               ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(comment, style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.8), fontSize: 12.sp)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoListItem(ThemeData theme) {
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.info_outline, color: colorScheme.primary, size: 20.sp),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ارسال سریع',
-                    style: TextStyle(color: colorScheme.onSurface, fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                SizedBox(height: 4.h),
-                Text('تحویل در کمتر از ۲ ساعت',
-                    style: TextStyle(
-                        color: theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant, fontSize: 11.sp)),
-              ],
-            ),
-          ),
-          Icon(Icons.arrow_forward_ios_rounded,
-              color: theme.textTheme.bodySmall?.color ?? colorScheme.onSurfaceVariant, size: 14.sp),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingActionBar(ThemeData theme, dynamic product) {
-    final colorScheme = theme.colorScheme;
-
-    return BlocBuilder<ProductDetailBloc, ProductDetailState>(
-      builder: (context, state) {
-        return Container(
-          height: 64.h,
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(40.r),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.2 : 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              )
-            ],
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final trackWidth = constraints.maxWidth;
-              final handleSize = 52.h;
-              final maxSlide = trackWidth - handleSize - 12.r;
-
-              return Stack(
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data['name'],
+                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900, fontSize: 14.sp),
+                    ),
+                    if (isVerified)
+                      Row(
+                        children: [
+                          Icon(Icons.verified_user_rounded, size: 10.sp, color: StatusColors.of(context).success),
+                          SizedBox(width: 4.w),
+                          Text('خریدار محصول', style: TextStyle(fontSize: 9.sp, color: StatusColors.of(context).success, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+              Column(
                 children: [
-                  // Background Indicators
-                  Positioned(
-                    left: 24.w,
-                    top: 0,
-                    bottom: 0,
+                  Text(
+                    PersianFormatter.digits(data['date']),
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp, color: colorScheme.outline),
+                  ),
+                  SizedBox(height: 5.h,),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: StatusColors.of(context).warning.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                     child: Row(
                       children: [
-                        Icon(Icons.chevron_right_rounded, color: colorScheme.primary.withValues(alpha: 0.2), size: 24.sp),
-                        Icon(Icons.chevron_right_rounded, color: colorScheme.primary.withValues(alpha: 0.5), size: 24.sp),
-                        Icon(Icons.chevron_right_rounded, color: colorScheme.primary, size: 24.sp),
+                        Icon(Icons.star_rounded, color: StatusColors.of(context).warning, size: 14.sp),
+                        SizedBox(width: 4.w),
+                        Text(
+                          PersianFormatter.digits(rating.toString()),
+                          style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: StatusColors.of(context).warning),
+                        ),
                       ],
                     ),
                   ),
-
-                  // Background Text
-                  Center(
-                    child: Opacity(
-                      opacity: (1 - (_slideValue / maxSlide)).clamp(0.2, 1.0),
-                      child: Text(
-                        state is AddToCartLoading ? 'در حال افزودن...' : 'افزودن به سبد خرید',
-                        style: TextStyle(
-                          color: colorScheme.onSurface.withValues(alpha: 0.6),
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Draggable Handle
-                  AnimatedPositioned(
-                    duration: _slideValue == 0 || _slideValue == maxSlide ? const Duration(milliseconds: 300) : Duration.zero,
-                    curve: Curves.easeOut,
-                    right: 6.r + _slideValue,
-                    top: 6.r,
-                    bottom: 6.r,
-                    child: GestureDetector(
-                      onHorizontalDragUpdate: state is AddToCartLoading ? null : (details) {
-                        setState(() {
-                          // RTL: Dragging left (negative delta) means increasing slide value
-                          _slideValue -= details.primaryDelta!;
-                          _slideValue = _slideValue.clamp(0.0, maxSlide);
-                        });
-                      },
-                      onHorizontalDragEnd: state is AddToCartLoading ? null : (details) {
-                        if (_slideValue >= maxSlide * 0.8) {
-                          setState(() {
-                            _slideValue = maxSlide;
-                          });
-                          // Action
-                          context.read<ProductDetailBloc>().add(AddToCartEvent(
-                            productId: product.id,
-                            quantity: 1, // Default quantity
-                          ));
-                        } else {
-                          setState(() {
-                            _slideValue = 0.0;
-                          });
-                        }
-                      },
-                      child: Container(
-                        width: handleSize,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(30.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.primary.withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            )
-                          ],
-                        ),
-                        child: Center(
-                          child: state is AddToCartLoading
-                              ? SizedBox(
-                                  width: 20.r,
-                                  height: 20.r,
-                                  child: CircularProgressIndicator(
-                                    color: colorScheme.surface,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.shopping_cart_outlined,
-                                      color: colorScheme.surface,
-                                      size: 20.sp,
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  // Success Text (Shown when slide completed)
-                  if (_slideValue >= maxSlide * 0.9 && state is AddToCartSuccess)
-                    Center(
-                      child: Text(
-                        'انجام شد',
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
-        );
-      },
+          SizedBox(height: 20.h),
+          Expanded(
+            child: Text(
+              data['comment'],
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
+                height: 1.6,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  //  2) OVERLAYS & ACTIONS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  Widget _buildNavButtons(BuildContext context) {
+    final top = MediaQuery.of(context).padding.top;
+    return Positioned(
+      top: top + 16.h,
+      left: 20.w,
+      right: 20.w,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildCircleButton(context, Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
+          Row(
+            children: [
+              _buildCircleButton(context, Icons.share_rounded, () {}),
+              SizedBox(width: 12.w),
+              _buildCircleButton(context, Icons.favorite_border_rounded, () {}),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircleButton(BuildContext context, IconData icon, VoidCallback onTap) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.surface,
+      shape: const CircleBorder(),
+      elevation: 4,
+      shadowColor: colorScheme.onSurface.withValues(alpha: 0.12),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Padding(
+          padding: EdgeInsets.all(12.r),
+          child: Icon(icon, color: colorScheme.onSurface.withValues(alpha: 0.87), size: 20.sp),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(ManageProductsEntity product, ProductDetailState state, ColorScheme colorScheme) {
+    final isLoading = state is AddToCartLoading;
+    return Container(
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'قیمت مصرف‌کننده',
+                  style: TextStyle(color: colorScheme.outline, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    Text(
+                      PersianFormatter.price(product.hasDiscount ? product.finalPrice : product.price),
+                      style: TextStyle(color: colorScheme.primary, fontSize: 22.sp, fontWeight: FontWeight.w900),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'تومان',
+                      style: TextStyle(color: colorScheme.primary, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                if (product.hasDiscount)
+                  Row(
+                    children: [
+                      Text(
+                        PersianFormatter.price(product.price),
+                        style: TextStyle(color: colorScheme.outlineVariant, fontSize: 13.sp, decoration: TextDecoration.lineThrough),
+                      ),
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                        decoration: BoxDecoration(color: colorScheme.error.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4.r)),
+                        child: Text(
+                          '${PersianFormatter.digits(product.discountPercentage.toString())}%-',
+                          style: TextStyle(color: colorScheme.error, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: isLoading ? null : () => bloc.add(AddToCartEvent(productId: product.id, quantity: 1)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.surface,
+                minimumSize: Size(double.infinity, 58.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
+                elevation: 0,
+              ),
+              child: isLoading
+                  ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: colorScheme.surface))
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shopping_cart_checkout_rounded, size: 20.sp),
+                        SizedBox(width: 8.w),
+                        Text('افزودن به سبد', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      color: colorScheme.outlineVariant,
+      alignment: Alignment.center,
+      child: Icon(Icons.shopping_bag_outlined, color: colorScheme.outline, size: 64.sp),
+    );
+  }
+
+  Future<void> _makeCall(String? num) async {
+    if (num == null) return;
+    final uri = Uri(scheme: 'tel', path: num);
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  }
+}
+
+// Extension to help with theme colors
+extension ColorBrightness on Color {
+  Color darken([int percent = 10]) {
+    assert(1 <= percent && percent <= 100);
+    var f = 1 - percent / 100;
+    return Color.fromARGB(
+      a.toInt(),
+      (r * f).toInt(),
+      (g * f).toInt(),
+      (b * f).toInt(),
     );
   }
 }

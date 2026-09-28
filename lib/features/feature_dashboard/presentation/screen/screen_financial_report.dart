@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_dashboard_stateful_widget_state.dart';
 import '../bloc/dashboard_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -26,8 +27,9 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
 
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.colorScheme.surfaceContainer,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -60,7 +62,7 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             fontFamily: 'BonyadeKoodak',
           ),
         ),
@@ -79,18 +81,18 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
         Expanded(
           child: Column(
             children: [
-              const FinancialReportCard(
+              FinancialReportCard(
                 value: '۲۰۰,۰۰۰',
                 icon: Icons.access_time_filled_rounded,
-                iconColor: Color(0xFF3F51B5),
-                backgroundColor: Color(0xFFE8EAF6),
+                iconColor: DashboardColors.of(context).adminIndigo,
+                backgroundColor: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.1),
               ),
               SizedBox(height: 15.h),
-              const FinancialReportCard(
+              FinancialReportCard(
                 value: '۲۴۰,۰۰۰',
                 icon: Icons.check_circle_rounded,
-                iconColor: Color(0xFF4CAF50),
-                backgroundColor: Color(0xFFE8F5E9),
+                iconColor: StatusColors.of(context).success,
+                backgroundColor: StatusColors.of(context).success.withValues(alpha: 0.1),
               ),
             ],
           ),
@@ -100,30 +102,30 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
           flex: 1,
           child: Column(
             children: [
-              const FinancialReportCard(
+              FinancialReportCard(
                 title: 'درآمد کل',
                 value: '۲۸,۵۰۰,۰۰۰',
                 icon: Icons.account_balance_wallet_rounded,
-                iconColor: Color(0xFF3F51B5),
-                backgroundColor: Colors.white,
+                iconColor: DashboardColors.of(context).adminIndigo,
+                backgroundColor: Theme.of(context).colorScheme.surface,
               ),
               SizedBox(height: 15.h),
-              const FinancialReportCard(
+              FinancialReportCard(
                 title: 'تسویه شده',
                 value: '۱۷,۲۵۰,۰۰۰',
                 icon: Icons.track_changes_rounded,
-                iconColor: Color(0xFF4CAF50),
-                backgroundColor: Color(0xFFE8F5E9),
-                valueColor: Color(0xFF2E7D32),
+                iconColor: StatusColors.of(context).success,
+                backgroundColor: StatusColors.of(context).success.withValues(alpha: 0.1),
+                valueColor: StatusColors.of(context).success,
               ),
               SizedBox(height: 15.h),
-              const FinancialReportCard(
+              FinancialReportCard(
                 title: 'تسویه نشده',
                 value: '۴۲,۲۵۰,۰۰۰',
                 icon: Icons.history_rounded,
-                iconColor: Color(0xFFE53935),
-                backgroundColor: Color(0xFFFFEBEE),
-                valueColor: Color(0xFFC62828),
+                iconColor: Theme.of(context).colorScheme.error,
+                backgroundColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                valueColor: Theme.of(context).colorScheme.error,
               ),
             ],
           ),
@@ -136,11 +138,11 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -154,7 +156,7 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
               fontFamily: 'BonyadeKoodak',
             ),
           ),
@@ -171,25 +173,25 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
                       centerSpaceRadius: 50.r,
                       sections: [
                         PieChartSectionData(
-                          color: const Color(0xFF3F51B5),
+                          color: DashboardColors.of(context).adminIndigo,
                           value: 40,
                           title: '',
                           radius: 30.r,
                         ),
                         PieChartSectionData(
-                          color: const Color(0xFF8D6E63),
+                          color: DashboardColors.of(context).adminOrange,
                           value: 37,
                           title: '',
                           radius: 30.r,
                         ),
                         PieChartSectionData(
-                          color: const Color(0xFF303F9F),
+                          color: DashboardColors.of(context).adminTeal,
                           value: 20,
                           title: '',
                           radius: 30.r,
                         ),
                         PieChartSectionData(
-                          color: const Color(0xFFD7CCC8),
+                          color: DashboardColors.of(context).adminYellow,
                           value: 16,
                           title: '',
                           radius: 30.r,
@@ -204,10 +206,10 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
                 flex: 2,
                 child: Column(
                   children: [
-                    _buildLegendItem('مکانیک', '۴۰٪', const Color(0xFF3F51B5)),
-                    _buildLegendItem('اتوسرویس', '۳۷٪', const Color(0xFF8D6E63)),
-                    _buildLegendItem('برق خودرو', '۲۰٪', const Color(0xFF303F9F)),
-                    _buildLegendItem('سایر', '۱۶٪', const Color(0xFFD7CCC8)),
+                    _buildLegendItem(context, 'مکانیک', '۴۰٪', DashboardColors.of(context).adminIndigo),
+                    _buildLegendItem(context, 'اتوسرویس', '۳۷٪', DashboardColors.of(context).adminOrange),
+                    _buildLegendItem(context, 'برق خودرو', '۲۰٪', DashboardColors.of(context).adminTeal),
+                    _buildLegendItem(context, 'سایر', '۱۶٪', DashboardColors.of(context).adminYellow),
                   ],
                 ),
               ),
@@ -218,7 +220,7 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
     );
   }
 
-  Widget _buildLegendItem(String title, String percentage, Color color) {
+  Widget _buildLegendItem(BuildContext context, String title, String percentage, Color color) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
@@ -228,7 +230,7 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
             percentage,
             style: TextStyle(
               fontSize: 12.sp,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontFamily: 'BonyadeKoodak',
             ),
           ),
@@ -237,7 +239,7 @@ class _ScreenFinancialReportState extends BaseDashboardStatefulWidgetState<Scree
             title,
             style: TextStyle(
               fontSize: 12.sp,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
               fontFamily: 'BonyadeKoodak',
             ),
           ),

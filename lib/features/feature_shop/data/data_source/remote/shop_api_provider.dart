@@ -1,10 +1,22 @@
-import 'package:dio/dio.dart';
+
+import 'package:resturant_app/core/services/generic_api_service.dart';
 
 class ShopApiProvider {
-  final Dio _dio = Dio(); // Consider injecting or using global dio
+  final GenericApiService _apiService = GenericApiService();
 
-  Future<Response> getShopData() async {
-    // return await _dio.get('YOUR_ENDPOINT');
-    throw UnimplementedError();
+  Future<dynamic> getShopData(Map<String, dynamic> params) async {
+    return await _apiService.post('/products/admin-product/list-active', params);
+  }
+
+  Future<dynamic> fetchCategories({
+    bool isPaginate = true,
+    int countItem = 10,
+  }) async {
+    final params = {
+      "is_paginate": isPaginate,
+      "count_item": countItem,
+      "tree": true,
+    };
+    return await _apiService.post("/categories/list-active", params);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 
 part 'address_model.freezed.dart';
 part 'address_model.g.dart';
@@ -8,7 +9,7 @@ double _anyToDouble(dynamic value) => double.tryParse(value?.toString() ?? '0.0'
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class AddressModel with _$AddressModel {
+sealed class AddressModel with _$AddressModel {
   const factory AddressModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(name: 'user_id', fromJson: _anyToString) String? userId,
@@ -30,31 +31,4 @@ class AddressModel with _$AddressModel {
 
   factory AddressModel.fromJson(Map<String, dynamic> json) =>
       _$AddressModelFromJson(json);
-}
-
-@freezed
-class OstanModel with _$OstanModel {
-  const factory OstanModel({
-    @JsonKey(fromJson: _anyToInt) int? id,
-    @JsonKey(fromJson: _anyToString) String? name,
-  }) = _OstanModel;
-
-  const OstanModel._();
-
-  factory OstanModel.fromJson(Map<String, dynamic> json) =>
-      _$OstanModelFromJson(json);
-}
-
-@freezed
-class ShahrestanModel with _$ShahrestanModel {
-  const factory ShahrestanModel({
-    @JsonKey(fromJson: _anyToInt) int? id,
-    @JsonKey(fromJson: _anyToString) String? name,
-    @JsonKey(fromJson: _anyToString) String? ostan,
-  }) = _ShahrestanModel;
-
-  const ShahrestanModel._();
-
-  factory ShahrestanModel.fromJson(Map<String, dynamic> json) =>
-      _$ShahrestanModelFromJson(json);
 }

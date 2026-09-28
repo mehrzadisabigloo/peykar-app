@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../../../../core/resources/data_state.dart';
 import '../../domain/entity/occupation_entity.dart';
+import '../../domain/entity/occupation_list_entity.dart';
 import '../../domain/repository/occupation_repository.dart';
 import '../data_source/remote/occupation_api_provider.dart';
 import '../model/occupation_model.dart';
@@ -11,17 +12,38 @@ class OccupationRepositoryImpl extends OccupationRepository {
   OccupationRepositoryImpl(this._apiProvider);
 
   @override
-  Future<DataState<List<OccupationEntity>>> fetchOccupations(OccupationFilterParams params) async {
+  Future<DataState<OccupationListEntity>> fetchOccupations(OccupationFilterParams params) async {
     try {
       final Response response = await _apiProvider.fetchOccupations(params);
       if (response.statusCode == 200) {
         if (response.data['success'] == true) {
-          final List<dynamic> data = response.data['data'] is List ? response.data['data'] : [];
+          final dynamic rawData = response.data['data'];
+          List<dynamic> data = [];
+          int currentPage = 1;
+          int lastPage = 1;
+          int total = 0;
+
+          if (rawData is Map<String, dynamic>) {
+            data = rawData['data'] is List ? rawData['data'] : [];
+            currentPage = rawData['current_page'] ?? 1;
+            lastPage = rawData['last_page'] ?? 1;
+            total = rawData['total'] ?? 0;
+          } else if (rawData is List) {
+            data = rawData;
+            total = rawData.length;
+          }
+
           final occupations = data
               .whereType<Map<String, dynamic>>()
               .map((json) => OccupationModel.fromJson(json).toEntity())
               .toList();
-          return DataSuccess(occupations);
+
+          return DataSuccess(OccupationListEntity(
+            occupations: occupations,
+            currentPage: currentPage,
+            lastPage: lastPage,
+            total: total,
+          ));
         } else {
           return DataFailed(response.data['message'] ?? "خطایی در دریافت لیست مشاغل رخ داد");
         }
@@ -34,17 +56,38 @@ class OccupationRepositoryImpl extends OccupationRepository {
   }
 
   @override
-  Future<DataState<List<OccupationEntity>>> fetchActiveOccupations(OccupationFilterParams params) async {
+  Future<DataState<OccupationListEntity>> fetchActiveOccupations(OccupationFilterParams params) async {
     try {
       final Response response = await _apiProvider.fetchActiveOccupations(params);
       if (response.statusCode == 200) {
         if (response.data['success'] == true) {
-          final List<dynamic> data = response.data['data'] is List ? response.data['data'] : [];
+          final dynamic rawData = response.data['data'];
+          List<dynamic> data = [];
+          int currentPage = 1;
+          int lastPage = 1;
+          int total = 0;
+
+          if (rawData is Map<String, dynamic>) {
+            data = rawData['data'] is List ? rawData['data'] : [];
+            currentPage = rawData['current_page'] ?? 1;
+            lastPage = rawData['last_page'] ?? 1;
+            total = rawData['total'] ?? 0;
+          } else if (rawData is List) {
+            data = rawData;
+            total = rawData.length;
+          }
+
           final occupations = data
               .whereType<Map<String, dynamic>>()
               .map((json) => OccupationModel.fromJson(json).toEntity())
               .toList();
-          return DataSuccess(occupations);
+
+          return DataSuccess(OccupationListEntity(
+            occupations: occupations,
+            currentPage: currentPage,
+            lastPage: lastPage,
+            total: total,
+          ));
         } else {
           return DataFailed(response.data['message'] ?? "خطایی در دریافت لیست مشاغل فعال رخ داد");
         }
@@ -52,6 +95,7 @@ class OccupationRepositoryImpl extends OccupationRepository {
         return DataFailed("خطای سرور: ${response.statusCode}");
       }
     } catch (e) {
+      print(e);
       return DataFailed('پاسخی دریافت نشد');
     }
   }

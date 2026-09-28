@@ -22,6 +22,18 @@ class ManageProductsApiProvider {
     return await _genericApiService.post("/products/list-repairman-active", params);
   }
 
+  Future<dynamic> fetchCategories({
+    bool isPaginate = true,
+    int countItem = 10,
+  }) async {
+    final params = {
+      "is_paginate": isPaginate,
+      "count_item": countItem,
+      "tree": true,
+    };
+    return await _genericApiService.post("/categories/list-active", params);
+  }
+
   Future<dynamic> addProduct({
     required String title,
     required String description,
@@ -30,6 +42,7 @@ class ManageProductsApiProvider {
     required double price,
     required int stock,
     required int maxPurchaseQuantity,
+    String? categoryId,
   }) async {
     final params = {
       "title": title,
@@ -39,6 +52,7 @@ class ManageProductsApiProvider {
       "price": price,
       "stock": stock,
       "max_purchase_quantity": maxPurchaseQuantity,
+      if (categoryId != null) "category_id": categoryId,
     };
 
     return await _genericApiService.post("/products/add", params);

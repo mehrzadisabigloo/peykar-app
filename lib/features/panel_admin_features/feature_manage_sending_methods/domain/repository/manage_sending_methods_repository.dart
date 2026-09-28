@@ -1,5 +1,6 @@
 import '../../../../../core/resources/data_state.dart';
 import '../../data/model/sending_method_model.dart';
+import '../../data/model/location_model.dart';
 import '../entity/manage_sending_methods_entity.dart';
 
 abstract class ManageSendingMethodsRepository {
@@ -9,4 +10,6 @@ abstract class ManageSendingMethodsRepository {
   Future<DataState<SendingMethodModel>> getSendingMethod(String id);
   Future<DataState<bool>> deleteSendingMethod(String id);
   Future<DataState<bool>> changeStatus(String id);
+  Future<DataState<List<OstanModel>>> fetchOstans();
+  Future<DataState<List<ShahrestanModel>>> fetchShahrestans(int ostanId);
 }

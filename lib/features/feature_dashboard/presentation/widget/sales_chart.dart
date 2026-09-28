@@ -1,20 +1,22 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/themes/theme_main.dart';
 
 class SalesChart extends StatelessWidget {
   const SalesChart({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -28,7 +30,7 @@ class SalesChart extends StatelessWidget {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
               fontFamily: 'BonyadeKoodak',
             ),
           ),
@@ -42,7 +44,7 @@ class SalesChart extends StatelessWidget {
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey[200],
+                      color: theme.colorScheme.outlineVariant,
                       strokeWidth: 1,
                     );
                   },
@@ -67,7 +69,7 @@ class SalesChart extends StatelessWidget {
                         return Text(
                           value.toInt().toString(),
                           style: TextStyle(
-                            color: Colors.grey[400],
+                            color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 10.sp,
                           ),
                         );
@@ -99,7 +101,7 @@ class SalesChart extends StatelessWidget {
                       FlSpot(11, 32),
                     ],
                     isCurved: true,
-                    color: Colors.blue[600],
+                    color: StatusColors.of(context).info,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(
@@ -109,8 +111,8 @@ class SalesChart extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          Colors.blue[600]!.withValues(alpha: 0.1),
-                          Colors.blue[600]!.withValues(alpha: 0.0),
+                          StatusColors.of(context).info.withValues(alpha: 0.1),
+                          StatusColors.of(context).info.withValues(alpha: 0.0),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

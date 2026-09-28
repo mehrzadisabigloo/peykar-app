@@ -64,3 +64,17 @@ class UsersFailed extends UsersState {
   @override
   List<Object?> get props => [message, filters];
 }
+
+class LocationStoredSuccess extends UsersState {}
+
+class LocationStoring extends UsersState {}
+
+class LocationPermissionProcessing extends UsersState {}
+
+class LocationStoreFailed extends UsersState {
+  final String message;
+  const LocationStoreFailed(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

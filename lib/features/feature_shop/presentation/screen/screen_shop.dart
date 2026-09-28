@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
+import '../../../../core/services/debounce_service.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/list_shimmer.dart';
+import '../../../../core/widgets/widget_infinite_list.dart';
+import '../../../panel_admin_features/feature_manage_shop_products/domain/entity/admin_product_filter_params.dart';
 import '../base/base_shop_stateful_widget_state.dart';
 import '../bloc/shop_bloc.dart';
+import '../../domain/entity/shop_entity.dart';
 import '../widget/product_card.dart';
 import '../widget/shop_banner.dart';
+import '../../../feature_home/presentation/widget/repairman_list_shimmer.dart';
+import '../../../../core/widgets/category_picker_sheet.dart';
+import '../../../feature_manage_products/domain/entity/manage_products_entity.dart';
 
 class ScreenShop extends StatefulWidget {
   const ScreenShop({super.key});
@@ -21,223 +33,298 @@ class _ScreenShopState extends BaseShopStatefulWidgetState<ScreenShop, ShopBloc>
   _ScreenShopState() : super(locator<ShopBloc>());
 
   final TextEditingController _searchController = TextEditingController();
-  int _selectedCategoryIndex = 0;
-  final List<String> _categories = ['همه', 'روغن موتور', 'فیلتر', 'لوازم یدکی', 'لاستیک', 'باتری'];
+  final TextEditingController _categoryController = TextEditingController();
+  final DebounceService _debounceService = DebounceService();
+
+  CategoryEntity? _selectedCategory;
+  List<CategoryEntity> _allCategories = [];
 
   @override
   void initState() {
     super.initState();
-    bloc.add(FetchShopDataEvent());
+    bloc.add(const FetchShopCategoriesEvent());
+    _refresh();
+  }
+
+  void _refresh() {
+    bloc.add(FetchShopDataEvent(
+        params: AdminProductFilterParams(
+      title: _searchController.text,
+      categoryId: _selectedCategory?.id,
+    )));
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _categoryController.dispose();
+    _debounceService.dispose();
     super.dispose();
   }
 
-  @override
-  Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: BlocBuilder<ShopBloc, ShopState>(
-        builder: (context, state) {
-          if (state is ShopLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is ShopError) {
-            return Center(child: Text(state.message));
-          }
-          if (state is ShopLoaded) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 10.h),
-                    _buildSearchBar(),
-                    SizedBox(height: 20.h),
-                    const ShopBanner(),
-                    SizedBox(height: 24.h),
-                    _buildCategoryList(),
-                    SizedBox(height: 24.h),
-                    _buildSectionHeader('محصولات پیشنهادی'),
-                    SizedBox(height: 16.h),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: state.entity.products.length,
-                      itemBuilder: (context, index) {
-                        return ProductCard(product: state.entity.products[index]);
-                      },
-                    ),
-                    SizedBox(height: 100.h), // Space for bottom nav
-                  ],
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
+  void _showCategoryPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CategoryPickerSheet(
+        categories: _allCategories,
+        onSelected: (cat, path) {
+          setState(() {
+            _selectedCategory = cat;
+            _categoryController.text = path;
+          });
+          _refresh();
+          context.pop();
         },
       ),
     );
   }
 
-  Widget _buildSearchBar() {
-    return Row(
-      children: [
-        // Filter Button
-        GestureDetector(
-          onTap: () {
-            // TODO: Open filter bottom sheet
-          },
-          child: Container(
-            height: 50.h,
-            width: 50.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.tune_rounded,
-              color: Colors.black87,
-              size: 24.sp,
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
-        // Search Input
-        Expanded(
-          child: Container(
-            height: 50.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'جستجو در محصولات',
-                hintStyle: TextStyle(
-                  color: Colors.grey.withValues(alpha: 0.7),
-                  fontSize: 14.sp,
-                ),
-                prefixIcon: Icon(
-                  Icons.search_rounded,
-                  color: Colors.grey.withValues(alpha: 0.7),
-                  size: 22.sp,
-                ),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-              ),
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.black87,
-              ),
-              textAlignVertical: TextAlignVertical.center,
-              cursorColor: Colors.blue,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  @override
+  Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-  Widget _buildCategoryList() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: List.generate(_categories.length, (index) {
-          final isSelected = _selectedCategoryIndex == index;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategoryIndex = index;
-              });
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.w),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.transparent : Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                boxShadow: [
-                  if (!isSelected)
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                ],
-              ),
+    return Scaffold(
+      backgroundColor: colorScheme.surfaceContainer,
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _categories[index],
-                    style: TextStyle(
-                      color: isSelected ? const Color(0xFF3F51B5) : Colors.grey,
-                      fontSize: 14.sp,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      fontFamily: 'BonyadeKoodak',
-                    ),
-                  ),
-                  if (isSelected)
-                    Container(
-                      margin: EdgeInsets.only(top: 4.h),
-                      height: 2.h,
-                      width: 20.w,
-                      color: const Color(0xFF3F51B5),
-                    ),
+                  SizedBox(height: 10.h),
+                  _buildSearchBar(context),
+                  SizedBox(height: 16.h),
                 ],
               ),
             ),
-          );
-        }),
+            Expanded(
+              child: BlocBuilder<ShopBloc, ShopState>(
+                builder: (context, state) {
+                  List<ShopProduct> items = [];
+                  bool hasReachedBottom = false;
+                  bool hasError = false;
+                  String? errorMessage;
+
+                  if (state is ShopInitial) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (state is ShopLoading && state.filters.page == 1) {
+                    return ListShimmer(height: 140);
+                  }
+
+                  if (state is ShopError) {
+                    if (state.filters.page == 1) {
+                      return ErrorStateWidget(
+                        message: state.message,
+                        onRetry: _refresh,
+                      );
+                    } else {
+                      hasError = true;
+                      errorMessage = state.message;
+                    }
+                  }
+
+                  if (state is ShopLoaded) {
+                    items = state.products;
+                    _allCategories = state.categories;
+                    hasReachedBottom = !state.hasMore;
+                    if (items.isEmpty && state.errorMessage != null) {
+                      hasError = true;
+                      errorMessage = state.errorMessage;
+                    }
+                  } else if (state is ShopLoadingMore) {
+                    items = state.products;
+                    hasReachedBottom = !state.hasMore;
+                  }
+
+                  return Column(
+                    children: [
+                      if (state is ShopLoaded) ...[
+                        ShopBanner(banners: state.banners),
+                        SizedBox(height: 20.h),
+                      ],
+                      _buildCategoryFilter(context),
+                      SizedBox(height: 16.h),
+                      Expanded(
+                        child: WidgetInfiniteList(
+                          builder: (context, item) => ProductCard(product: item as ShopProduct),
+                          items: items,
+                          bloc: bloc.listBloc,
+                          itemEquality: (first, second) => (first as ShopProduct).id == (second as ShopProduct).id,
+                          hasReachedTop: true,
+                          hasReachedBottom: hasReachedBottom,
+                          isLoading: false,
+                          loadingWidget: const RepairmanListShimmer(),
+                          errorWidget: ErrorStateWidget(
+                            message: errorMessage ?? "",
+                            onRetry: () => bloc.add(const LoadMoreShopProducts()),
+                          ),
+                          hasErrorOccurred: hasError,
+                          loadBottomData: () => bloc.add(const LoadMoreShopProducts()),
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+  Widget _buildCategoryFilter(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final adminIndigo = DashboardColors.of(context).adminIndigo;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: colorScheme.outlineVariant, width: 1.2),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.r),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _showCategoryPicker,
+              child: Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Row(
+                  children: [
+                    Icon(Icons.tune_rounded,
+                        color: adminIndigo, size: 22.sp),
+                    SizedBox(width: 10.w,),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'فیلتر دسته بندی',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: colorScheme.onSurface,
+                            fontFamily: 'BonyadeKoodak',
+                          ),
+                        ),
+                        if (_selectedCategory != null) ...[
+                          SizedBox(height: 6.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: adminIndigo.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _categoryController.text,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: adminIndigo,
+                                    fontFamily: 'BonyadeKoodak',
+                                  ),
+                                ),
+                                SizedBox(width: 6.w),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCategory = null;
+                                        _categoryController.clear();
+                                      });
+                                      _refresh();
+                                    },
+                                    borderRadius: BorderRadius.circular(4.r),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(4.r),
+                                      child: Icon(Icons.close_rounded,
+                                          size: 16.sp,
+                                          color: adminIndigo),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const Spacer(),
+                    if (_selectedCategory == null)
+                      Icon(Icons.arrow_drop_down_rounded,
+                          color: adminIndigo, size: 22.sp),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        Text(
-          'مشاهده همه',
-          style: TextStyle(
-            color: Colors.blue,
-            fontSize: 12.sp,
-            fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final adminIndigo = DashboardColors.of(context).adminIndigo;
+
+    return Container(
+      height: 55.h,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: colorScheme.outlineVariant, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          _debounceService.run(() {
+            _refresh();
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'جستجو در محصولات...',
+          hintStyle: TextStyle(
+            color: colorScheme.outline,
+            fontSize: 14.sp,
+            fontFamily: 'BonyadeKoodak',
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: adminIndigo,
+            size: 24.sp,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 14.h),
         ),
-      ],
+        style: TextStyle(
+          fontSize: 15.sp,
+          color: colorScheme.onSurface,
+          fontFamily: 'BonyadeKoodak',
+        ),
+        textAlignVertical: TextAlignVertical.center,
+        cursorColor: adminIndigo,
+      ),
     );
   }
 }

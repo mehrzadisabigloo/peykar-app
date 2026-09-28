@@ -10,6 +10,7 @@ import '../../domain/repository/auth_repository.dart';
 import '../../domain/entity/auth_entity.dart';
 import '../../../panel_admin_features/feature_occupation/domain/repository/occupation_repository.dart';
 import '../../../panel_admin_features/feature_occupation/domain/entity/occupation_entity.dart';
+import '../../../panel_admin_features/feature_occupation/domain/entity/occupation_list_entity.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -129,11 +130,11 @@ class AuthenticationBloc extends BaseBloc<AuthenticationEvent, AuthenticationSta
   Future<void> _onFetchOccupations(FetchOccupations event, Emitter<AuthenticationState> emit) async {
     emit(const OccupationLoading());
     final dataState = await occupationRepository.fetchActiveOccupations(const OccupationFilterParams(isPaginate: false));
-    if (dataState is DataSuccess) {
-      emit(OccupationsLoaded(dataState.data!));
+    if (dataState is DataSuccess && dataState.data != null) {
+      final List<OccupationEntity> list = dataState.data!.occupations;
+      emit(OccupationsLoaded(list));
     } else {
       emit(Failed(dataState.error ?? "خطا در دریافت اطلاعات"));
     }
   }
 }
-

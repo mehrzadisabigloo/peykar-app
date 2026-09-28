@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widget/product_card.dart';
 import '../widget/product_card_shimmer.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 
@@ -30,8 +31,9 @@ class _ScreenManageProductsState extends BaseManageProductsStatefulWidgetState<S
 
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: colorScheme.surfaceContainer,
       body: SafeArea(
         child: Column(
           children: [
@@ -57,7 +59,7 @@ class _ScreenManageProductsState extends BaseManageProductsStatefulWidgetState<S
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3F51B5), // Blue color from image
+                  backgroundColor: DashboardColors.of(context).adminIndigo, // Blue color from image
                   minimumSize: Size(double.infinity, 50.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.r),
@@ -70,7 +72,7 @@ class _ScreenManageProductsState extends BaseManageProductsStatefulWidgetState<S
                     Text(
                       '+ افزودن محصول +',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colorScheme.surface,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -84,7 +86,7 @@ class _ScreenManageProductsState extends BaseManageProductsStatefulWidgetState<S
             Expanded(
               child: BlocBuilder<ManageProductsBloc, ManageProductsState>(
                 builder: (context, state) {
-                  if (state is ManageProductsLoading) {
+                  if (state is ManageProductsInitial || state is ManageProductsLoading) {
                     return ListView.builder(
                       itemCount: 5,
                       padding: EdgeInsets.only(bottom: 20.h),

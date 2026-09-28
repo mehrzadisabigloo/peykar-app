@@ -8,18 +8,18 @@ abstract class BaseWidgetState<T extends StatefulWidget> extends State<T> {
   Duration get baseAnimDurationShorter => const Duration(milliseconds: 150);
 
   Color get primaryColor => Theme.of(context).colorScheme.primary;
-  Color primaryColorLight(BuildContext context) => const Color(0xffc6c6c6);
+  Color get primaryColorLight => Theme.of(context).colorScheme.primaryContainer;
   Color get secondaryColor => Theme.of(context).colorScheme.secondary;
   Color get canvasColor => Theme.of(context).canvasColor;
   Color get colorDivider => Theme.of(context).dividerColor;
   Color get onPrimary => Theme.of(context).colorScheme.onPrimaryContainer;
   Color get colorError => Theme.of(context).colorScheme.error;
-  Color get colorGreyText => const Color(0xff707070);
-  Color get colorGreyOutline => const Color(0xffeeeeee);
-  Color get colorGreyTextDark => const Color(0xff555555);
-  Color get colorGreyTextLight => const Color(0xffaaaaaa);
-  Color get colorShimmerBase => primaryColorLight(context).withAlpha(150);
-  Color get shimmerHighlightColor => Colors.white.withAlpha(150);
+  Color get colorGreyText => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get colorGreyOutline => Theme.of(context).colorScheme.outlineVariant;
+  Color get colorGreyTextDark => Theme.of(context).colorScheme.onSurface;
+  Color get colorGreyTextLight => Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+  Color get colorShimmerBase => Theme.of(context).colorScheme.surfaceContainer;
+  Color get shimmerHighlightColor => Theme.of(context).colorScheme.surface;
 
   SizedBox get verySmallVerticalGap => SizedBox(height: 4.r);
   SizedBox get smallVerticalGap => SizedBox(height: 8.r);

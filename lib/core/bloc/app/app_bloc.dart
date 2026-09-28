@@ -10,6 +10,6 @@ class AppBloc extends Bloc<AppEvent, AppBlocState> {
   }
 
   void _onDataUpdated(AppEventDataUpdated event, Emitter<AppBlocState> emit) {
-    // Handle app wide updates
+    emit(AppBlocStateDataUpdated(event.data, event.operation));
   }
 }

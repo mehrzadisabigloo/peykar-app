@@ -8,6 +8,8 @@ abstract class ManageProductsRepository {
     double? priceTo,
   });
 
+  Future<DataState<List<CategoryEntity>>> fetchCategories();
+
   Future<DataState<dynamic>> addProduct({
     required String title,
     required String description,
@@ -16,6 +18,7 @@ abstract class ManageProductsRepository {
     required double price,
     required int stock,
     required int maxPurchaseQuantity,
+    String? categoryId,
   });
 
   Future<DataState<ManageProductsEntity>> fetchProductById(String productId);

@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/resources/data_state.dart';
 import '../../../../../core/services/locator.dart';
+import '../../../../../core/utils/jalali_date.dart';
+import '../../../../../core/widgets/cstm_snakbar.dart';
+import '../../../../feature_reminders/presentation/widget/persian_calendar_view.dart';
 import '../../domain/repository/manage_discounts_repository.dart';
 import '../../data/model/discount_model.dart';
 
@@ -23,6 +26,25 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
   
   String _discountType = 'percentage';
   bool _isLoading = false;
+
+  void _showDatePicker() {
+    showDialog(
+
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: PersianCalendarView(
+          initialDate: Jalali.parse(_expiryController.text) ?? Jalali.fromDateTime(DateTime.now()),
+          onDateSelected: (jalali) {
+            setState(() {
+              _expiryController.text = '${jalali.year}/${jalali.month.toString().padLeft(2, '0')}/${jalali.day.toString().padLeft(2, '0')}';
+            });
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -47,14 +69,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
       if (mounted) context.pop(true);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.error ?? 'خطا در ثبت اطلاعات'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-          ),
-        );
+        CstmSnackBar.showError(context, result.error ?? 'خطا در ثبت اطلاعات');
       }
     }
   }
@@ -64,7 +79,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
         physics: const BouncingScrollPhysics(),
@@ -73,6 +88,30 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: colorScheme.primary, size: 24.sp),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Text(
+                        'لطفا اطلاعات مربوط به کد تخفیف را برای ثبت در سیستم وارد نمایید.',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: colorScheme.primary,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 32.h),
               _buildSectionHeader('اطلاعات پایه'),
               _buildField(
                 controller: _codeController,
@@ -86,8 +125,10 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
                   Expanded(
                     child: _buildField(
                       controller: _expiryController,
-                      label: 'تاریخ انقضا (YYYY-MM-DD)',
+                      label: 'تاریخ انقضا',
                       icon: Icons.calendar_today_rounded,
+                      readOnly: true,
+                      onTap: _showDatePicker,
                       validator: (v) => v!.isEmpty ? 'الزامی' : null,
                     ),
                   ),
@@ -107,7 +148,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
               _buildSectionHeader('نوع و مقدار تخفیف'),
               _buildTypeSelector(),
               SizedBox(height: 20.h),
-              if (_discountType == 'Percentage')
+              if (_discountType == 'percentage')
                 _buildField(
                   controller: _percentageController,
                   label: 'درصد تخفیف (0-100)',
@@ -131,7 +172,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
                   onPressed: _isLoading ? null : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colorScheme.surface,
                     elevation: 8,
                     shadowColor: colorScheme.primary.withValues(alpha: 0.3),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -140,7 +181,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
                       ? SizedBox(
                           width: 24.sp,
                           height: 24.sp,
-                          child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(color: colorScheme.surface, strokeWidth: 2.5),
                         )
                       : Text(
                           'ایجاد کد تخفیف',
@@ -175,7 +216,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
             ),
           ),
         ],
@@ -187,7 +228,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
     return Container(
       padding: EdgeInsets.all(4.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6F8),
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -210,10 +251,10 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
           duration: const Duration(milliseconds: 200),
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? colorScheme.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: isSelected
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)]
+                ? [BoxShadow(color: colorScheme.onSurface.withValues(alpha: 0.05), blurRadius: 10)]
                 : null,
           ),
           child: Text(
@@ -222,7 +263,7 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? colorScheme.primary : Colors.black45,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.45),
             ),
           ),
         ),
@@ -236,6 +277,8 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
     required IconData icon,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,23 +287,39 @@ class _ScreenAddDiscountState extends State<ScreenAddDiscount> {
           padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
           child: Text(
             label,
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+            ),
           ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          readOnly: readOnly,
+          onTap: onTap,
           style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20.sp, color: Colors.black45),
+            prefixIcon: Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45)),
             filled: true,
-            fillColor: const Color(0xFFF5F6F8),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
               borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           ),

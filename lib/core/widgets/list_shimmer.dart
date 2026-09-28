@@ -18,84 +18,92 @@ class ListShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListView.builder(
       padding: padding ?? EdgeInsets.all(20.r),
       itemCount: count,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: 16.h),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[200]!,
-            highlightColor: Colors.grey[50]!,
-            child: Container(
-              height: height.h,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(borderRadius.r),
+        return Container(
+          height: height.h,
+          margin: EdgeInsets.only(bottom: 16.h),
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(borderRadius.r),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.onSurface.withValues(alpha: 0.03),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
               ),
-              child: Padding(
-                padding: EdgeInsets.all(16.r),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 50.r,
-                      height: 50.r,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
+            ],
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.05)),
+          ),
+          child: Shimmer.fromColors(
+            baseColor: colorScheme.surfaceContainer,
+            highlightColor: colorScheme.surface,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 50.r,
+                  height: 50.r,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                SizedBox(width: 14.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 16.h,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 14.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(height: 10.h),
+                      Container(
+                        width: 150.w,
+                        height: 12.h,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            width: double.infinity,
-                            height: 16.h,
+                            width: 80.w,
+                            height: 10.h,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colorScheme.surface,
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),
-                          SizedBox(height: 10.h),
                           Container(
-                            width: 150.w,
-                            height: 12.h,
+                            width: 60.w,
+                            height: 24.h,
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(4.r),
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
-                          ),
-                          const Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 80.w,
-                                height: 10.h,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                              ),
-                              Container(
-                                width: 60.w,
-                                height: 24.h,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         );

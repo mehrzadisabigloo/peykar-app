@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widget/service_card.dart';
 import '../widget/service_card_shimmer.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 
@@ -43,7 +44,7 @@ class _ScreenManageServicesState extends BaseManageServicesStatefulWidgetState<S
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3F51B5),
+              backgroundColor: DashboardColors.of(context).adminIndigo,
               minimumSize: Size(double.infinity, 50.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.r),
@@ -56,7 +57,7 @@ class _ScreenManageServicesState extends BaseManageServicesStatefulWidgetState<S
                 Text(
                   '+ افزودن خدمت +',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -70,7 +71,7 @@ class _ScreenManageServicesState extends BaseManageServicesStatefulWidgetState<S
         Expanded(
           child: BlocBuilder<ManageServicesBloc, ManageServicesState>(
             builder: (context, state) {
-              if (state is ManageServicesLoading) {
+              if (state is ManageServicesInitial || state is ManageServicesLoading) {
                 return ListView.builder(
                   itemCount: 5,
                   padding: EdgeInsets.only(bottom: 20.h),

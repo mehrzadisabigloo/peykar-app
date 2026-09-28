@@ -11,7 +11,7 @@ int _anyToInt(dynamic value) {
 }
 
 @freezed
-class UsersListModel with _$UsersListModel {
+sealed class UsersListModel with _$UsersListModel {
   const factory UsersListModel({
     @Default([]) List<UserModel> users,
     @JsonKey(name: 'current_page', fromJson: _anyToInt) @Default(1) int currentPage,

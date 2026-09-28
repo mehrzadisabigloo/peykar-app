@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:resturant_app/core/widgets/empty_state_widget.dart';
 import 'package:resturant_app/core/widgets/error_state_widget.dart';
-import 'package:resturant_app/core/widgets/list_shimmer.dart';
+import 'package:resturant_app/core/widgets/management_card_shimmer.dart';
 import '../../../../../../core/bloc/app/app_bloc.dart';
 import '../../../../../../core/bloc/error/error_bloc.dart';
 import '../../../../../../core/services/locator.dart';
+import '../../../../../../core/widgets/cstm_snakbar.dart';
+import '../../../../../../core/themes/theme_main.dart';
 import '../base/base_occupation_stateful_widget_state.dart';
 import '../bloc/occupation_bloc.dart';
 import '../bloc/occupation_event.dart';
@@ -33,24 +35,29 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       body: BlocConsumer<OccupationBloc, OccupationState>(
         listener: (context, state) {
-          if (state is OccupationActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-            );
-            bloc.add(const FetchOccupationsEvent());
+          if (state is OccupationsLoaded) {
+            if (state.successMessage != null) {
+              CstmSnackBar.showSuccess(context, state.successMessage!);
+            }
+            if (state.errorMessage != null) {
+              CstmSnackBar.showError(context, state.errorMessage!);
+            }
           }
-          if (state is OccupationError && state.message.isNotEmpty) {
-             // We only show snackbar for errors that happen during actions, 
-             // for initial load errors we use the ErrorStateWidget in the builder.
-             // However, some apps show both. Standardizing on builder for now if it's a major error.
+          if (state is OccupationActionSuccess) {
+            CstmSnackBar.showSuccess(context, state.message);
+            bloc.add(const FetchOccupationsEvent());
           }
         },
         builder: (context, state) {
-          if (state is OccupationLoading) {
-            return const ListShimmer(height: 100);
+          if (state is OccupationInitial || state is OccupationLoading) {
+            return ListView.builder(
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
+              itemCount: 5,
+              itemBuilder: (context, index) => const ManagementCardShimmer(height: 100),
+            );
           }
 
           if (state is OccupationError) {
@@ -61,7 +68,7 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
           }
 
           if (state is OccupationsLoaded) {
-            final occupations = state.occupations;
+            final occupations = state.occupationList.occupations;
             if (occupations.isEmpty) {
               return const EmptyStateWidget(
                 title: 'هیچ شغلی ثبت نشده است',
@@ -70,22 +77,23 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
               );
             }
 
-            return RefreshIndicator(
-              onRefresh: () async => bloc.add(const FetchOccupationsEvent()),
-              child: ListView.builder(
+            return ListView.builder(
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
                 itemCount: occupations.length,
                 itemBuilder: (context, index) {
                   final occupation = occupations[index];
+                  final isOrderProcessing = state is OccupationsLoaded && state.orderProcessingId == occupation.id;
+                  final isStatusProcessing = state is OccupationsLoaded && state.statusProcessingId == occupation.id;
+
                   return Container(
                     margin: EdgeInsets.only(bottom: 16.h),
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(24.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -97,21 +105,27 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              onPressed: () => bloc.add(MoveOccupationUpEvent(occupation.id!)),
+                              onPressed: (isOrderProcessing || isStatusProcessing) ? null : () => bloc.add(MoveOccupationUpEvent(occupation.id!)),
                               icon: const Icon(Icons.keyboard_arrow_up_rounded),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
-                            Text(
-                              '${occupation.sortOrder}',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
-                              ),
-                            ),
+                            isOrderProcessing
+                              ? SizedBox(
+                                  width: 12.sp,
+                                  height: 12.sp,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
+                                )
+                              : Text(
+                                  '${occupation.sortOrder}',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
                             IconButton(
-                              onPressed: () => bloc.add(MoveOccupationDownEvent(occupation.id!)),
+                              onPressed: (isOrderProcessing || isStatusProcessing) ? null : () => bloc.add(MoveOccupationDownEvent(occupation.id!)),
                               icon: const Icon(Icons.keyboard_arrow_down_rounded),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -145,18 +159,30 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
                             ],
                           ),
                         ),
-                        Switch(
-                          value: occupation.isActive,
-                          onChanged: (value) => bloc.add(ChangeOccupationStatusEvent(occupation.id!)),
-                          activeThumbColor: colorScheme.primary,
-                        ),
+                        isStatusProcessing
+                            ? Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: SizedBox(
+                                  width: 20.sp,
+                                  height: 20.sp,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              )
+                            : Switch(
+                                value: occupation.isActive,
+                                onChanged: isOrderProcessing ? null : (value) => bloc.add(ChangeOccupationStatusEvent(occupation.id!)),
+                                activeThumbColor: colorScheme.primary,
+                                activeTrackColor: colorScheme.primary.withValues(alpha: 0.2),
+                              ),
                       ],
                     ),
                   );
                 },
-              ),
-            );
-          }
+              );
+            }
 
           return const SizedBox.shrink();
         },
@@ -168,13 +194,13 @@ class _ScreenManageOccupationsState extends BaseOccupationStatefulWidgetState<Sc
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isActive ? StatusColors.of(context).success.withValues(alpha: 0.1) : StatusColors.of(context).warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         isActive ? 'فعال' : 'غیرفعال',
         style: TextStyle(
-          color: isActive ? Colors.green : Colors.orange,
+          color: isActive ? StatusColors.of(context).success : StatusColors.of(context).warning,
           fontSize: 10.sp,
           fontWeight: FontWeight.bold,
         ),

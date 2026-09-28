@@ -7,16 +7,25 @@ class ServiceCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-        padding: EdgeInsets.all(12.r),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-        ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+      padding: EdgeInsets.all(12.r),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.05)),
+      ),
+      child: Shimmer.fromColors(
+        baseColor: colorScheme.surfaceContainer,
+        highlightColor: colorScheme.surface,
         child: Row(
           children: [
             // Image Placeholder
@@ -25,7 +34,7 @@ class ServiceCardShimmer extends StatelessWidget {
               height: 80.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15.r),
-                color: Colors.white,
+                color: colorScheme.surface,
               ),
             ),
             SizedBox(width: 16.w),
@@ -37,19 +46,28 @@ class ServiceCardShimmer extends StatelessWidget {
                   Container(
                     width: 120.w,
                     height: 14.h,
-                    color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
                   ),
                   SizedBox(height: 12.h),
                   Container(
                     width: 80.w,
                     height: 12.h,
-                    color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
                   ),
                   SizedBox(height: 12.h),
                   Container(
                     width: 100.w,
                     height: 14.h,
-                    color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
                   ),
                 ],
               ),
@@ -58,7 +76,10 @@ class ServiceCardShimmer extends StatelessWidget {
             Container(
               width: 20.w,
               height: 20.h,
-              color: Colors.white,
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(4.r),
+              ),
             ),
           ],
         ),

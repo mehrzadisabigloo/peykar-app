@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_admin_stateful_widget_state.dart';
 import '../bloc/admin_bloc.dart';
 
@@ -19,7 +20,7 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Container(
-      color: const Color(0xFFF8F9FB),
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Column(
         children: [
           _buildSearchBar(),
@@ -43,11 +44,11 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
       padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),
@@ -56,8 +57,8 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
         child: TextField(
           decoration: InputDecoration(
             hintText: 'جستجو در خدمات دهندگان...',
-            hintStyle: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
-            prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400], size: 22.sp),
+            hintStyle: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 22.sp),
             suffixIcon: Icon(Icons.tune_rounded, color: Theme.of(context).colorScheme.primary, size: 20.sp),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -76,17 +77,23 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
       'صافکاری نوین'
     ];
     final statuses = ['تایید شده', 'تایید شده', 'در انتظار تایید', 'تایید شده', 'غیرفعال'];
-    final statusColors = [Colors.green, Colors.green, Colors.orange, Colors.green, Colors.red];
+    final statusColors = [
+      StatusColors.of(context).success,
+      StatusColors.of(context).success,
+      StatusColors.of(context).warning,
+      StatusColors.of(context).success,
+      Theme.of(context).colorScheme.error,
+    ];
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -98,10 +105,10 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
             width: 56.r,
             height: 56.r,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6F8),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Icon(Icons.storefront_rounded, color: Colors.grey[400], size: 28.sp),
+            child: Icon(Icons.storefront_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 28.sp),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -113,19 +120,19 @@ class _ScreenServiceProvidersState extends BaseAdminStatefulWidgetState<ScreenSe
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
                 Row(
                   children: [
-                    Icon(Icons.verified_rounded, size: 14.sp, color: const Color(0xFF1E88E5)),
+                    Icon(Icons.verified_rounded, size: 14.sp, color: StatusColors.of(context).info),
                     SizedBox(width: 4.w),
                     Text(
                       'تایید شده توسط زینو',
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: Colors.black45,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],

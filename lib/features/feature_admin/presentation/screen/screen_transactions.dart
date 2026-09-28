@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_admin_stateful_widget_state.dart';
 import '../bloc/admin_bloc.dart';
 
@@ -21,7 +22,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Container(
-      color: const Color(0xFFF8F9FB),
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Column(
         children: [
           _buildTabs(),
@@ -65,7 +66,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
         margin: EdgeInsets.symmetric(horizontal: 8.w),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.transparent : Colors.white,
+          color: isSelected ? Colors.transparent : colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Column(
@@ -73,7 +74,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
             Text(
               title,
               style: TextStyle(
-                color: isSelected ? colorScheme.primary : Colors.grey,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 fontSize: 14.sp,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
               ),
@@ -107,11 +108,11 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -124,12 +125,12 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
               Container(
                 padding: EdgeInsets.all(10.r),
                 decoration: BoxDecoration(
-                  color: (isSuccess ? Colors.green : Colors.red).withValues(alpha: 0.1),
+                  color: (isSuccess ? StatusColors.of(context).success : Theme.of(context).colorScheme.error).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isSuccess ? Icons.swap_vert_rounded : Icons.priority_high_rounded,
-                  color: isSuccess ? Colors.green : Colors.red,
+                  color: isSuccess ? StatusColors.of(context).success : Theme.of(context).colorScheme.error,
                   size: 20.sp,
                 ),
               ),
@@ -142,24 +143,24 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w800,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     dates[index],
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: Colors.grey,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
               const Spacer(),
-              _buildStatusBadge(statuses[index], isSuccess ? Colors.green : Colors.red),
+              _buildStatusBadge(statuses[index], isSuccess ? StatusColors.of(context).success : Theme.of(context).colorScheme.error),
             ],
           ),
           SizedBox(height: 16.h),
-          Divider(color: Colors.grey.withValues(alpha: 0.05)),
+          Divider(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
           SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,7 +169,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
                 'سفارش ${orderNos[index]}',
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: Colors.black54,
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -179,7 +180,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF3F51B5),
+                      color: DashboardColors.of(context).adminIndigo,
                     ),
                   ),
                   SizedBox(width: 4.w),
@@ -187,7 +188,7 @@ class _ScreenTransactionsState extends BaseAdminStatefulWidgetState<ScreenTransa
                     'تومان',
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: Colors.black54,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

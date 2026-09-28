@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../../core/resources/data_state.dart';
 import '../../../../../../core/services/locator.dart';
+import '../../../../../../core/widgets/cstm_snakbar.dart';
 import '../../domain/repository/manage_sending_methods_repository.dart';
 import '../../data/model/sending_method_model.dart';
+import '../../data/model/location_model.dart';
 
 class ScreenAddSendingMethod extends StatefulWidget {
   final String? methodId;
@@ -20,18 +22,50 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
   final _priceController = TextEditingController();
   
   List<SendingMethodLocationModel> _locations = [];
+  List<OstanModel> _ostans = [];
+  final Map<int, List<ShahrestanModel>> _shahrestansMap = {}; // ostanId -> List<ShahrestanModel>
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.methodId != null) {
-      _loadMethod();
+    _fetchInitialData();
+  }
+
+  Future<void> _fetchInitialData() async {
+    setState(() => _isLoading = true);
+    try {
+      await _fetchOstans();
+      if (widget.methodId != null) {
+        await _loadMethod();
+      }
+    } catch (e) {
+      if (mounted) CstmSnackBar.showError(context, 'خطا در دریافت اطلاعات اولیه');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _fetchOstans() async {
+    final repo = locator<ManageSendingMethodsRepository>();
+    final result = await repo.fetchOstans();
+    if (result is DataSuccess) {
+      _ostans = result.data ?? [];
+    }
+  }
+
+  Future<void> _fetchShahrestans(int ostanId) async {
+    if (_shahrestansMap.containsKey(ostanId)) return;
+    final repo = locator<ManageSendingMethodsRepository>();
+    final result = await repo.fetchShahrestans(ostanId);
+    if (result is DataSuccess) {
+      setState(() {
+        _shahrestansMap[ostanId] = result.data ?? [];
+      });
     }
   }
 
   Future<void> _loadMethod() async {
-    setState(() => _isLoading = true);
     final repo = locator<ManageSendingMethodsRepository>();
     final dataState = await repo.getSendingMethod(widget.methodId!);
     if (dataState is DataSuccess) {
@@ -39,8 +73,14 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
       _titleController.text = method.title ?? '';
       _priceController.text = method.price?.toString() ?? '';
       _locations = List.from(method.locations ?? []);
+      
+      // Fetch shahrestans for existing locations
+      for (var loc in _locations) {
+        if (loc.ostanId != null) {
+          await _fetchShahrestans(loc.ostanId!);
+        }
+      }
     }
-    setState(() => _isLoading = false);
   }
 
   Future<void> _save() async {
@@ -69,12 +109,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
       if (mounted) context.pop(true);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.error ?? 'خطا در ثبت اطلاعات'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        CstmSnackBar.showError(context, result.error ?? 'خطا در ثبت اطلاعات');
       }
     }
   }
@@ -82,11 +117,14 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
   void _addLocation() {
     setState(() {
       _locations.add(SendingMethodLocationModel(
-        ostanId: 1,
-        shahrestanId: 1,
+        ostanId: _ostans.isNotEmpty ? _ostans.first.id : null,
+        shahrestanId: null,
         price: 0,
       ));
     });
+    if (_ostans.isNotEmpty && _ostans.first.id != null) {
+      _fetchShahrestans(_ostans.first.id!);
+    }
   }
 
   @override
@@ -94,7 +132,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: _isLoading && widget.methodId != null && _titleController.text.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -105,6 +143,30 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Container(
+                      padding: EdgeInsets.all(16.r),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, color: colorScheme.primary, size: 24.sp),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              'لطفا اطلاعات روش ارسال را برای ثبت در سیستم وارد نمایید.',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: colorScheme.primary,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 32.h),
                     _buildSectionHeader('اطلاعات پایه'),
                     _buildField(
                       controller: _titleController,
@@ -132,7 +194,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
                           ),
                           child: IconButton(
                             onPressed: _addLocation,
-                            icon: const Icon(Icons.add_location_alt_rounded,color: Colors.white,),
+                            icon: Icon(Icons.add_location_alt_rounded,color: colorScheme.surface,),
                           ),
                         ),
                       ],
@@ -145,7 +207,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
                           padding: EdgeInsets.symmetric(vertical: 20.h),
                           child: Text(
                             'هیچ محدوده اختصاصی ثبت نشده است',
-                            style: TextStyle(color: Colors.black26, fontSize: 12.sp),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.26), fontSize: 12.sp),
                           ),
                         ),
                       ),
@@ -157,7 +219,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
                         onPressed: _isLoading ? null : _save,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: colorScheme.onPrimary,
                           elevation: 8,
                           shadowColor: colorScheme.primary.withValues(alpha: 0.3),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -166,7 +228,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
                             ? SizedBox(
                                 width: 24.sp,
                                 height: 24.sp,
-                                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2.5),
                               )
                             : Text(
                                 widget.methodId == null ? 'ایجاد روش ارسال' : 'ذخیره تغییرات',
@@ -183,51 +245,89 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
   }
 
   Widget _buildLocationCard(int index, SendingMethodLocationModel location) {
+    final List<ShahrestanModel> shahrestans = _shahrestansMap[location.ostanId] ?? [];
+    final colorScheme = Theme.of(context).colorScheme;
+    final double dropdownWidth = (1.sw - 88.w - 12.w) / 2;
+
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.r),
+      margin: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6F8),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.05)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
                 child: Text(
                   'محدوده شماره ${index + 1}',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12.sp,
+                    color: colorScheme.primary,
+                    fontFamily: 'BonyadeKoodak',
+                  ),
                 ),
               ),
               IconButton(
                 onPressed: () => setState(() => _locations.removeAt(index)),
-                icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+                icon: Icon(Icons.delete_outline_rounded, color: colorScheme.error, size: 22.sp),
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.error.withValues(alpha: 0.05),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 20.h),
           Row(
             children: [
               Expanded(
-                child: _buildSmallField(
-                  label: 'کد استان',
-                  initialValue: location.ostanId?.toString(),
-                  onChanged: (v) => setState(() => location.ostanId = int.tryParse(v)),
+                child: _buildLocationDropdown<int>(
+                  label: 'استان',
+                  value: location.ostanId,
+                  items: _ostans.map((o) => DropdownMenuItem(value: o.id, child: Text(o.name ?? ''))).toList(),
+                  onChanged: (v) {
+                    setState(() {
+                      location.ostanId = v;
+                      location.shahrestanId = null;
+                    });
+                    if (v != null) _fetchShahrestans(v);
+                  },
+                  hint: 'انتخاب استان',
+                  icon: Icons.map_outlined,
                 ),
               ),
               SizedBox(width: 12.w),
               Expanded(
-                child: _buildSmallField(
-                  label: 'کد شهرستان',
-                  initialValue: location.shahrestanId?.toString(),
-                  onChanged: (v) => setState(() => location.shahrestanId = int.tryParse(v)),
+                child: _buildLocationDropdown<int>(
+                  label: 'شهرستان',
+                  value: location.shahrestanId,
+                  items: shahrestans.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name ?? ''))).toList(),
+                  onChanged: (v) => setState(() => location.shahrestanId = v),
+                  hint: 'انتخاب شهرستان',
+                  icon: Icons.location_city_rounded,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 16.h),
           _buildSmallField(
             label: 'هزینه اختصاصی (تومان)',
             initialValue: location.price?.toString(),
@@ -235,6 +335,69 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLocationDropdown<T>({
+    required String label,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required Function(T?) onChanged,
+    String? hint,
+    IconData? icon,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.sp, 
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), 
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BonyadeKoodak',
+            ),
+          ),
+        ),
+        DropdownButtonFormField<T>(
+          value: items.any((item) => item.value == value) ? value : null,
+          items: items,
+          onChanged: onChanged,
+          hint: hint != null ? Text(hint, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.26), fontFamily: 'BonyadeKoodak')) : null,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: colorScheme.primary, size: 20.sp),
+          decoration: InputDecoration(
+            prefixIcon: icon != null ? Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45)) : null,
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          ),
+          style: TextStyle(
+            fontSize: 14.sp, 
+            fontWeight: FontWeight.w600, 
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87), 
+            fontFamily: 'BonyadeKoodak',
+          ),
+          dropdownColor: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+      ],
     );
   }
 
@@ -255,7 +418,7 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w900,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
           ),
         ),
       ],
@@ -276,7 +439,11 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
           padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
           child: Text(
             label,
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+            ),
           ),
         ),
         TextFormField(
@@ -285,14 +452,24 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
           validator: validator,
           style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20.sp, color: Colors.black45),
+            prefixIcon: Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45)),
             filled: true,
-            fillColor: const Color(0xFFF5F6F8),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
               borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           ),
@@ -306,24 +483,45 @@ class _ScreenAddSendingMethodState extends State<ScreenAddSendingMethod> {
     String? initialValue,
     required Function(String) onChanged,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 10.sp, color: Colors.black45, fontWeight: FontWeight.bold),
+        Padding(
+          padding: EdgeInsets.only(right: 4.w, bottom: 6.h),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp, 
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), 
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BonyadeKoodak',
+            ),
+          ),
         ),
-        SizedBox(height: 4.h),
         TextFormField(
           initialValue: initialValue,
           onChanged: onChanged,
           keyboardType: TextInputType.number,
-          style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, fontFamily: 'BonyadeKoodak'),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r), 
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r), 
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r), 
+              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            prefixIcon: Icon(Icons.payments_outlined, size: 18.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
           ),
         ),
       ],

@@ -4,6 +4,12 @@ import '../entity/manage_services_entity.dart';
 abstract class ManageServicesRepository {
   Future<DataState<List<ManageServicesEntity>>> fetchManageServicesData();
 
+  Future<DataState<List<ManageServicesEntity>>> fetchActiveServices({
+    bool isPaginate = true,
+    int countItem = 10,
+    String? title,
+  });
+
   Future<DataState<dynamic>> addService({
     required String title,
     required String description,

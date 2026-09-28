@@ -12,11 +12,11 @@ class AdminIncomeChart extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -33,10 +33,10 @@ class AdminIncomeChart extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w900,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              Icon(Icons.more_horiz_rounded, color: Colors.grey[400]),
+              Icon(Icons.more_horiz_rounded, color: colorScheme.onSurfaceVariant),
             ],
           ),
           SizedBox(height: 24.h),
@@ -49,11 +49,11 @@ class AdminIncomeChart extends StatelessWidget {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => colorScheme.primary,
-                    tooltipRoundedRadius: 8,
+                    // tooltipRoundedRadius: 8,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         '${rod.toY.toInt()} M',
-                        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        TextStyle(color: colorScheme.surface, fontWeight: FontWeight.bold),
                       );
                     },
                   ),
@@ -70,7 +70,7 @@ class AdminIncomeChart extends StatelessWidget {
                           child: Text(
                             '${(value + 1).toInt()}د',
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.bold,
                             ),
@@ -87,7 +87,7 @@ class AdminIncomeChart extends StatelessWidget {
                         return Text(
                           '${value.toInt()}K',
                           style: TextStyle(
-                            color: Colors.grey[400],
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 10.sp,
                           ),
                         );
@@ -102,7 +102,7 @@ class AdminIncomeChart extends StatelessWidget {
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey[50],
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
                       strokeWidth: 1,
                     );
                   },

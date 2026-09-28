@@ -8,7 +8,14 @@ class AppointmentsRouter implements FeatureRouter {
         GoRoute(
           name: 'appointments',
           path: '/appointments',
-          builder: (context, state) => const ScreenAppointments(),
+          builder: (context, state) {
+            final repairmanId = state.uri.queryParameters['repairman_id'];
+            final initialDate = state.uri.queryParameters['initial_date'];
+            return ScreenAppointments(
+              repairmanId: repairmanId,
+              initialDate: initialDate,
+            );
+          },
         ),
       ];
 }

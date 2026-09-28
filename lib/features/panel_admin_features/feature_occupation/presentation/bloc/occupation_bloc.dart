@@ -10,6 +10,7 @@ class OccupationBloc extends BaseBloc<OccupationEvent, OccupationState> {
 
   OccupationBloc(this._repository) : super(OccupationInitial()) {
     on<FetchOccupationsEvent>(_onFetchOccupations);
+    on<FetchActiveOccupationsEvent>(_onFetchActiveOccupations);
     on<ChangeOccupationStatusEvent>(_onChangeStatus);
     on<MoveOccupationUpEvent>(_onMoveUp);
     on<MoveOccupationDownEvent>(_onMoveDown);
@@ -25,33 +26,79 @@ class OccupationBloc extends BaseBloc<OccupationEvent, OccupationState> {
     }
   }
 
-  Future<void> _onChangeStatus(ChangeOccupationStatusEvent event, Emitter<OccupationState> emit) async {
+  Future<void> _onFetchActiveOccupations(FetchActiveOccupationsEvent event, Emitter<OccupationState> emit) async {
     emit(OccupationLoading());
-    final dataState = await _repository.changeOccupationStatus(event.id);
+    final dataState = await _repository.fetchActiveOccupations(event.params);
     if (dataState is DataSuccess) {
-      emit(OccupationActionSuccess("وضعیت شغل با موفقیت تغییر یافت", dataState.data!));
+      emit(OccupationsLoaded(dataState.data!));
     } else {
-      emit(OccupationError(dataState.error ?? "خطا در تغییر وضعیت"));
+      emit(OccupationError(dataState.error ?? "خطا در دریافت اطلاعات مشاغل فعال"));
+    }
+  }
+
+  Future<void> _onChangeStatus(ChangeOccupationStatusEvent event, Emitter<OccupationState> emit) async {
+    final currentState = state;
+    if (currentState is! OccupationsLoaded) return;
+
+    emit(currentState.copyWith(statusProcessingId: event.id, clearOrderProcessingId: true, clearMessages: true));
+    
+    final dataState = await _repository.changeOccupationStatus(event.id);
+    
+    if (dataState is DataSuccess) {
+      emit(currentState.copyWith(
+        successMessage: "وضعیت شغل با موفقیت تغییر یافت",
+        clearStatusProcessingId: true,
+      ));
+      add(const FetchOccupationsEvent()); // Refresh to get updated list
+    } else {
+      emit(currentState.copyWith(
+        errorMessage: dataState.error ?? "خطا در تغییر وضعیت",
+        clearStatusProcessingId: true,
+      ));
     }
   }
 
   Future<void> _onMoveUp(MoveOccupationUpEvent event, Emitter<OccupationState> emit) async {
-    emit(OccupationLoading());
+    final currentState = state;
+    if (currentState is! OccupationsLoaded) return;
+
+    emit(currentState.copyWith(orderProcessingId: event.id, clearStatusProcessingId: true, clearMessages: true));
+    
     final dataState = await _repository.moveOccupationUp(event.id);
+    
     if (dataState is DataSuccess) {
-      emit(OccupationActionSuccess("اولویت شغل با موفقیت بالا رفت", dataState.data!));
+      emit(currentState.copyWith(
+        successMessage: "اولویت شغل با موفقیت بالا رفت",
+        clearOrderProcessingId: true,
+      ));
+      add(const FetchOccupationsEvent());
     } else {
-      emit(OccupationError(dataState.error ?? "خطا در جابجایی"));
+      emit(currentState.copyWith(
+        errorMessage: dataState.error ?? "خطا در جابجایی",
+        clearOrderProcessingId: true,
+      ));
     }
   }
 
   Future<void> _onMoveDown(MoveOccupationDownEvent event, Emitter<OccupationState> emit) async {
-    emit(OccupationLoading());
+    final currentState = state;
+    if (currentState is! OccupationsLoaded) return;
+
+    emit(currentState.copyWith(orderProcessingId: event.id, clearStatusProcessingId: true, clearMessages: true));
+    
     final dataState = await _repository.moveOccupationDown(event.id);
+    
     if (dataState is DataSuccess) {
-      emit(OccupationActionSuccess("اولویت شغل با موفقیت پایین آمد", dataState.data!));
+      emit(currentState.copyWith(
+        successMessage: "اولویت شغل با موفقیت پایین آمد",
+        clearOrderProcessingId: true,
+      ));
+      add(const FetchOccupationsEvent());
     } else {
-      emit(OccupationError(dataState.error ?? "خطا در جابجایی"));
+      emit(currentState.copyWith(
+        errorMessage: dataState.error ?? "خطا در جابجایی",
+        clearOrderProcessingId: true,
+      ));
     }
   }
 }

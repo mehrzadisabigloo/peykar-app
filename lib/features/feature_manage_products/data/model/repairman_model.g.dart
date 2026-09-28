@@ -6,8 +6,8 @@ part of 'repairman_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RepairmanModelImpl _$$RepairmanModelImplFromJson(Map<String, dynamic> json) =>
-    _$RepairmanModelImpl(
+_RepairmanModel _$RepairmanModelFromJson(Map<String, dynamic> json) =>
+    _RepairmanModel(
       id: json['id'] as String? ?? '',
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
@@ -18,6 +18,7 @@ _$RepairmanModelImpl _$$RepairmanModelImplFromJson(Map<String, dynamic> json) =>
       profileImageId: json['profile_image_id'] as String?,
       ostan: json['ostan'] as String?,
       shahrestan: json['shahrestan'] as String?,
+      address: json['address'] as String?,
       brand: json['brand'] as String?,
       identityImages: _toList(json['identity_images']),
       businessLicenseImage: _toList(json['business_license_image']),
@@ -35,39 +36,39 @@ _$RepairmanModelImpl _$$RepairmanModelImplFromJson(Map<String, dynamic> json) =>
       hasService: _anyToBool(json['has_service']),
     );
 
-Map<String, dynamic> _$$RepairmanModelImplToJson(
-  _$RepairmanModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'first_name': instance.firstName,
-  'last_name': instance.lastName,
-  'mobile': instance.mobile,
-  'email': instance.email,
-  'role': instance.role,
-  'birthday': instance.birthday,
-  'profile_image_id': instance.profileImageId,
-  'ostan': instance.ostan,
-  'shahrestan': instance.shahrestan,
-  'brand': instance.brand,
-  'identity_images': instance.identityImages,
-  'business_license_image': instance.businessLicenseImage,
-  'phone_numbers': instance.phoneNumbers,
-  'location': instance.location,
-  'shop_images': instance.shopImages,
-  'subscription_code': instance.subscriptionCode,
-  'referral_code': instance.referralCode,
-  'occupation_id': instance.occupationId,
-  'status': instance.status,
-  'referral_count': instance.referralCount,
-  'has_product': instance.hasProduct,
-  'has_service': instance.hasService,
-};
+Map<String, dynamic> _$RepairmanModelToJson(_RepairmanModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'first_name': instance.firstName,
+      'last_name': instance.lastName,
+      'mobile': instance.mobile,
+      'email': instance.email,
+      'role': instance.role,
+      'birthday': instance.birthday,
+      'profile_image_id': instance.profileImageId,
+      'ostan': instance.ostan,
+      'shahrestan': instance.shahrestan,
+      'address': instance.address,
+      'brand': instance.brand,
+      'identity_images': instance.identityImages,
+      'business_license_image': instance.businessLicenseImage,
+      'phone_numbers': instance.phoneNumbers,
+      'location': instance.location,
+      'shop_images': instance.shopImages,
+      'subscription_code': instance.subscriptionCode,
+      'referral_code': instance.referralCode,
+      'occupation_id': instance.occupationId,
+      'status': instance.status,
+      'referral_count': instance.referralCount,
+      'has_product': instance.hasProduct,
+      'has_service': instance.hasService,
+    };
 
-_$LocationModelImpl _$$LocationModelImplFromJson(Map<String, dynamic> json) =>
-    _$LocationModelImpl(
+_LocationModel _$LocationModelFromJson(Map<String, dynamic> json) =>
+    _LocationModel(
       lat: json['lat'] == null ? 0.0 : _anyToDouble(json['lat']),
       lng: json['lng'] == null ? 0.0 : _anyToDouble(json['lng']),
     );
 
-Map<String, dynamic> _$$LocationModelImplToJson(_$LocationModelImpl instance) =>
+Map<String, dynamic> _$LocationModelToJson(_LocationModel instance) =>
     <String, dynamic>{'lat': instance.lat, 'lng': instance.lng};

@@ -52,6 +52,36 @@ class ManageProductsRepositoryImpl extends ManageProductsRepository {
   }
 
   @override
+  Future<DataState<List<CategoryEntity>>> fetchCategories() async {
+    try {
+      final Response response = await _apiProvider.fetchCategories();
+      if (response.statusCode == 200) {
+        final dynamic rootData = response.data;
+        List<dynamic> rawList = [];
+        if (rootData is Map<String, dynamic>) {
+          final data = rootData['data'];
+          if (data is List) {
+            rawList = data;
+          } else if (data is Map && data['data'] is List) {
+            rawList = data['data'];
+          }
+        }
+        final categories = rawList
+            .whereType<Map<String, dynamic>>()
+            .map((json) => CategoryModel.fromJson(json).toEntity())
+            .toList();
+        return DataSuccess(categories);
+      } else {
+        return DataFailed(response.data is Map
+            ? (response.data['message'] ?? "خطایی رخ داد")
+            : "خطایی رخ داد");
+      }
+    } catch (e) {
+      return const DataFailed('پاسخی دریافت نشد');
+    }
+  }
+
+  @override
   Future<DataState<dynamic>> addProduct({
     required String title,
     required String description,
@@ -60,6 +90,7 @@ class ManageProductsRepositoryImpl extends ManageProductsRepository {
     required double price,
     required int stock,
     required int maxPurchaseQuantity,
+    String? categoryId,
   }) async {
     try {
       final Response response = await _apiProvider.addProduct(
@@ -70,6 +101,7 @@ class ManageProductsRepositoryImpl extends ManageProductsRepository {
         price: price,
         stock: stock,
         maxPurchaseQuantity: maxPurchaseQuantity,
+        categoryId: categoryId,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

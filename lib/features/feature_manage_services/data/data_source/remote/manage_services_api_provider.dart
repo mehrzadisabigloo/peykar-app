@@ -15,6 +15,20 @@ class ManageServicesApiProvider {
     return await _genericApiService.post("/services/list-repairman-active", params);
   }
 
+  Future<dynamic> getActiveServices({
+    bool isPaginate = true,
+    int countItem = 10,
+    String? title,
+  }) async {
+    final params = {
+      "is_paginate": isPaginate,
+      "count_item": countItem,
+    };
+    if (title != null) params["title"] = title;
+
+    return await _genericApiService.post("/services/list-active", params);
+  }
+
   Future<dynamic> addService({
     required String title,
     required String description,

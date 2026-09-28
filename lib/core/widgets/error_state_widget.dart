@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'status_card.dart';
+
 class ErrorStateWidget extends StatelessWidget {
   final String title;
   final String message;
@@ -20,29 +22,18 @@ class ErrorStateWidget extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32.w),
-        child: Container(
-          padding: EdgeInsets.all(32.r),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: StatusCard(
+          accentColor: colorScheme.error,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Sophisticated Error Icon with Glow
+              // Sophisticated Error Icon with Soft Glow
               Container(
                 width: 100.r,
                 height: 100.r,
                 decoration: BoxDecoration(
-                  color: colorScheme.error.withValues(alpha: 0.08),
+                  color: colorScheme.error.withValues(alpha: 0.05),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -50,13 +41,13 @@ class ErrorStateWidget extends StatelessWidget {
                     width: 70.r,
                     height: 70.r,
                     decoration: BoxDecoration(
-                      color: colorScheme.error.withValues(alpha: 0.12),
+                      color: colorScheme.error.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.error_outline_rounded,
-                      size: 40.sp,
-                      color: colorScheme.error,
+                      size: 36.sp,
+                      color: colorScheme.error.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -66,50 +57,45 @@ class ErrorStateWidget extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF1A1C1E),
+                  color: theme.colorScheme.onSurface,
+                  fontFamily: 'BonyadeKoodak',
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 10.h),
               // Message
               Text(
                 message,
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF74777F),
-                  height: 1.5,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  height: 1.6,
+                  fontFamily: 'BonyadeKoodak',
                 ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 32.h),
-              // Premium Retry Button
-              ElevatedButton(
+              // Minimalist Retry Button
+              TextButton.icon(
                 onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3F51B5),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h), // Added padding for better control
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
+                icon: Icon(Icons.refresh_rounded, size: 20.sp),
+                label: const Text(
+                  'تلاش مجدد',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'BonyadeKoodak',
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.refresh_rounded, size: 20.sp),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'تلاش مجدد',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                style: TextButton.styleFrom(
+                  foregroundColor: colorScheme.error,
+                  backgroundColor: colorScheme.error.withValues(alpha: 0.08),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
                 ),
               ),
             ],

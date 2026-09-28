@@ -1,9 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/themes/theme_main.dart';
+import '../../../../core/resources/consts.dart';
+import '../../../panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
 
 class HomeBanner extends StatefulWidget {
-  const HomeBanner({super.key});
+  final List<BannerEntity> banners;
+  const HomeBanner({super.key, this.banners = const []});
 
   @override
   State<HomeBanner> createState() => _HomeBannerState();
@@ -13,36 +20,6 @@ class _HomeBannerState extends State<HomeBanner> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<BannerData> _banners = [
-    BannerData(
-      title: 'سرویس دوره‌ای خودرو',
-      subtitle: 'با بهترین متخصصین در محل شما',
-      buttonText: 'رزرو نوبت',
-      color: const Color(0xFF6C63FF),
-      icon: Icons.settings_suggest_rounded,
-    ),
-    BannerData(
-      title: 'تخفیف ویژه لاستیک',
-      subtitle: 'تا ۲۰٪ تخفیف برای برندهای برتر',
-      buttonText: 'مشاهده فروشگاه',
-      color: const Color(0xFFFF6584),
-      icon: Icons.shopping_basket_rounded,
-    ),
-    BannerData(
-      title: 'کارشناسی تخصصی بدنه',
-      subtitle: 'تضمین سلامت خودرو قبل از خرید',
-      buttonText: 'درخواست کارشناس',
-      color: const Color(0xFF43A047),
-      icon: Icons.verified_user_rounded,
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -51,24 +28,112 @@ class _HomeBannerState extends State<HomeBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final bannersToShow = widget.banners.isNotEmpty ? widget.banners : _getDefaultBanners(context);
+
     return Column(
       children: [
         SizedBox(
-          height: 180.h,
+          height: 160.h,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) => setState(() => _currentPage = index),
-            itemCount: _banners.length,
-            itemBuilder: (context, index) => _buildBannerItem(_banners[index]),
+            itemCount: bannersToShow.length,
+            itemBuilder: (context, index) {
+              final item = bannersToShow[index];
+              if (item is BannerEntity) {
+                return _buildRemoteBannerItem(context, item);
+              }
+              return _buildDefaultBannerItem(context, item as BannerData);
+            },
           ),
         ),
         SizedBox(height: 12.h),
-        _buildPageIndicator(),
+        _buildPageIndicator(context, bannersToShow.length),
       ],
     );
   }
 
-  Widget _buildBannerItem(BannerData banner) {
+  List<dynamic> _getDefaultBanners(BuildContext context) {
+    return [
+      BannerData(
+        title: 'سرویس دوره‌ای خودرو',
+        subtitle: 'با بهترین متخصصین در محل شما',
+        buttonText: 'رزرو نوبت',
+        color: Theme.of(context).colorScheme.primary,
+        icon: Icons.settings_suggest_rounded,
+      ),
+      BannerData(
+        title: 'تخفیف ویژه لاستیک',
+        subtitle: 'تا ۲۰٪ تخفیف برای برندهای برتر',
+        buttonText: 'مشاهده فروشگاه',
+        color: StatusColors.of(context).warning,
+        icon: Icons.shopping_basket_rounded,
+      ),
+      BannerData(
+        title: 'کارشناسی تخصصی بدنه',
+        subtitle: 'تضمین سلامت خودرو قبل از خرید',
+        buttonText: 'درخواست کارشناس',
+        color: StatusColors.of(context).success,
+        icon: Icons.verified_user_rounded,
+      ),
+    ];
+  }
+
+  Widget _buildRemoteBannerItem(BuildContext context, BannerEntity banner) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () {
+        if (banner.activityType == 'reminder') {
+          context.pushNamed('reminders');
+        } else if (banner.activityType == 'product' && banner.activityId != null) {
+          context.pushNamed('product_detail', pathParameters: {'productId': banner.activityId!});
+        }
+      },
+      borderRadius: BorderRadius.circular(28.r),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28.r),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28.r),
+          child: banner.firstImageId.isNotEmpty
+              ? CachedNetworkImage(
+                  imageUrl: '${Consts.baseFileUrl}${banner.firstImageId}',
+                  fit: BoxFit.fill,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: theme.colorScheme.surfaceContainer,
+                    highlightColor: theme.colorScheme.surface,
+                    child: Container(color: theme.colorScheme.surface),
+                  ),
+                  errorWidget: (context, url, error) => _buildPlaceholder(context),
+                )
+              : _buildPlaceholder(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      child: Center(
+        child: Icon(Icons.photo_outlined, color: Theme.of(context).colorScheme.surface, size: 40),
+      ),
+    );
+  }
+
+  Widget _buildDefaultBannerItem(BuildContext context, BannerData banner) {
+    final theme = Theme.of(context);
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -99,7 +164,7 @@ class _HomeBannerState extends State<HomeBanner> {
               top: -30.h,
               child: CircleAvatar(
                 radius: 80.r,
-                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.1),
               ),
             ),
             Positioned(
@@ -107,7 +172,7 @@ class _HomeBannerState extends State<HomeBanner> {
               bottom: -20.h,
               child: CircleAvatar(
                 radius: 50.r,
-                backgroundColor: Colors.white.withValues(alpha: 0.05),
+                backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.05),
               ),
             ),
 
@@ -124,7 +189,7 @@ class _HomeBannerState extends State<HomeBanner> {
                         Text(
                           banner.title,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: theme.colorScheme.surface,
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w900,
                           ),
@@ -133,30 +198,9 @@ class _HomeBannerState extends State<HomeBanner> {
                         Text(
                           banner.subtitle,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: theme.colorScheme.surface.withValues(alpha: 0.9),
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: banner.color,
-                            elevation: 0,
-                            minimumSize: Size(100.w, 36.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 16.w),
-                          ),
-                          child: Text(
-                            banner.buttonText,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ),
                       ],
@@ -167,13 +211,13 @@ class _HomeBannerState extends State<HomeBanner> {
                     child: Container(
                       padding: EdgeInsets.all(12.r),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: theme.colorScheme.surface.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         banner.icon,
                         size: 60.sp,
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                       ),
                     ),
                   ),
@@ -186,11 +230,11 @@ class _HomeBannerState extends State<HomeBanner> {
     );
   }
 
-  Widget _buildPageIndicator() {
+  Widget _buildPageIndicator(BuildContext context, int count) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
-        _banners.length,
+        count,
         (index) => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: EdgeInsets.symmetric(horizontal: 3.w),
@@ -198,8 +242,8 @@ class _HomeBannerState extends State<HomeBanner> {
           width: _currentPage == index ? 24.w : 6.w,
           decoration: BoxDecoration(
             color: _currentPage == index
-                ? const Color(0xFF3F51B5)
-                : Colors.grey.withValues(alpha: 0.3),
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),

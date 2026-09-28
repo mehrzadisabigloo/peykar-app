@@ -24,6 +24,7 @@ class ShopBasketModel extends ShopBasketEntity {
 
       return BasketItem(
         id: item['id']?.toString() ?? '',
+        productId: item['product_id']?.toString() ?? product['id']?.toString() ?? '',
         title: product['title'] ?? 'بدون نام',
         imageUrl: firstImageUrl,
         price: (item['final_price'] ?? 0).toDouble(),
@@ -32,39 +33,53 @@ class ShopBasketModel extends ShopBasketEntity {
       );
     }).toList();
 
-    // 2. Group items by Repairman (Shop)
+    // 2. Group items by Shop (Repairman or Admin)
     final Map<String, List<BasketItem>> groupedItems = {};
     final Map<String, String> shopNames = {};
     
     for (var i = 0; i < itemsList.length; i++) {
       final itemJson = itemsList[i];
       final product = itemJson['product'] ?? {};
-      final repairman = product['repairman'] ?? {};
-      final repairmanId = repairman['id']?.toString() ?? 'default_shop';
+      final ownerType = product['owner_type'] ?? 'repairman';
       
-      final firstName = repairman['first_name'] ?? '';
-      final lastName = repairman['last_name'] ?? '';
-      final brand = repairman['brand'];
-      
-      final shopName = (brand != null && brand.toString().isNotEmpty) 
-          ? brand.toString() 
-          : (firstName.isNotEmpty || lastName.isNotEmpty) 
-            ? '$firstName $lastName' 
-            : 'فروشگاه زینو';
+      String shopId = '';
+      String shopName = '';
 
-      if (!groupedItems.containsKey(repairmanId)) {
-        groupedItems[repairmanId] = [];
-        shopNames[repairmanId] = shopName;
+      if (ownerType == 'admin') {
+        final admin = product['admin'] ?? {};
+        shopId = admin['id']?.toString() ?? 'admin_shop';
+        final firstName = admin['first_name'] ?? '';
+        final lastName = admin['last_name'] ?? '';
+        shopName = (firstName.isNotEmpty || lastName.isNotEmpty) ? '$firstName $lastName' : 'فروشگاه مرکزی';
+      } else {
+        final repairman = product['repairman'] ?? {};
+        shopId = repairman['id']?.toString() ?? 'default_shop';
+        final firstName = repairman['first_name'] ?? '';
+        final lastName = repairman['last_name'] ?? '';
+        final brand = repairman['brand'];
+        
+        shopName = (brand != null && brand.toString().isNotEmpty) 
+            ? brand.toString() 
+            : (firstName.isNotEmpty || lastName.isNotEmpty) 
+              ? '$firstName $lastName' 
+              : 'فروشگاه زینو';
       }
-      groupedItems[repairmanId]!.add(allItems[i]);
+
+      if (!groupedItems.containsKey(shopId)) {
+        groupedItems[shopId] = [];
+        shopNames[shopId] = shopName;
+      }
+      groupedItems[shopId]!.add(allItems[i]);
     }
 
     // 3. Create BasketShopGroup list
     final List<BasketShopGroup> groups = groupedItems.entries.map((entry) {
       final items = entry.value;
+      final repairmanId = entry.key;
       final groupTotal = items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
       return BasketShopGroup(
-        shopName: shopNames[entry.key] ?? 'فروشگاه',
+        repairmanId: repairmanId,
+        shopName: shopNames[repairmanId] ?? 'فروشگاه',
         items: items,
         groupTotalPrice: groupTotal,
       );

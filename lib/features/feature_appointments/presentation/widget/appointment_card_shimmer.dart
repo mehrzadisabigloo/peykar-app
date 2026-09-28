@@ -7,74 +7,116 @@ class AppointmentCardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15.r),
-        ),
-        child: Row(
+    final theme = Theme.of(context);
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h, left: 0.w, right: 0.w),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: theme.colorScheme.surfaceContainer,
+        highlightColor: theme.colorScheme.surface,
+        child: Column(
           children: [
-            // Left Section (Time and Status)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                Container(
-                  width: 60.w,
-                  height: 18.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
+                // Right Section (Service Name and Subtitle)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 16.r,
+                          height: 16.r,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Container(
+                          width: 100.w,
+                          height: 14.h,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    Container(
+                      width: 120.w,
+                      height: 10.h,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 8.h),
-                Container(
-                  width: 70.w,
-                  height: 18.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
+                const Spacer(),
+                // Left Section (Time and Status)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 50.w,
+                      height: 16.h,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Container(
+                      width: 60.w,
+                      height: 18.h,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const Spacer(),
-            // Center Section (Service Name and Subtitle)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            // Action Buttons Shimmer (For Repairman Mode)
+            SizedBox(height: 16.h),
+            Divider(color: theme.colorScheme.surface),
+            SizedBox(height: 12.h),
+            Row(
               children: [
-                Container(
-                  width: 100.w,
-                  height: 16.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
+                Expanded(
+                  child: Container(
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 ),
-                SizedBox(height: 8.h),
-                Container(
-                  width: 120.w,
-                  height: 12.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.r),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Container(
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 ),
               ],
-            ),
-            SizedBox(width: 12.w),
-            // Chevron Placeholder
-            Container(
-              width: 20.w,
-              height: 20.h,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
             ),
           ],
         ),

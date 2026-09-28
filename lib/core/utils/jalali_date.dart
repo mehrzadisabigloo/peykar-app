@@ -48,6 +48,21 @@ class Jalali {
     return Jalali(jy, jm, jd);
   }
 
+  static Jalali? parse(String? input) {
+    if (input == null || input.isEmpty) return null;
+    try {
+      final parts = input.split(RegExp(r'[/|-]'));
+      if (parts.length >= 3) {
+        return Jalali(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+      }
+    } catch (_) {}
+    return null;
+  }
+
   DateTime toDateTime() {
     int jy = year - 979;
     int jm = month - 1;

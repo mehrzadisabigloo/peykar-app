@@ -6,8 +6,8 @@ part of 'address_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AddressModelImpl _$$AddressModelImplFromJson(Map<String, dynamic> json) =>
-    _$AddressModelImpl(
+_AddressModel _$AddressModelFromJson(Map<String, dynamic> json) =>
+    _AddressModel(
       id: _anyToString(json['id']),
       userId: _anyToString(json['user_id']),
       ostanId: _anyToInt(json['ostan_id']),
@@ -30,7 +30,7 @@ _$AddressModelImpl _$$AddressModelImplFromJson(Map<String, dynamic> json) =>
             ),
     );
 
-Map<String, dynamic> _$$AddressModelImplToJson(_$AddressModelImpl instance) =>
+Map<String, dynamic> _$AddressModelToJson(_AddressModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'user_id': instance.userId,
@@ -47,28 +47,3 @@ Map<String, dynamic> _$$AddressModelImplToJson(_$AddressModelImpl instance) =>
       'ostan': instance.ostan,
       'shahrestan': instance.shahrestan,
     };
-
-_$OstanModelImpl _$$OstanModelImplFromJson(Map<String, dynamic> json) =>
-    _$OstanModelImpl(
-      id: _anyToInt(json['id']),
-      name: _anyToString(json['name']),
-    );
-
-Map<String, dynamic> _$$OstanModelImplToJson(_$OstanModelImpl instance) =>
-    <String, dynamic>{'id': instance.id, 'name': instance.name};
-
-_$ShahrestanModelImpl _$$ShahrestanModelImplFromJson(
-  Map<String, dynamic> json,
-) => _$ShahrestanModelImpl(
-  id: _anyToInt(json['id']),
-  name: _anyToString(json['name']),
-  ostan: _anyToString(json['ostan']),
-);
-
-Map<String, dynamic> _$$ShahrestanModelImplToJson(
-  _$ShahrestanModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'ostan': instance.ostan,
-};

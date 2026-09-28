@@ -30,36 +30,53 @@ class ManageDiscountsBloc extends BaseBloc<ManageDiscountsEvent, ManageDiscounts
   Future<void> _onDeleteDiscount(DeleteDiscountEvent event, Emitter<ManageDiscountsState> emit) async {
     final currentState = state;
     if (currentState is ManageDiscountsLoaded) {
-      emit(ManageDiscountsLoaded(currentState.discounts, processingId: event.id));
+      emit(currentState.copyWith(processingId: event.id, isDeleting: true, clearMessages: true));
     }
 
     final dataState = await repository.deleteDiscount(event.id);
     
     if (dataState is DataSuccess) {
-      add(const FetchDiscountsEvent());
+      final updatedDiscounts = (state as ManageDiscountsLoaded).discounts.where((d) => d.id != event.id).toList();
+      emit(ManageDiscountsLoaded(updatedDiscounts, successMessage: 'کد تخفیف با موفقیت حذف شد'));
     } else {
       if (state is ManageDiscountsLoaded) {
-        emit(ManageDiscountsLoaded((state as ManageDiscountsLoaded).discounts));
+        emit((state as ManageDiscountsLoaded).copyWith(
+          processingId: null,
+          isDeleting: false,
+          errorMessage: dataState.error ?? "خطا در حذف",
+        ));
+      } else {
+        emit(ManageDiscountsError(dataState.error ?? "خطا در حذف"));
       }
-      emit(ManageDiscountsError(dataState.error ?? "خطا در حذف"));
     }
   }
 
   Future<void> _onChangeDiscountStatus(ChangeDiscountStatusEvent event, Emitter<ManageDiscountsState> emit) async {
     final currentState = state;
     if (currentState is ManageDiscountsLoaded) {
-      emit(ManageDiscountsLoaded(currentState.discounts, processingId: event.id));
+      emit(currentState.copyWith(processingId: event.id, isDeleting: false, clearMessages: true));
     }
 
     final dataState = await repository.changeStatus(event.id);
     
     if (dataState is DataSuccess) {
-      add(const FetchDiscountsEvent());
+      final updatedDiscounts = (state as ManageDiscountsLoaded).discounts.map((d) {
+        if (d.id == event.id) {
+          return d.copyWith(status: d.isActive ? 'Deactive' : 'Active');
+        }
+        return d;
+      }).toList();
+      emit(ManageDiscountsLoaded(updatedDiscounts, successMessage: 'وضعیت کد تخفیف تغییر کرد'));
     } else {
       if (state is ManageDiscountsLoaded) {
-        emit(ManageDiscountsLoaded((state as ManageDiscountsLoaded).discounts));
+        emit((state as ManageDiscountsLoaded).copyWith(
+          processingId: null,
+          isDeleting: false,
+          errorMessage: dataState.error ?? "خطا در تغییر وضعیت",
+        ));
+      } else {
+        emit(ManageDiscountsError(dataState.error ?? "خطا در تغییر وضعیت"));
       }
-      emit(ManageDiscountsError(dataState.error ?? "خطا در تغییر وضعیت"));
     }
   }
 }

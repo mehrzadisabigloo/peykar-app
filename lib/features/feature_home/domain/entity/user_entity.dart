@@ -6,6 +6,12 @@ class UserEntity {
   final String? role;
   final String? status;
   final String? brand;
+  final String? ostan;
+  final String? shahrestan;
+  final String? address;
+  final String? profileImageId;
+  final double? ratingAverage;
+  final int? ratingsCount;
 
   const UserEntity({
     this.id,
@@ -15,6 +21,12 @@ class UserEntity {
     this.role,
     this.status,
     this.brand,
+    this.ostan,
+    this.shahrestan,
+    this.address,
+    this.profileImageId,
+    this.ratingAverage,
+    this.ratingsCount,
   });
 
   String get fullName {

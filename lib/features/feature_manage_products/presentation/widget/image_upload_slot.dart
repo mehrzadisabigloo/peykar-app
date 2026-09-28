@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../core/resources/consts.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../../feature_upload_file/presentation/bloc/upload_file_bloc.dart';
 import '../base/base_manage_products_stateful_widget_state.dart';
 
@@ -13,6 +17,9 @@ class ImageUploadSlot extends StatefulWidget {
   final Function(String? imageId) onUploadSuccess;
   final String? initialImageId;
   final String imageType;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
 
   const ImageUploadSlot({
     super.key,
@@ -20,6 +27,9 @@ class ImageUploadSlot extends StatefulWidget {
     required this.onUploadSuccess,
     required this.imageType,
     this.initialImageId,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
   });
 
   @override
@@ -38,6 +48,20 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
   void initState() {
     super.initState();
     _uploadedImageId = widget.initialImageId;
+  }
+
+  @override
+  void didUpdateWidget(covariant ImageUploadSlot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialImageId != oldWidget.initialImageId) {
+      setState(() {
+        _uploadedImageId = widget.initialImageId;
+        if (_uploadedImageId == null) {
+          _selectedFile = null;
+          _uploadProgress = 0;
+        }
+      });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -93,9 +117,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
           });
           widget.onUploadSuccess(_uploadedImageId);
         } else if (state is UploadFileFailed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error ?? 'آپلود ناموفق بود'), backgroundColor: Colors.red),
-          );
+          CstmSnackBar.showError(context, state.error ?? 'آپلود ناموفق بود');
           setState(() {
             _selectedFile = null;
           });
@@ -104,18 +126,18 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
       child: InkWell(
         onTap: _uploadedImageId == null && _selectedFile == null ? _pickImage : null,
         child: Container(
-          width: 100.w,
-          height: 100.w,
+          width: widget.width ?? 100.w,
+          height: widget.height ?? 100.w,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(15.r),
             border: Border.all(
-              color: _uploadedImageId != null ? const Color(0xFF3F51B5) : Colors.grey[300]!,
+              color: _uploadedImageId != null ? DashboardColors.of(context).adminIndigo : Theme.of(context).colorScheme.outlineVariant,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
               ),
@@ -128,10 +150,20 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15.r),
                   child: _selectedFile != null
-                      ? Image.file(_selectedFile!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
-                      : Container(
-                          color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
-                          child: const Icon(Icons.check_circle, color: Color(0xFF3F51B5)),
+                      ? Image.file(_selectedFile!, fit: widget.fit, width: double.infinity, height: double.infinity)
+                      : CachedNetworkImage(
+                          imageUrl: "${Consts.baseFileUrl}$_uploadedImageId",
+                          fit: widget.fit,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeholder: (context, url) => Container(
+                            color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.1),
+                            child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: DashboardColors.of(context).adminIndigo)),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: DashboardColors.of(context).adminIndigo.withValues(alpha: 0.1),
+                            child: Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error),
+                          ),
                         ),
                 ),
                 if (_uploadedImageId == null && _selectedFile != null)
@@ -142,7 +174,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                         filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.5),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(15.r),
                           ),
                           child: Center(
@@ -155,7 +187,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                                   height: 48.r,
                                   child: CircularProgressIndicator(
                                     value: 1.0,
-                                    color: Colors.white.withValues(alpha: 0.1),
+                                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
                                     strokeWidth: 2,
                                   ),
                                 ),
@@ -165,7 +197,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                                   height: 48.r,
                                   child: CircularProgressIndicator(
                                     value: _uploadProgress,
-                                    color: Colors.white,
+                                    color: Theme.of(context).colorScheme.surface,
                                     strokeWidth: 2,
                                   ),
                                 ),
@@ -174,7 +206,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w900,
-                                    color: Colors.white,
+                                    color: Theme.of(context).colorScheme.surface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -192,8 +224,8 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                     onTap: _removeImage,
                     child: Container(
                       padding: EdgeInsets.all(4.w),
-                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                      child: Icon(Icons.close, size: 14.sp, color: Colors.white),
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.error, shape: BoxShape.circle),
+                      child: Icon(Icons.close, size: 14.sp, color: Theme.of(context).colorScheme.surface),
                     ),
                   ),
                 ),
@@ -201,11 +233,11 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_photo_alternate, color: Colors.grey[400], size: 32.sp),
+                    Icon(Icons.add_photo_alternate, color: Theme.of(context).colorScheme.outline, size: 32.sp),
                     SizedBox(height: 4.h),
                     Text(
                       'انتخاب',
-                      style: TextStyle(fontSize: 10.sp, color: Colors.grey[400]),
+                      style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.outline),
                     ),
                   ],
                 ),

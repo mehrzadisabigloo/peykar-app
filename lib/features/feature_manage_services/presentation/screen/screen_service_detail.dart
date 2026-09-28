@@ -10,6 +10,7 @@ import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
 import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../../../feature_manage_products/domain/entity/repairman_entity.dart';
 import '../../domain/entity/manage_services_entity.dart';
 import '../base/base_manage_services_stateful_widget_state.dart';
@@ -53,10 +54,10 @@ class _ScreenServiceDetailState
     // Teal-focused theme for services
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme.copyWith(
-      primary: Colors.teal,
-      onPrimary: Colors.white,
-      primaryContainer: Colors.teal.shade100,
-      onPrimaryContainer: Colors.teal.shade900,
+      primary: DashboardColors.of(context).adminTeal,
+      onPrimary: theme.colorScheme.surface,
+      primaryContainer: theme.colorScheme.primaryContainer,
+      onPrimaryContainer: theme.colorScheme.onPrimaryContainer,
     );
     final textTheme = theme.textTheme;
 
@@ -171,21 +172,11 @@ class _ScreenServiceDetailState
                                     await launchUrl(launchUri);
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        CstmSnackBar().snackBar(
-                                          'خطا در برقراری تماس',
-                                          colorScheme.error,
-                                        ),
-                                      );
+                                      CstmSnackBar.showError(context, 'خطا در برقراری تماس');
                                     }
                                   }
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    CstmSnackBar().snackBar(
-                                      'شماره تماس یافت نشد',
-                                      colorScheme.error,
-                                    ),
-                                  );
+                                  CstmSnackBar.showError(context, 'شماره تماس یافت نشد');
                                 }
                               },
                             ),
@@ -509,7 +500,7 @@ class _ScreenServiceDetailState
                 Text(
                   service.status == 'active' ? 'آماده پذیرش' : 'غیرفعال',
                   style: TextStyle(
-                      color: service.status == 'active' ? Colors.teal : Colors.red,
+                      color: service.status == 'active' ? StatusColors.of(context).success : Theme.of(context).colorScheme.error,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold),
                 ),
@@ -584,7 +575,7 @@ class _ScreenServiceDetailState
               Row(
                 children: List.generate(5, (index) => Icon(
                   index < rating ? Icons.star_rounded : Icons.star_outline_rounded,
-                  color: Colors.amber,
+                  color: StatusColors.of(context).warning,
                   size: 16.sp,
                 )),
               ),
@@ -644,7 +635,7 @@ class _ScreenServiceDetailState
         borderRadius: BorderRadius.circular(40.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -703,12 +694,7 @@ class _ScreenServiceDetailState
                       setState(() {
                         _slideValue = maxSlide;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        CstmSnackBar().snackBar(
-                          'درخواست سرویس ثبت شد. با شما تماس می‌گیریم.',
-                          colorScheme.primary,
-                        ),
-                      );
+                      CstmSnackBar.showInfo(context, 'درخواست سرویس ثبت شد. با شما تماس می‌گیریم.');
                       Future.delayed(const Duration(seconds: 1), () {
                         if (mounted) setState(() => _slideValue = 0.0);
                       });

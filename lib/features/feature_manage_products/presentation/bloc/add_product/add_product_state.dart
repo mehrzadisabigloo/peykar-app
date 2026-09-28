@@ -15,6 +15,18 @@ class AddProductLoading extends AddProductState {
   const AddProductLoading();
 }
 
+class CategoriesLoading extends AddProductState {
+  const CategoriesLoading();
+}
+
+class CategoriesLoaded extends AddProductState {
+  final List<CategoryEntity> categories;
+  const CategoriesLoaded(this.categories);
+
+  @override
+  List<Object?> get props => [categories];
+}
+
 class AddProductSuccess extends AddProductState {
   const AddProductSuccess();
 }

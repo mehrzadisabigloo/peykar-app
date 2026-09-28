@@ -8,6 +8,7 @@ import 'package:resturant_app/core/services/router.dart';
 import 'package:resturant_app/core/themes/bloc/theme_bloc.dart';
 import 'package:resturant_app/features/feature_auth/l10n/auth_localizations.dart';
 import 'package:resturant_app/features/feature_home/l10n/home_localizations.dart';
+import 'package:resturant_app/core/widgets/cstm_snakbar.dart';
 import 'package:resturant_app/features/feature_auth/presentation/bloc/authentication_bloc.dart';
 
 void main() async {
@@ -71,20 +72,10 @@ class MyApp extends StatelessWidget {
 
   void authBlocListener(BuildContext context, AuthenticationState state) {
     if (state is Failed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.message),
-          backgroundColor: Colors.red,
-        ),
-      );
+      CstmSnackBar.showError(context, state.message);
     }
     if (state is Loaded) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login Successful'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      CstmSnackBar.showSuccess(context, 'Login Successful');
     }
   }
 }

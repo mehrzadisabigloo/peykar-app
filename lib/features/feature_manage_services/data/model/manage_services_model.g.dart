@@ -6,9 +6,9 @@ part of 'manage_services_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ManageServicesModelImpl _$$ManageServicesModelImplFromJson(
+_ManageServicesModel _$ManageServicesModelFromJson(
   Map<String, dynamic> json,
-) => _$ManageServicesModelImpl(
+) => _ManageServicesModel(
   id: json['id'] == null ? '' : _anyToString(json['id']),
   repairmanId: _anyToString(json['repairman_id']),
   title: json['title'] == null ? '' : _anyToString(json['title']),
@@ -27,8 +27,8 @@ _$ManageServicesModelImpl _$$ManageServicesModelImplFromJson(
       : RepairmanModel.fromJson(json['repairman'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$$ManageServicesModelImplToJson(
-  _$ManageServicesModelImpl instance,
+Map<String, dynamic> _$ManageServicesModelToJson(
+  _ManageServicesModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'repairman_id': instance.repairmanId,

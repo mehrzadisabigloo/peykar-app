@@ -8,5 +8,17 @@ abstract class ShopEvent extends Equatable {
 }
 
 class FetchShopDataEvent extends ShopEvent {
-  const FetchShopDataEvent();
+  final AdminProductFilterParams params;
+  const FetchShopDataEvent({this.params = const AdminProductFilterParams()});
+
+  @override
+  List<Object?> get props => [params];
+}
+
+class LoadMoreShopProducts extends ShopEvent {
+  const LoadMoreShopProducts();
+}
+
+class FetchShopCategoriesEvent extends ShopEvent {
+  const FetchShopCategoriesEvent();
 }

@@ -8,7 +8,8 @@ class AuthModel extends AuthEntity {
       super.hasPass,
       super.force,
       super.token,
-      super.isLogin,});
+      super.isLogin,
+      super.status,});
 
 
   factory AuthModel.fromJson(dynamic json){
@@ -18,6 +19,7 @@ class AuthModel extends AuthEntity {
       force: json['data'] == null || json['data'].length == 0 ? false : json['data']?['forceLoginSmsm'],
       token: json['data'] == null || json['data'].length == 0 ? '' : json['data']?['token'],
       isLogin: json['data'] == null || json['data'].length == 0 ? false : json['data']?['login'] ?? true,
+      status: json['data'] == null || json['data'].length == 0 ? '' : json['data']?['status'],
     );
   }
 

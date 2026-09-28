@@ -1,4 +1,5 @@
 import '../../../../../core/resources/data_state.dart';
+import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 import '../../domain/entity/manage_addresses_entity.dart';
 import '../../domain/repository/manage_addresses_repository.dart';
 import '../data_source/remote/manage_addresses_api_provider.dart';
@@ -38,7 +39,7 @@ class ManageAddressesRepositoryImpl extends ManageAddressesRepository {
           return DataFailed(response.data['message'] ?? "خطا در ثبت آدرس");
         }
       } else {
-        return DataFailed("خطای سرور: ${response.statusCode}");
+        return DataFailed(response.data['message']);
       }
     } catch (e) {
       return DataFailed(e.toString());
@@ -56,7 +57,7 @@ class ManageAddressesRepositoryImpl extends ManageAddressesRepository {
           return DataFailed(response.data['message'] ?? "خطا در ویرایش آدرس");
         }
       } else {
-        return DataFailed("خطای سرور: ${response.statusCode}");
+        return DataFailed(response.data['message']);
       }
     } catch (e) {
       return DataFailed(e.toString());
@@ -91,6 +92,38 @@ class ManageAddressesRepositoryImpl extends ManageAddressesRepository {
         } else {
           return DataFailed(response.data['message'] ?? "خطا در دریافت اطلاعات آدرس");
         }
+      } else {
+        return DataFailed("خطای سرور: ${response.statusCode}");
+      }
+    } catch (e) {
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<List<OstanModel>>> fetchOstans() async {
+    try {
+      final response = await _apiProvider.fetchOstans();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['ostans'];
+        final ostans = data.map((json) => OstanModel.fromJson(json)).toList();
+        return DataSuccess(ostans);
+      } else {
+        return DataFailed("خطای سرور: ${response.statusCode}");
+      }
+    } catch (e) {
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<List<ShahrestanModel>>> fetchShahrestans(int ostanId) async {
+    try {
+      final response = await _apiProvider.fetchShahrestans(ostanId);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['shahrestans'];
+        final shahrestans = data.map((json) => ShahrestanModel.fromJson(json)).toList();
+        return DataSuccess(shahrestans);
       } else {
         return DataFailed("خطای سرور: ${response.statusCode}");
       }

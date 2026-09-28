@@ -14,6 +14,13 @@ class FetchOccupationsEvent extends OccupationEvent {
   List<Object?> get props => [params];
 }
 
+class FetchActiveOccupationsEvent extends OccupationEvent {
+  final OccupationFilterParams params;
+  const FetchActiveOccupationsEvent({this.params = const OccupationFilterParams()});
+  @override
+  List<Object?> get props => [params];
+}
+
 class ChangeOccupationStatusEvent extends OccupationEvent {
   final String id;
   const ChangeOccupationStatusEvent(this.id);

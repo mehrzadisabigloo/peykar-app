@@ -23,6 +23,7 @@ class FinancialReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -30,7 +31,7 @@ class FinancialReportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -52,7 +53,7 @@ class FinancialReportCard extends StatelessWidget {
                   title!,
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: Colors.grey[700],
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontFamily: 'BonyadeKoodak',
                     fontWeight: FontWeight.w500,
                   ),
@@ -67,7 +68,7 @@ class FinancialReportCard extends StatelessWidget {
                 unit,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                   fontFamily: 'BonyadeKoodak',
                 ),
               ),
@@ -77,7 +78,7 @@ class FinancialReportCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: valueColor ?? Colors.black87,
+                  color: valueColor ?? theme.colorScheme.onSurface,
                   fontFamily: 'BonyadeKoodak',
                 ),
               ),

@@ -7,7 +7,7 @@ String _anyToString(dynamic value) => value?.toString() ?? '';
 int _anyToInt(dynamic value) => (value is num) ? value.toInt() : (int.tryParse(value?.toString() ?? '0') ?? 0);
 
 @freezed
-class DiscountModel with _$DiscountModel {
+sealed class DiscountModel with _$DiscountModel {
   const factory DiscountModel({
     @JsonKey(fromJson: _anyToString) String? id,
     @JsonKey(name: 'discount_code', fromJson: _anyToString) String? discountCode,

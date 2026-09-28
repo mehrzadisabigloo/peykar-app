@@ -7,6 +7,7 @@ import '../../../../../core/bloc/app/app_bloc.dart';
 import '../../../../../core/bloc/error/error_bloc.dart';
 import '../../../../../core/resources/consts.dart';
 import '../../../../../core/services/locator.dart';
+import '../../../../../core/widgets/cstm_snakbar.dart';
 import '../../domain/entity/manage_bank_accounts_entity.dart';
 import '../base/base_manage_bank_accounts_stateful_widget_state.dart';
 import '../bloc/manage_bank_accounts_bloc.dart';
@@ -36,7 +37,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
     _cardController = TextEditingController(text: widget.account?.cardNumber);
     _accountController = TextEditingController(text: widget.account?.accountNumber);
     _shebaController = TextEditingController(text: widget.account?.shebaNumber);
-    _selectedBankId = widget.account?.bankId;
+    _selectedBankId = widget.account?.bankId ?? widget.account?.bank?.id;
     bloc.add(const FetchBanksEvent());
   }
 
@@ -54,12 +55,15 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: BlocBuilder<ManageBankAccountsBloc, ManageBankAccountsState>(
         builder: (context, state) {
-          final isLoading = state is ManageBankAccountsLoading;
+          final isActionLoading = (state is BanksLoaded && state.isActionLoading) || 
+                                 (state is BankAccountsLoaded && state.isActionLoading) ||
+                                 (state is ManageBankAccountsError && state.isActionLoading);
+          final isLoading = (state is ManageBankAccountsLoading) || isActionLoading;
           final banks = state is BanksLoaded ? state.banks : <BankEntity>[];
-          final isBanksLoading = isLoading && banks.isEmpty;
+          final isBanksLoading = (state is ManageBankAccountsLoading) && banks.isEmpty;
 
           return BlocListener<ManageBankAccountsBloc, ManageBankAccountsState>(
             listener: (context, state) {
@@ -74,9 +78,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                 }
               }
               if (state is ManageBankAccountsError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-                );
+                CstmSnackBar.showError(context, state.message);
               }
             },
             child: SingleChildScrollView(
@@ -139,16 +141,17 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                         onPressed: isLoading ? null : () => _save(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                           elevation: 8,
                           shadowColor: colorScheme.primary.withValues(alpha: 0.3),
+                          textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'BonyadeKoodak'),
                         ),
                         child: isLoading
-                            ? SizedBox(width: 24.sp, height: 24.sp, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                            ? SizedBox(width: 24.sp, height: 24.sp, child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2.5))
                             : Text(
                                 widget.account == null ? 'ثبت حساب بانکی' : 'ذخیره تغییرات',
-                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'BonyadeKoodak'),
                               ),
                       ),
                     ),
@@ -181,6 +184,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                 fontSize: 12.sp,
                 color: colorScheme.primary,
                 height: 1.5,
+                fontFamily: 'BonyadeKoodak',
               ),
             ),
           ),
@@ -193,9 +197,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
     if (!_formKey.currentState!.validate()) return;
     
     if (_cardController.text.isEmpty && _accountController.text.isEmpty && _shebaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حداقل یکی از موارد شماره کارت، شماره حساب یا شماره شبا باید وارد شود.')),
-      );
+      CstmSnackBar.showError(context, 'حداقل یکی از موارد شماره کارت، شماره حساب یا شماره شبا باید وارد شود.');
       return;
     }
 
@@ -226,7 +228,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
           ),
         ),
         SizedBox(width: 8.w),
-        Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: Colors.black87)),
+        Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87), fontFamily: 'BonyadeKoodak')),
       ],
     );
   }
@@ -235,54 +237,62 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'انتخاب بانک',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey,
+        Padding(
+          padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
+          child: Text(
+            'انتخاب بانک',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+              fontFamily: 'BonyadeKoodak',
+            ),
           ),
         ),
-        SizedBox(height: 8.h),
         SizedBox(
           width: double.infinity,
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: DropdownMenu<int>(
+              key: ValueKey('bank_dropdown_${banks.length}'),
               initialSelection: _selectedBankId,
               width: 1.sw - 48.w,
               menuHeight: 300.h,
               enableSearch: false,
               hintText: isLoading ? 'در حال دریافت لیست بانک‌ها...' : 'بانک خود را انتخاب کنید',
+              selectedTrailingIcon: Icon(Icons.check_circle_rounded, color: colorScheme.primary, size: 20.sp),
               textStyle: TextStyle(
                 fontSize: 14.sp,
-                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
+                fontFamily: 'BonyadeKoodak',
               ),
               menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.white),
+                backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surface),
                 elevation: WidgetStateProperty.all(15),
-                shadowColor: WidgetStateProperty.all(Colors.black.withValues(alpha: 0.2)),
+                shadowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
                 shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.r),
+                    borderRadius: BorderRadius.circular(16.r),
                   ),
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
-                fillColor: const Color(0xFFF5F6F8),
+                fillColor: Theme.of(context).colorScheme.surfaceContainer,
                 hoverColor: Colors.transparent,
                 contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.r),
+                  borderRadius: BorderRadius.circular(16.r),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.r),
+                  borderRadius: BorderRadius.circular(16.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.r),
-                  borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.2), width: 1),
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
                 ),
               ),
               dropdownMenuEntries: banks.map((BankEntity bank) {
@@ -293,7 +303,7 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                   style: MenuItemButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                     backgroundColor: isSelected ? colorScheme.primary.withValues(alpha: 0.05) : Colors.transparent,
-                    foregroundColor: isSelected ? colorScheme.primary : Colors.black87,
+                    foregroundColor: isSelected ? colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
                   ),
                   labelWidget: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -307,8 +317,8 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                                 imageUrl: bank.logo!.startsWith('http') ? bank.logo! : '${Consts.baseFileUrl}${bank.logo}',
                                 width: 24.sp,
                                 height: 24.sp,
-                                placeholder: (context, url) => Container(color: Colors.grey[200]),
-                                errorWidget: (context, url, error) => Icon(Icons.account_balance_rounded, size: 20.sp, color: Colors.black26),
+                                placeholder: (context, url) => Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                                errorWidget: (context, url, error) => Icon(Icons.account_balance_rounded, size: 20.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.26)),
                               ),
                             ),
                             SizedBox(width: 12.w),
@@ -318,7 +328,8 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              color: isSelected ? colorScheme.primary : Colors.black87,
+                              color: isSelected ? colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.87),
+                              fontFamily: 'BonyadeKoodak',
                             ),
                           ),
                         ],
@@ -361,27 +372,41 @@ class _ScreenAddBankAccountState extends BaseManageBankAccountsStatefulWidgetSta
       children: [
         Padding(
           padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
-          child: Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black54)),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+              fontFamily: 'BonyadeKoodak',
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           maxLength: maxLength,
           validator: validator,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, fontFamily: 'BonyadeKoodak'),
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20.sp, color: Colors.black45),
+            prefixIcon: Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45)),
             filled: true,
-            fillColor: const Color(0xFFF5F6F8),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
               borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             counterText: '',

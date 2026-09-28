@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../../../core/themes/theme_main.dart';
 import '../base/base_admin_stateful_widget_state.dart';
 import '../bloc/admin_bloc.dart';
 
@@ -21,7 +22,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
   @override
   Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Container(
-      color: const Color(0xFFF8F9FB),
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Column(
         children: [
           _buildTabs(),
@@ -65,7 +66,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
         margin: EdgeInsets.symmetric(horizontal: 8.w),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.transparent : Colors.white,
+          color: isSelected ? Colors.transparent : colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Column(
@@ -73,7 +74,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
             Text(
               title,
               style: TextStyle(
-                color: isSelected ? colorScheme.primary : Colors.grey,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 fontSize: 14.sp,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
               ),
@@ -110,11 +111,11 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colorScheme.onSurface.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -145,7 +146,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -156,7 +157,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF3F51B5),
+                        color: DashboardColors.of(context).adminIndigo,
                       ),
                     ),
                     SizedBox(width: 4.w),
@@ -164,7 +165,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
                       'تومان',
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: Colors.black54,
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -173,7 +174,7 @@ class _ScreenSettlementsState extends BaseAdminStatefulWidgetState<ScreenSettlem
               ],
             ),
           ),
-          _buildStatusBadge(statuses[index], isSettled ? Colors.green : Colors.red),
+          _buildStatusBadge(statuses[index], isSettled ? StatusColors.of(context).success : Theme.of(context).colorScheme.error),
         ],
       ),
     );

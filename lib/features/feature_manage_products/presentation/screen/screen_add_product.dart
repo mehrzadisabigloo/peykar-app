@@ -3,11 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
+import '../../domain/entity/manage_products_entity.dart';
 import '../base/base_manage_products_stateful_widget_state.dart';
 import '../bloc/add_product/add_product_bloc.dart';
 import '../widget/image_upload_slot.dart';
+import '../../../../core/widgets/category_picker_sheet.dart';
+import '../../../../core/themes/theme_main.dart';
 
 class ScreenAddProduct extends StatefulWidget {
   const ScreenAddProduct({super.key});
@@ -16,7 +20,8 @@ class ScreenAddProduct extends StatefulWidget {
   State<ScreenAddProduct> createState() => _ScreenAddProductState();
 }
 
-class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<ScreenAddProduct, AddProductBloc> {
+class _ScreenAddProductState
+    extends BaseManageProductsStatefulWidgetState<ScreenAddProduct, AddProductBloc> {
   _ScreenAddProductState() : super(locator<AddProductBloc>());
 
   final _formKey = GlobalKey<FormState>();
@@ -26,13 +31,18 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
   final _stockController = TextEditingController();
   final _maxPurchaseController = TextEditingController();
   final _keywordsController = TextEditingController();
+  final _categoryController = TextEditingController();
 
   List<String> keywords = [];
   final Map<int, String?> _uploadedImageIds = {};
 
+  CategoryEntity? _selectedCategory;
+  List<CategoryEntity> _allCategories = [];
+
   @override
   void initState() {
     super.initState();
+    bloc.add(const FetchCategoriesEvent());
   }
 
   @override
@@ -43,6 +53,7 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
     _stockController.dispose();
     _maxPurchaseController.dispose();
     _keywordsController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -55,22 +66,39 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
     }
   }
 
+  void _showCategoryPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CategoryPickerSheet(
+        categories: _allCategories,
+        onSelected: (cat, path) {
+          setState(() {
+            _selectedCategory = cat;
+            _categoryController.text = path;
+          });
+          context.pop();
+        },
+      ),
+    );
+  }
+
   @override
-  Widget buildNinoWidget(BuildContext context, ErrorState errorState, AppBlocState appState) {
+  Widget buildNinoWidget(
+      BuildContext context, ErrorState errorState, AppBlocState appState) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       body: BlocConsumer<AddProductBloc, AddProductState>(
         bloc: bloc,
         listener: (context, state) {
           if (state is AddProductSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('محصول با موفقیت اضافه شد'), backgroundColor: Colors.green),
-            );
+            CstmSnackBar.showSuccess(context, 'محصول با موفقیت اضافه شد');
             context.pop(true);
           } else if (state is AddProductError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
+            CstmSnackBar.showError(context, state.message);
+          } else if (state is CategoriesLoaded) {
+            _allCategories = state.categories;
           }
         },
         builder: (context, state) {
@@ -119,6 +147,8 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
                       maxLines: 3,
                       validator: (v) => v!.isEmpty ? 'توضیحات الزامی است' : null,
                     ),
+                    SizedBox(height: 16.h),
+                    _buildCategoryField(),
                     SizedBox(height: 24.h),
                     _buildSectionTitle('قیمت و موجودی'),
                     SizedBox(height: 12.h),
@@ -184,7 +214,7 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
       style: TextStyle(
         fontSize: 16.sp,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF3F51B5),
+        color: DashboardColors.of(context).adminIndigo,
       ),
     );
   }
@@ -200,11 +230,11 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -218,11 +248,44 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF3F51B5), size: 20.sp),
+          prefixIcon: Icon(icon, color: DashboardColors.of(context).adminIndigo, size: 20.sp),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          labelStyle: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-          hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
+          labelStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          hintStyle: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.outline),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(15.r),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: _categoryController,
+        readOnly: true,
+        onTap: _showCategoryPicker,
+        validator: (v) => _selectedCategory == null ? 'انتخاب دسته‌بندی الزامی است' : null,
+        decoration: InputDecoration(
+          labelText: 'دسته‌بندی',
+          hintText: 'انتخاب دسته‌بندی',
+          prefixIcon: Icon(Icons.category_rounded,
+              color: DashboardColors.of(context).adminIndigo, size: 20.sp),
+          suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: Theme.of(context).colorScheme.outline),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          labelStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          hintStyle: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.outline),
         ),
       ),
     );
@@ -231,11 +294,11 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
   Widget _buildKeywordField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -246,14 +309,14 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
         onFieldSubmitted: _addKeyword,
         decoration: InputDecoration(
           hintText: 'کلمه کلیدی را تایپ کرده و اینتر بزنید',
-          prefixIcon: Icon(Icons.tag, color: const Color(0xFF3F51B5), size: 20.sp),
+          prefixIcon: Icon(Icons.tag, color: DashboardColors.of(context).adminIndigo, size: 20.sp),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.add_circle, color: Color(0xFF3F51B5)),
+            icon: Icon(Icons.add_circle, color: DashboardColors.of(context).adminIndigo),
             onPressed: () => _addKeyword(_keywordsController.text),
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
+          hintStyle: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.outline),
         ),
       ),
     );
@@ -263,10 +326,10 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
     return Chip(
       label: Text(
         label,
-        style: TextStyle(fontSize: 12.sp, color: Colors.white),
+        style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.surface),
       ),
-      backgroundColor: const Color(0xFF3F51B5),
-      deleteIcon: Icon(Icons.close, size: 14.sp, color: Colors.white),
+      backgroundColor: DashboardColors.of(context).adminIndigo,
+      deleteIcon: Icon(Icons.close, size: 14.sp, color: Theme.of(context).colorScheme.surface),
       onDeleted: () {
         setState(() {
           keywords.remove(label);
@@ -285,7 +348,10 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
             ? null
             : () {
                 if (_formKey.currentState!.validate()) {
-                  final images = _uploadedImageIds.values.where((id) => id != null).cast<String>().toList();
+                  final images = _uploadedImageIds.values
+                      .where((id) => id != null)
+                      .cast<String>()
+                      .toList();
                   bloc.add(AddProductSubmitEvent(
                     title: _titleController.text,
                     description: _descriptionController.text,
@@ -294,25 +360,28 @@ class _ScreenAddProductState extends BaseManageProductsStatefulWidgetState<Scree
                     price: double.parse(_priceController.text),
                     stock: int.parse(_stockController.text),
                     maxPurchaseQuantity: int.parse(_maxPurchaseController.text),
+                    categoryId: _selectedCategory?.id,
                   ));
                 }
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3F51B5),
+          backgroundColor: DashboardColors.of(context).adminIndigo,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
           elevation: 0,
         ),
         child: state is AddProductLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
             : Text(
                 'ثبت محصول',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
       ),
     );
   }
 }
+
+

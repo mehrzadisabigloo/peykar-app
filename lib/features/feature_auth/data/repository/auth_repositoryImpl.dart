@@ -114,9 +114,12 @@ class AuthRepositoryImpl extends AuthRepository{
       print('qqq');
       AuthEntity authEntity = AuthModel.fromJson(response.data);
       if(response.data['data'] != null){
+        final storage = locator<FlutterSecureStorage>();
         if (authEntity.token != null) {
-          final storage = locator<FlutterSecureStorage>();
           storage.write(key: 'token', value: authEntity.token);
+        }
+        if (authEntity.status != null) {
+          storage.write(key: 'status', value: authEntity.status);
         }
       }
 

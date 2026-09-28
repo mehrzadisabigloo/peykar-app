@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
+import '../../../../core/widgets/cstm_snakbar.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
 import '../base/base_auth_stateful_widget_state.dart';
 import '../bloc/authentication_bloc.dart';
+import '../../../../core/themes/theme_main.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   final String phoneNumber;
@@ -83,20 +85,14 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
       setState(() => _isLoading = true);
     } else if (state is Failed) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
+      CstmSnackBar.showError(context, state.message);
     } else if (state is AuthSuccess) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('رمز عبور با موفقیت تغییر کرد'), backgroundColor: Colors.green),
-      );
+      CstmSnackBar.showSuccess(context, 'رمز عبور با موفقیت تغییر کرد');
       context.goNamed('login');
     } else if (state is Loaded) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('کد مجددا ارسال شد')),
-      );
+      CstmSnackBar.showSuccess(context, 'کد مجددا ارسال شد');
     }
   }
 
@@ -113,12 +109,12 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.sp),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -141,7 +137,7 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
               Text(
                 'کد تایید ارسال شده به ${widget.phoneNumber} را وارد کنید',
                 style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.black54,
+                  color: colorScheme.onSurface.withValues(alpha: 0.54),
                   fontSize: 14.sp,
                 ),
                 textAlign: TextAlign.center,
@@ -206,9 +202,7 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
                             _passController.text,
                           ));
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('رمز عبور و تکرار آن مطابقت ندارند')),
-                          );
+                          CstmSnackBar.showError(context, 'رمز عبور و تکرار آن مطابقت ندارند');
                         }
                       }
                     : null,
@@ -216,7 +210,7 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
                   minimumSize: Size(double.infinity, 56.h),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colorScheme.surface)
                     : const Text('تغییر رمز عبور'),
               ),
               SizedBox(height: 30.h),
@@ -228,12 +222,13 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
   }
 
   Widget _inputField(String label, TextEditingController controller, {TextInputType? keyboardType}) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13.sp, color: Colors.black54),
+          style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         SizedBox(height: 8.h),
         TextField(
@@ -247,12 +242,13 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
   }
 
   Widget _passwordField(String label, bool obscure, Function(bool) onToggle, TextEditingController controller) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13.sp, color: Colors.black54),
+          style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         SizedBox(height: 8.h),
         TextField(
@@ -263,7 +259,7 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
             suffixIcon: IconButton(
               icon: Icon(
                 obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: Colors.black26,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.26),
                 size: 22.sp,
               ),
               onPressed: () => onToggle(!obscure),
@@ -275,13 +271,14 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
   }
 
   Widget _requirementRow(String text, bool isMet) {
+    final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
         children: [
           Icon(
             Icons.check_circle,
-            color: isMet ? const Color(0xff4CAF50) : const Color(0xffE0E0E0),
+            color: isMet ? StatusColors.of(context).success : theme.colorScheme.outlineVariant,
             size: 20.sp,
           ),
           SizedBox(width: 12.w),
@@ -289,7 +286,7 @@ class _ForgetPasswordPageState extends BaseAuthStatefulWidgetState<ForgetPasswor
             text,
             style: TextStyle(
               fontSize: 13.sp,
-              color: isMet ? Colors.black87 : Colors.black26,
+              color: isMet ? theme.colorScheme.onSurface.withValues(alpha: 0.87) : theme.colorScheme.onSurface.withValues(alpha: 0.26),
             ),
           ),
         ],
