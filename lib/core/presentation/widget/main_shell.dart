@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resturant_app/features/feature_appointments/presentation/widget/comment_input_bottom_sheet.dart';
-import 'package:resturant_app/features/feature_home/presentation/bloc/main_home_page_bloc.dart';
-import 'package:resturant_app/features/feature_home/presentation/widget/home_header.dart';
-import 'package:resturant_app/features/feature_home/presentation/widget/main_bottom_nav.dart';
+import 'package:chaharmahal_shop_front/core/routes/app_route_meta.dart';
+import 'package:chaharmahal_shop_front/features/feature_appointments/presentation/widget/comment_input_bottom_sheet.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/presentation/bloc/main_home_page_bloc.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/presentation/widget/home_header.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/presentation/widget/main_bottom_nav.dart';
 import 'app_drawer.dart';
 
 class MainShell extends StatelessWidget {
@@ -48,21 +49,9 @@ class MainShell extends StatelessWidget {
       child: BlocBuilder<MainHomePageBloc, MainHomePageState>(
         builder: (context, state) {
         final path = appUri.path;
-        final String title = _getTitle(state);
-        
-        final bool isSubPage = path.contains('/add_') || 
-            path.contains('/product_detail') || 
-            path.contains('/shop_basket') || 
-            path == '/all_top_repair_shops' || 
-            path.startsWith('/repair_shop/') || 
-            path.contains('/edit') || 
-            path.startsWith('/category_detail/') || 
-            path.endsWith('/products') || 
-            path.startsWith('/reminder_details') ||
-            path.startsWith('/repairman/payment-type') ||
-            path.startsWith('/checkout') ||
-            path.contains('/manage_shop_settings') ||
-            path == '/about_us';
+        final AppRouteMeta? meta = extra is AppRouteMeta ? (extra as AppRouteMeta) : null;
+        final String title = meta?.title ?? _getTitle(state);
+        final bool isSubPage = meta?.isSubPage ?? _fallbackIsSubPage(path);
         final bool isHome = path.startsWith('/home') && (state.role != 'repairman' && state.role != 'admin') && state.index == 4;
         final colorScheme = Theme.of(context).colorScheme;
 
@@ -165,6 +154,22 @@ class MainShell extends StatelessWidget {
     ),
   );
 }
+
+  bool _fallbackIsSubPage(String path) {
+    return path.contains('/add_') ||
+        path.contains('/product_detail') ||
+        path.contains('/shop_basket') ||
+        path == '/all_top_repair_shops' ||
+        path.startsWith('/repair_shop/') ||
+        path.contains('/edit') ||
+        path.startsWith('/category_detail/') ||
+        path.endsWith('/products') ||
+        path.startsWith('/reminder_details') ||
+        path.startsWith('/repairman/payment-type') ||
+        path.startsWith('/checkout') ||
+        path.contains('/manage_shop_settings') ||
+        path == '/about_us';
+  }
 
   String _getTitle(MainHomePageState state) {
     final path = appUri.path;

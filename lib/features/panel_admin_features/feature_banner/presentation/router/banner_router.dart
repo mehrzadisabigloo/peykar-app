@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../../../../../core/services/feature_router.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
 import '../screen/screen_add_edit_banner.dart';
 import '../screen/screen_manage_banners.dart';
 

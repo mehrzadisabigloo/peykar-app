@@ -1,35 +1,36 @@
-import 'package:dio/dio.dart';
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManageReminderSubItemsApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
 
-  Future<Response> addSubItem(String reminderTypeId, String title) async {
+  ManageReminderSubItemsApiProvider(this._genericApiService);
+
+  Future<dynamic> addSubItem(String reminderTypeId, String title) async {
     return await _genericApiService.post("/reminder-sub-items/add/$reminderTypeId", {'title': title});
   }
 
-  Future<Response> addSubItemsBulk(String reminderTypeId, List<String> titles) async {
+  Future<dynamic> addSubItemsBulk(String reminderTypeId, List<String> titles) async {
     final items = titles.map((t) => {'title': t}).toList();
     return await _genericApiService.post("/reminder-sub-items/add-bulk/$reminderTypeId", {'items': items});
   }
 
-  Future<Response> editSubItem(String id, String title) async {
+  Future<dynamic> editSubItem(String id, String title) async {
     return await _genericApiService.put("/reminder-sub-items/edit/$id", {'title': title});
   }
 
-  Future<Response> deleteSubItem(String id) async {
+  Future<dynamic> deleteSubItem(String id) async {
     return await _genericApiService.delete("/reminder-sub-items/delete/$id");
   }
 
-  Future<Response> getSubItem(String id) async {
+  Future<dynamic> getSubItem(String id) async {
     return await _genericApiService.get("/reminder-sub-items/get/$id");
   }
 
-  Future<Response> changeStatus(String id) async {
+  Future<dynamic> changeStatus(String id) async {
     return await _genericApiService.patch("/reminder-sub-items/change-status/$id", {});
   }
 
-  Future<Response> listSubItems({
+  Future<dynamic> listSubItems({
     String? reminderTypeId,
     String? title,
     bool isPaginate = false,
@@ -45,7 +46,7 @@ class ManageReminderSubItemsApiProvider {
     });
   }
 
-  Future<Response> listActiveSubItems({
+  Future<dynamic> listActiveSubItems({
     String? reminderTypeId,
     String? title,
     bool isPaginate = false,

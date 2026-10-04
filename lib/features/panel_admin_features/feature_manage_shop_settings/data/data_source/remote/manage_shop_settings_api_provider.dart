@@ -1,7 +1,9 @@
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManageShopSettingsApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ManageShopSettingsApiProvider(this._genericApiService);
 
   Future<dynamic> getShopSettings() async {
     return await _genericApiService.get("/shop-settings");

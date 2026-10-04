@@ -1,14 +1,13 @@
-// ignore_for_file: unused_import, avoid_print
-
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../resources/consts.dart';
+import 'auth_notifier.dart';
 
 class LoggingInterceptor extends Interceptor {
   static const storage = FlutterSecureStorage();
+
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     String? token = await storage.read(key: 'token');
@@ -16,30 +15,42 @@ class LoggingInterceptor extends Interceptor {
     options.headers.addAll({
       "Content-Type": "application/json",
       'Cache-Control': 'no-cache',
-      'X-API-KEY': '3702a7421bd806813b6f8bc937ba805d96ce9e429ed1f6fb6beac4408452c42a'
+      if (Consts.apiKey.isNotEmpty) 'X-API-KEY': Consts.apiKey,
     });
 
     if (token != null) {
-      options.headers.addAll(
-          {"Authorization": "Bearer $token",}
-      );
+      options.headers.addAll({
+        "Authorization": "Bearer $token",
+      });
     }
 
-    print('Request: ${options.uri}');
-    print('Request: ${options.data}');
-    handler.next(options); // Continue to the next handler
+    if (kDebugMode) {
+      debugPrint('--> [HTTP ${options.method}] ${options.uri}');
+      if (options.data != null && !_containsSensitiveData(options.path)) {
+        debugPrint('    Body: ${options.data}');
+      }
+    }
+
+    handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('Response: ${response.data}');
-    print('Response: ${response.statusCode}');
-    handler.next(response); // Continue to the next handler
+    if (kDebugMode) {
+      debugPrint('<-- [HTTP ${response.statusCode}] ${response.requestOptions.uri}');
+      debugPrint('    Response: ${response.data}');
+    }
+    handler.next(response);
   }
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
-    print('Error: ${err.response?.data}');
+    if (kDebugMode) {
+      debugPrint('<-- [HTTP Error ${err.response?.statusCode}] ${err.requestOptions.uri}');
+      if (err.response?.data != null) {
+        debugPrint('    Response Error Body: ${err.response?.data}');
+      }
+    }
 
     if (err.response?.statusCode == 401 || err.response?.statusCode == 402) {
       await removeToken();
@@ -48,11 +59,22 @@ class LoggingInterceptor extends Interceptor {
     handler.next(err);
   }
 
+  bool _containsSensitiveData(String path) {
+    final lower = path.toLowerCase();
+    return lower.contains('login') ||
+        lower.contains('password') ||
+        lower.contains('auth') ||
+        lower.contains('token');
+  }
+
   Future<void> removeToken() async {
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'token');
     await storage.delete(key: 'status');
-    print('Auth storage cleared');
+    if (kDebugMode) {
+      debugPrint('Auth storage cleared');
+    }
+    AuthNotifier.instance.notifyTokenCleared();
   }
 }
 
@@ -84,25 +106,20 @@ class GenericApiService {
   final Dio dio = DioClient().getDio();
 
   Future<dynamic> post(String url, Map<String, dynamic> params) async {
-    // locator<ConnectionCheckerCubit>().checkConnection(url.contains('auth') ? 'auth' : 'home');
     try {
       final response = await dio.post(url, data: params);
       return response;
     } on DioException catch (e) {
-
       final response = e.response;
       if (response != null) {
-
         return response;
       } else {
-
         return response;
       }
     }
   }
 
   Future<dynamic> get(String url) async {
-    // locator<ConnectionCheckerCubit>().checkConnection(url.contains('auth') ? 'auth' : 'home');
     try {
       final response = await dio.get(url);
       return response;
@@ -117,18 +134,14 @@ class GenericApiService {
   }
 
   Future<dynamic> put(String url, Map<String, dynamic> params) async {
-    // locator<ConnectionCheckerCubit>().checkConnection(url.contains('auth') ? 'auth' : 'home');
     try {
       final response = await dio.put(url, data: params);
       return response;
     } on DioException catch (e) {
-
       final response = e.response;
       if (response != null) {
-
         return response;
       } else {
-
         return response;
       }
     }
@@ -149,41 +162,30 @@ class GenericApiService {
   }
 
   Future<dynamic> delete(String url) async {
-
-    // locator<ConnectionCheckerCubit>().checkConnection(url.contains('auth') ? 'auth' : 'home');
     try {
-      final response = await dio.delete(url,);
+      final response = await dio.delete(url);
       return response;
     } on DioException catch (e) {
-
       final response = e.response;
       if (response != null) {
-
         return response;
       } else {
-
         return response;
       }
     }
   }
 
   Future<dynamic> deleteMessages(String url, Map<String, dynamic> params) async {
-
-    // locator<ConnectionCheckerCubit>().checkConnection(url.contains('auth') ? 'auth' : 'home');
     try {
-      final response = await dio.delete(url,data: params);
+      final response = await dio.delete(url, data: params);
       return response;
     } on DioException catch (e) {
-
       final response = e.response;
       if (response != null) {
-
         return response;
       } else {
-
         return response;
       }
     }
   }
-
 }

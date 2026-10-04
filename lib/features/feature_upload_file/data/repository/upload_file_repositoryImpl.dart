@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:resturant_app/core/resources/data_state.dart';
-import 'package:resturant_app/features/feature_upload_file/data/data_source/remote/api_provider.dart';
-import 'package:resturant_app/features/feature_upload_file/data/model/upload_file_model.dart';
-import 'package:resturant_app/features/feature_upload_file/domain/entity/upload_file_entity.dart';
+import 'package:chaharmahal_shop_front/core/resources/data_state.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/data/data_source/remote/api_provider.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/data/model/upload_file_model.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/domain/entity/upload_file_entity.dart';
 
 import '../../domain/repository/upload_file_repository.dart';
 

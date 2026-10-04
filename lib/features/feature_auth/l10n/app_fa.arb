@@ -1,4 +1,5 @@
 {
+  "appName": "چهارمحال شاپ",
   "login": "ورود",
   "phoneNumber": "شماره موبایل",
   "password": "رمز عبور",
@@ -9,5 +10,15 @@
   "resendCode": "ارسال مجدد کد",
   "changePassword": "تغییر رمز عبور",
   "newPassword": "رمز عبور جدید",
-  "confirmNewPassword": "تکرار رمز عبور جدید"
+  "confirmNewPassword": "تکرار رمز عبور جدید",
+  "dashboard": "داشبورد",
+  "store": "فروشگاه",
+  "appointments": "نوبت‌ها",
+  "reminders": "یادآورها",
+  "profile": "پروفایل",
+  "aboutUs": "درباره ما",
+  "adminPanel": "پنل مدیریت",
+  "cart": "سبد خرید",
+  "confirm": "تایید",
+  "cancel": "انصراف"
 }

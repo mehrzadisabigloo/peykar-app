@@ -125,7 +125,7 @@ sealed class ReminderModel with _$ReminderModel {
         }
       } else if (!effectivelyTimeReminder && hasKMLogs) {
         final relevantKMLogs = kilometerLogsJalali ?? kilometerLogs;
-        final kmNext = nextKm ?? relevantKMLogs!.first.nextKm;
+        final kmNext = (nextKm != null && nextKm! > 0) ? nextKm! : relevantKMLogs!.first.nextKm;
         final kmDone = relevantKMLogs!.first.doneKm;
         final kmCurrent = currentKm ?? 0;
 

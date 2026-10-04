@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/themes/theme_main.dart';
-import 'package:resturant_app/core/resources/consts.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
+import 'package:chaharmahal_shop_front/core/resources/consts.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
 
 class BannerCard extends StatelessWidget {
   final BannerEntity banner;

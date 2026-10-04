@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:resturant_app/core/bloc/base/base_bloc.dart';
-import 'package:resturant_app/features/feature_manage_services/domain/repository/manage_services_repository.dart';
-import 'package:resturant_app/core/resources/data_state.dart';
+import 'package:chaharmahal_shop_front/core/bloc/base/base_bloc.dart';
+import 'package:chaharmahal_shop_front/features/feature_manage_services/domain/repository/manage_services_repository.dart';
+import 'package:chaharmahal_shop_front/core/resources/data_state.dart';
 
 part 'add_service_event.dart';
 part 'add_service_state.dart';

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:resturant_app/core/themes/theme_main.dart';
-import 'package:resturant_app/core/themes/theme_manager.dart';
+import 'package:chaharmahal_shop_front/core/themes/theme_main.dart';
+import 'package:chaharmahal_shop_front/core/themes/theme_manager.dart';
 
 part 'theme_event.dart';
 part 'theme_state.dart';

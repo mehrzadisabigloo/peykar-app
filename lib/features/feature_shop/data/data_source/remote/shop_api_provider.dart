@@ -1,8 +1,9 @@
-
-import 'package:resturant_app/core/services/generic_api_service.dart';
+import 'package:chaharmahal_shop_front/core/services/generic_api_service.dart';
 
 class ShopApiProvider {
-  final GenericApiService _apiService = GenericApiService();
+  final GenericApiService _apiService;
+
+  ShopApiProvider(this._apiService);
 
   Future<dynamic> getShopData(Map<String, dynamic> params) async {
     return await _apiService.post('/products/admin-product/list-active', params);

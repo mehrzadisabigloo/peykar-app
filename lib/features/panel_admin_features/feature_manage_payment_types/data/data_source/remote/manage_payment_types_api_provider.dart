@@ -1,7 +1,9 @@
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManagePaymentTypesApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ManagePaymentTypesApiProvider(this._genericApiService);
 
   Future<dynamic> listPaymentTypes(Map<String, dynamic> params) async {
     return await _genericApiService.post("/payment_type/list", params);

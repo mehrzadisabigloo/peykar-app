@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class ManageServicesApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ManageServicesApiProvider(this._genericApiService);
 
   Future<dynamic> getManageServicesData({
     bool isPaginate = true,

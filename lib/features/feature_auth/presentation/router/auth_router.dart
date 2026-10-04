@@ -7,6 +7,7 @@ import '../screen/login_password.dart';
 import '../screen/sign_up.dart';
 import '../screen/forget_password.dart';
 import '../screen/change_password.dart';
+import '../screen/pending_approval_screen.dart';
 
 class AuthRouter implements FeatureRouter {
   @override
@@ -14,6 +15,10 @@ class AuthRouter implements FeatureRouter {
         GoRoute(
           name: 'login',
           path: '/',
+          builder: (context, state) => const DesignedLoginPage(force: false),
+        ),
+        GoRoute(
+          path: '/login',
           builder: (context, state) => const DesignedLoginPage(force: false),
         ),
         GoRoute(
@@ -63,6 +68,11 @@ class AuthRouter implements FeatureRouter {
             final extra = state.extra as Map<String, dynamic>;
             return SignUpPage(mobile: extra['mobile']);
           },
+        ),
+        GoRoute(
+          name: 'pending_approval',
+          path: '/pending_approval',
+          builder: (context, state) => const PendingApprovalScreen(),
         ),
       ];
 }

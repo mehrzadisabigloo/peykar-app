@@ -9,7 +9,7 @@ import '../../../../core/services/locator.dart';
 import '../../../../core/themes/theme_main.dart';
 import '../base/base_manage_services_stateful_widget_state.dart';
 import '../bloc/add_service/add_service_bloc.dart';
-import 'package:resturant_app/features/feature_manage_products/presentation/widget/image_upload_slot.dart';
+import 'package:chaharmahal_shop_front/features/feature_manage_products/presentation/widget/image_upload_slot.dart';
 
 class ScreenAddService extends StatefulWidget {
   const ScreenAddService({super.key});

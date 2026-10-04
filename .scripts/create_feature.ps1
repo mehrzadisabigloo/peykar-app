@@ -77,13 +77,13 @@ Set-Content -Path $RepoPath -Value $RepoContent
 # 3. API Provider / Remote Data Source
 $ApiProviderPath = "$RemoteDataSourceDir/${SnakeName}_api_provider.dart"
 $ApiProviderContent = @"
-import 'package:dio/dio.dart';
+import '../../../../core/services/generic_api_service.dart';
 
 class ${PascalName}ApiProvider {
-  final Dio _dio = Dio(); // Consider injecting or using global dio
+  final GenericApiService _genericApiService = GenericApiService();
 
-  Future<Response> get${PascalName}Data() async {
-    // return await _dio.get('YOUR_ENDPOINT');
+  Future<dynamic> get${PascalName}Data() async {
+    // return await _genericApiService.get('YOUR_ENDPOINT');
     throw UnimplementedError();
   }
 }

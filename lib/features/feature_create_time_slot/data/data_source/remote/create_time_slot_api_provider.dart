@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class CreateTimeSlotApiProvider {
-  final GenericApiService _apiService = GenericApiService();
+  final GenericApiService _apiService;
+
+  CreateTimeSlotApiProvider(this._apiService);
 
   Future<dynamic> createTimeSlots({
     required String date,
@@ -26,7 +28,6 @@ class CreateTimeSlotApiProvider {
   }) async {
     final body = {
       if (date != null) 'date': date,
-      // if (status != null) 'status': status,
       'is_paginate': isPaginate,
       'count_item': countItem,
       'page': page,

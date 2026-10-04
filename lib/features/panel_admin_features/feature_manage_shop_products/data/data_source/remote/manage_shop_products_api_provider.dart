@@ -1,7 +1,9 @@
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManageShopProductsApiProvider {
-  final GenericApiService _apiService = GenericApiService();
+  final GenericApiService _apiService;
+
+  ManageShopProductsApiProvider(this._apiService);
 
   Future<dynamic> listAdminProducts(Map<String, dynamic> params) async {
     return await _apiService.post('/products/admin-product/list', params);

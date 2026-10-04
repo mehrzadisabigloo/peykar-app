@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:resturant_app/core/themes/theme_main.dart';
+import 'package:chaharmahal_shop_front/core/themes/theme_main.dart';
 
 
 class ThemeManager {

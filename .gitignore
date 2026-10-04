@@ -1,45 +1,98 @@
-# Miscellaneous
+# ==============================================================================
+# Operating System Files
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 *.class
 *.log
-*.pyc
 *.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+*.tmp
+*.bak
 
-# IntelliJ related
+# ==============================================================================
+# IDE & Code Editor Files
+# ==============================================================================
+# IntelliJ / Android Studio
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
+.artifacts/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Visual Studio Code
+.vscode/
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Eclipse / Other
+.project
+.classpath
+.settings/
+.atom/
+.history/
+.svn/
+
+# ==============================================================================
+# Flutter & Dart Build & Cache Artifacts
+# ==============================================================================
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/coverage/
+build/
+coverage/
+doc/api/
 
-# Symbolication related
+# Symbolication & Obfuscation
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# ==============================================================================
+# Android Specific
+# ==============================================================================
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/captures/
+android/.kotlin/
+
+# Android Local Credentials & Keys (DO NOT COMMIT SECRETS)
+android/local.properties
+**/key.properties
+*.keystore
+*.jks
+
+# ==============================================================================
+# iOS Specific
+# ==============================================================================
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flt
+ios/Flutter/.last_build_id
+ios/Runner.xcodeproj/project.xcworkspace
+ios/Runner.xcworkspace
+*.mode1v3
+*.mode2v3
+*.rubydoc
+
+# ==============================================================================
+# Web & Desktop Ephemeral Build Output
+# ==============================================================================
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+macOS/Flutter/ephemeral/
+
+# ==============================================================================
+# Local Working Directory & Scripts
+# ==============================================================================
+migrate_working_dir/

@@ -2,12 +2,14 @@ import '../../../../../core/services/generic_api_service.dart';
 import '../../../../feature_home/domain/entity/users_filter_params.dart';
 
 class ClientServicesApiProvider {
+  final GenericApiService _genericApiService;
+
+  ClientServicesApiProvider(this._genericApiService);
+
   Future<dynamic> fetchActiveUsers(UsersFilterParams params) async {
-    final genericApiService = GenericApiService();
-    return genericApiService.post('/auth/users-active', params.toJson());
+    return _genericApiService.post('/auth/users-active', params.toJson());
   }
 
-  // Original script-generated method (kept for potential future use)
   Future<dynamic> getClientServicesData() async {
     throw UnimplementedError();
   }

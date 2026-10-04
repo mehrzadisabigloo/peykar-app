@@ -1,5 +1,5 @@
 import '../../../../../../core/resources/data_state.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_manage_bank_accounts/domain/entity/manage_bank_accounts_entity.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_manage_bank_accounts/domain/entity/manage_bank_accounts_entity.dart';
 
 abstract class ManageBankAccountsRepository {
   Future<DataState<List<BankAccountEntity>>> fetchBankAccounts(BankAccountFilterParams params);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:resturant_app/features/feature_manage_products/domain/entity/manage_products_entity.dart';
+import 'package:chaharmahal_shop_front/features/feature_manage_products/domain/entity/manage_products_entity.dart';
 
 class CategoryPickerSheet extends StatefulWidget {
   final List<CategoryEntity> categories;

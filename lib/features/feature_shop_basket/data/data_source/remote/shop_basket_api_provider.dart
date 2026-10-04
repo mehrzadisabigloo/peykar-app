@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class ShopBasketApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ShopBasketApiProvider(this._genericApiService);
 
   Future<dynamic> getShopBasketData({
     String cartType = 'current',

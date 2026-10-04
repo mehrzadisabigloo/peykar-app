@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class AppointmentsApiProvider {
-  final GenericApiService _apiService = GenericApiService();
+  final GenericApiService _apiService;
+
+  AppointmentsApiProvider(this._apiService);
 
   Future<dynamic> getRepairmanReservations({
     String? status,

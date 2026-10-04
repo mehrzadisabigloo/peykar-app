@@ -118,7 +118,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.resturant_app',
+                  userAgentPackageName: 'com.example.chaharmahal_shop_front',
                 ),
                 RichAttributionWidget(
                   attributions: [

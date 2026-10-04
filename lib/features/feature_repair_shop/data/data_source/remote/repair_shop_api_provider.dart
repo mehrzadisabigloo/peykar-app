@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class RepairShopApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  RepairShopApiProvider(this._genericApiService);
 
   Future<dynamic> getRepairShopData(String repairmanId) async {
     return await _genericApiService.get("/auth/get/$repairmanId");

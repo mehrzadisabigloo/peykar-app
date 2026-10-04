@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 
 part 'address_model.freezed.dart';
 part 'address_model.g.dart';

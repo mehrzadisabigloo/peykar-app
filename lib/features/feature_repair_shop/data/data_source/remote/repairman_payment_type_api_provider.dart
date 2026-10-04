@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class RepairmanPaymentTypeApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  RepairmanPaymentTypeApiProvider(this._genericApiService);
 
   Future<dynamic> addPaymentType(int paymentTypeId) async {
     final body = {

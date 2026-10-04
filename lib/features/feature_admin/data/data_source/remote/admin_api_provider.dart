@@ -1,10 +1,11 @@
-import 'package:dio/dio.dart';
+import '../../../../../core/services/generic_api_service.dart';
 
 class AdminApiProvider {
-  final Dio _dio = Dio(); // Consider injecting or using global dio
+  final GenericApiService _genericApiService;
 
-  Future<Response> getAdminData() async {
-    // return await _dio.get('YOUR_ENDPOINT');
+  AdminApiProvider(this._genericApiService);
+
+  Future<dynamic> getAdminData() async {
     throw UnimplementedError();
   }
 }

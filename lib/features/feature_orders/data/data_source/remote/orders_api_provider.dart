@@ -1,7 +1,9 @@
 import '../../../../../core/services/generic_api_service.dart';
 
 class OrdersApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  OrdersApiProvider(this._genericApiService);
 
   Future<dynamic> getOrders({
     int countItem = 10,

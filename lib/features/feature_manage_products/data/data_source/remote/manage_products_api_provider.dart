@@ -1,8 +1,9 @@
-
 import '../../../../../core/services/generic_api_service.dart';
 
 class ManageProductsApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ManageProductsApiProvider(this._genericApiService);
 
   Future<dynamic> getManageProductsData({
     bool isPaginate = true,
@@ -14,9 +15,6 @@ class ManageProductsApiProvider {
     final params = {
       "is_paginate": isPaginate,
       "count_item": countItem,
-      // "title": title,
-      // "price_from": priceFrom,
-      // "price_to": priceTo,
     };
     
     return await _genericApiService.post("/products/list-repairman-active", params);

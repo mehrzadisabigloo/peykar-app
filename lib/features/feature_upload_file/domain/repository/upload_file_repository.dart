@@ -1,5 +1,5 @@
 
-import 'package:resturant_app/features/feature_upload_file/domain/entity/upload_file_entity.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/domain/entity/upload_file_entity.dart';
 
 import '../../../../core/resources/data_state.dart';
 

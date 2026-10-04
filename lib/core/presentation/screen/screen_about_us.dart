@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resturant_app/core/themes/theme_main.dart';
+import 'package:chaharmahal_shop_front/core/enums/user_role.dart';
+import 'package:chaharmahal_shop_front/core/themes/theme_main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../features/feature_home/presentation/bloc/main_home_page_bloc.dart';
 
@@ -19,7 +20,7 @@ class ScreenAboutUs extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: BlocBuilder<MainHomePageBloc, MainHomePageState>(
         builder: (context, state) {
-          final bool isAdmin = state.role == 'admin';
+          final bool isAdmin = UserRole.fromString(state.role).isAdmin;
 
           return Scaffold(
             backgroundColor: colorScheme.surface,

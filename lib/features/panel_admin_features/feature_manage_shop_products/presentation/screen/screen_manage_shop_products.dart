@@ -358,6 +358,7 @@ class _ScreenManageShopProductsState extends BaseManageShopProductsStatefulWidge
 
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
+
       children: [
         Icon(icon, size: 14.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
         SizedBox(width: 6.w),

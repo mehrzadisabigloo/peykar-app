@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../../../core/resources/data_state.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_manage_bank_accounts/domain/entity/manage_bank_accounts_entity.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_manage_bank_accounts/domain/entity/manage_bank_accounts_entity.dart';
 import '../../domain/repository/manage_bank_accounts_repository.dart';
 import '../data_source/remote/manage_bank_accounts_api_provider.dart';
 import '../model/bank_account_model.dart';

@@ -2,10 +2,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resturant_app/core/widgets/empty_state_widget.dart';
-import 'package:resturant_app/core/widgets/error_state_widget.dart';
-import 'package:resturant_app/core/widgets/list_shimmer.dart';
-import 'package:resturant_app/core/widgets/stylish_popup.dart';
+import 'package:chaharmahal_shop_front/core/widgets/empty_state_widget.dart';
+import 'package:chaharmahal_shop_front/core/widgets/error_state_widget.dart';
+import 'package:chaharmahal_shop_front/core/widgets/list_shimmer.dart';
+import 'package:chaharmahal_shop_front/core/widgets/stylish_popup.dart';
 import '../../../../../core/bloc/app/app_bloc.dart';
 import '../../../../../core/bloc/error/error_bloc.dart';
 import '../../../../../core/services/locator.dart';

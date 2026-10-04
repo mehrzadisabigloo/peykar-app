@@ -12,9 +12,9 @@ import '../bloc/dashboard_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widget/dashboard_stats_card.dart';
 import '../widget/dashboard_banner_shimmer.dart';
-import 'package:resturant_app/core/services/shop_settings_holder.dart';
-import 'package:resturant_app/features/feature_home/presentation/bloc/main_home_page_bloc.dart';
-import 'package:resturant_app/features/feature_home/presentation/widget/home_banner.dart';
+import 'package:chaharmahal_shop_front/core/services/shop_settings_holder.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/presentation/bloc/main_home_page_bloc.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/presentation/widget/home_banner.dart';
 
 class ScreenDashboard extends StatefulWidget {
   const ScreenDashboard({super.key});

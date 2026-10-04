@@ -10,7 +10,7 @@ import '../../../../core/services/location_service.dart';
 import '../../../../core/bloc/app/app_bloc.dart';
 import '../../../../core/bloc/error/error_bloc.dart';
 import '../../../../core/services/locator.dart';
-import 'package:resturant_app/core/widgets/cstm_snakbar.dart';
+import 'package:chaharmahal_shop_front/core/widgets/cstm_snakbar.dart';
 import '../../../../core/themes/theme_main.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';

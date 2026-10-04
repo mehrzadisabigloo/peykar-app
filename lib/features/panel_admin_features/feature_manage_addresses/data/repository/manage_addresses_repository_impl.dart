@@ -1,5 +1,5 @@
 import '../../../../../core/resources/data_state.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_manage_sending_methods/data/model/location_model.dart';
 import '../../domain/entity/manage_addresses_entity.dart';
 import '../../domain/repository/manage_addresses_repository.dart';
 import '../data_source/remote/manage_addresses_api_provider.dart';

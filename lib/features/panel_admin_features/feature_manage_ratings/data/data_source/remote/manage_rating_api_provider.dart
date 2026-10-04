@@ -1,7 +1,9 @@
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManageRatingApiProvider {
-  final GenericApiService _apiService = GenericApiService();
+  final GenericApiService _apiService;
+
+  ManageRatingApiProvider(this._apiService);
 
   Future<dynamic> getRatings({
     String? status,

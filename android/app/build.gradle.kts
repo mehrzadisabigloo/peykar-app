@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.resturant_app"
+    namespace = "com.example.chaharmahal_shop_front"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.resturant_app"
+        applicationId = "com.example.chaharmahal_shop_front"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -1,10 +1,11 @@
-import 'package:dio/dio.dart';
+import '../../../../../core/services/generic_api_service.dart';
 
 class DashboardApiProvider {
-  final Dio _dio = Dio(); // Consider injecting or using global dio
+  final GenericApiService _genericApiService;
 
-  Future<Response> getDashboardData() async {
-    // return await _dio.get('YOUR_ENDPOINT');
+  DashboardApiProvider(this._genericApiService);
+
+  Future<dynamic> getDashboardData() async {
     throw UnimplementedError();
   }
 }

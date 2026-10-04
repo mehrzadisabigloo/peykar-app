@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resturant_app/core/services/locator.dart';
+import 'package:chaharmahal_shop_front/core/enums/user_role.dart';
+import 'package:chaharmahal_shop_front/core/services/locator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../features/feature_home/presentation/bloc/main_home_page_bloc.dart';
 import '../../../features/feature_profile/domain/entity/profile_entity.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:resturant_app/core/themes/theme_main.dart';
+import 'package:chaharmahal_shop_front/core/themes/theme_main.dart';
 import '../../resources/consts.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -17,8 +18,9 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bool isAdmin = role == 'admin';
-    final bool isRepairman = role == 'repairman';
+    final userRole = UserRole.fromString(role);
+    final bool isAdmin = userRole.isAdmin;
+    final bool isRepairman = userRole.isRepairman;
 
     return Drawer(
       width: 285.w,
@@ -178,8 +180,9 @@ class AppDrawer extends StatelessWidget {
       builder: (context, state) {
         final ProfileEntity? profile = state.profile;
 
-        final bool isRepairman = (profile?.role ?? role) == 'repairman';
-        final bool isAdmin = (profile?.role ?? role) == 'admin';
+        final userRole = UserRole.fromString(profile?.role ?? role);
+        final bool isRepairman = userRole.isRepairman;
+        final bool isAdmin = userRole.isAdmin;
         final String displayName = profile?.fullName ?? (isAdmin ? 'مدیر سیستم' : 'کاربر زینو');
 
         return InkWell(

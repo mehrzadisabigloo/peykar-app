@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:resturant_app/core/bloc/app/app_bloc.dart';
-import 'package:resturant_app/core/services/locator.dart';
-import 'package:resturant_app/core/services/router.dart';
-import 'package:resturant_app/core/themes/bloc/theme_bloc.dart';
-import 'package:resturant_app/features/feature_auth/l10n/auth_localizations.dart';
-import 'package:resturant_app/features/feature_home/l10n/home_localizations.dart';
-import 'package:resturant_app/core/widgets/cstm_snakbar.dart';
-import 'package:resturant_app/features/feature_auth/presentation/bloc/authentication_bloc.dart';
+import 'package:chaharmahal_shop_front/core/bloc/app/app_bloc.dart';
+import 'package:chaharmahal_shop_front/core/services/locator.dart';
+import 'package:chaharmahal_shop_front/core/services/router.dart';
+import 'package:chaharmahal_shop_front/core/themes/bloc/theme_bloc.dart';
+import 'package:chaharmahal_shop_front/features/feature_auth/l10n/auth_localizations.dart';
+import 'package:chaharmahal_shop_front/features/feature_home/l10n/home_localizations.dart';
+import 'package:chaharmahal_shop_front/core/widgets/cstm_snakbar.dart';
+import 'package:chaharmahal_shop_front/features/feature_auth/presentation/bloc/authentication_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
                   routerConfig: router,
                   theme: themeState.themeData,
                   debugShowCheckedModeBanner: false,
-                  title: 'Restaurant App',
+                  title: 'Chaharmahal Shop',
                   localizationsDelegates: const [
                     AuthLocalizations.delegate,
                     HomeLocalizations.delegate,

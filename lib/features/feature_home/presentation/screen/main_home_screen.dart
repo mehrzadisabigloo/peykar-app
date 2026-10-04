@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:resturant_app/features/feature_auth/presentation/screen/pending_approval_screen.dart';
+import 'package:chaharmahal_shop_front/features/feature_auth/presentation/screen/pending_approval_screen.dart';
 import '../../../feature_dashboard/presentation/screen/screen_dashboard.dart';
 import '../bloc/main_home_page_bloc.dart';
 import '../widget/main_bottom_nav.dart';

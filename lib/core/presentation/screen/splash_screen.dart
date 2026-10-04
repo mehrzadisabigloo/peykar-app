@@ -2,11 +2,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resturant_app/core/resources/data_state.dart';
-import 'package:resturant_app/core/services/locator.dart';
-import 'package:resturant_app/core/services/shop_settings_holder.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_manage_shop_settings/domain/repository/manage_shop_settings_repository.dart';
-import '../../themes/theme_main.dart';
+import 'package:chaharmahal_shop_front/core/resources/data_state.dart';
+import 'package:chaharmahal_shop_front/core/services/locator.dart';
+import 'package:chaharmahal_shop_front/core/services/shop_settings_holder.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_manage_shop_settings/domain/repository/manage_shop_settings_repository.dart';
 import '../../services/auth_guard.dart';
 import '../../widgets/cstm_snakbar.dart';
 

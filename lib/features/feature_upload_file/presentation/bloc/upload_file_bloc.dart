@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:resturant_app/core/bloc/base/base_bloc.dart';
-import 'package:resturant_app/core/resources/data_state.dart';
-import 'package:resturant_app/features/feature_upload_file/domain/entity/upload_file_entity.dart';
-import 'package:resturant_app/features/feature_upload_file/domain/repository/upload_file_repository.dart';
+import 'package:chaharmahal_shop_front/core/bloc/base/base_bloc.dart';
+import 'package:chaharmahal_shop_front/core/resources/data_state.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/domain/entity/upload_file_entity.dart';
+import 'package:chaharmahal_shop_front/features/feature_upload_file/domain/repository/upload_file_repository.dart';
 import 'package:equatable/equatable.dart';
 
 part 'upload_file_event.dart';

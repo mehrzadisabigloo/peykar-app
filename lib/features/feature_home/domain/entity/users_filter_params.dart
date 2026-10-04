@@ -87,7 +87,7 @@ class UsersFilterParams {
       mobile: clearMobile ? null : (mobile ?? this.mobile),
       role: clearRole ? null : (role ?? this.role),
       filter: filter ?? this.filter,
-      // distanceKm: clearDistanceKm ? null : (distanceKm ?? this.distanceKm),
+      distanceKm: clearDistanceKm ? null : (distanceKm ?? this.distanceKm),
       sortByRating: clearSortByRating ? null : (sortByRating ?? this.sortByRating),
       occupationId: clearOccupationId ? null : (occupationId ?? this.occupationId),
     );

@@ -17,7 +17,7 @@ import '../bloc/banner_bloc.dart';
 import '../bloc/banner_event.dart';
 import '../bloc/banner_state.dart';
 import '../widget/banner_card.dart';
-import 'package:resturant_app/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
+import 'package:chaharmahal_shop_front/features/panel_admin_features/feature_banner/domain/entity/banner_entity.dart';
 
 class ScreenManageBanners extends StatefulWidget {
   const ScreenManageBanners({super.key});

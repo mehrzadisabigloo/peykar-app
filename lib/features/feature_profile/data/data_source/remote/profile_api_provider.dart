@@ -1,8 +1,9 @@
-
 import '../../../../../core/services/generic_api_service.dart';
 
 class ProfileApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
+
+  ProfileApiProvider(this._genericApiService);
 
   Future<dynamic> getProfileData() async {
     return await _genericApiService.get("/auth/me");

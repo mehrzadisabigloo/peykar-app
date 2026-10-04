@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:resturant_app/features/feature_reminders/data/model/reminder_response_model.dart';
-import 'package:resturant_app/features/feature_reminders/domain/entity/reminders_entity.dart';
-import 'package:resturant_app/core/utils/jalali_date.dart';
+import 'package:chaharmahal_shop_front/features/feature_reminders/data/model/reminder_response_model.dart';
+import 'package:chaharmahal_shop_front/core/utils/jalali_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -19,10 +18,11 @@ void main() {
       };
 
       final model = ReminderModel.fromJson(json);
+      final entity = model.toEntity();
 
-      expect(model.progress, 0.5);
-      expect(model.remainingText, '5000 کیلومتر مانده');
-      expect(model.progressColor, const Color(0xFF3F51B5)); // Default blue for < 0.7
+      expect(entity.progress, 0.5);
+      expect(entity.remainingText, '5000 کیلومتر مانده');
+      expect(entity.progressColor, Colors.orange); // Default orange for kilometer reminder
     });
 
     test('Kilometer reminder critical progress calculation', () {
@@ -37,15 +37,14 @@ void main() {
       };
 
       final model = ReminderModel.fromJson(json);
+      final entity = model.toEntity();
 
-      expect(model.progress, 0.95);
-      expect(model.remainingText, '500 کیلومتر مانده');
-      expect(model.progressColor, Colors.red);
+      expect(entity.progress, 0.95);
+      expect(entity.remainingText, '500 کیلومتر مانده');
+      expect(entity.progressColor, Colors.red);
     });
 
     test('Time reminder progress calculation', () {
-      // Mocking today's date is hard without a wrapper, 
-      // but we can use Jalali to generate strings relative to now.
       final now = DateTime.now();
       final done = now.subtract(const Duration(days: 30));
       final next = now.add(const Duration(days: 30));
@@ -65,10 +64,10 @@ void main() {
       };
 
       final model = ReminderModel.fromJson(json);
+      final entity = model.toEntity();
 
-      // Should be around 0.5
-      expect(model.progress, closeTo(0.5, 0.05));
-      expect(model.remainingText, anyOf(contains('30 روز مانده'), contains('29 روز مانده')));
+      expect(entity.progress, closeTo(0.5, 0.05));
+      expect(entity.remainingText, anyOf(contains('30 روز مانده'), contains('29 روز مانده')));
     });
   });
 }

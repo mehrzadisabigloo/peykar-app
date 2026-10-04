@@ -1,30 +1,31 @@
-import 'package:dio/dio.dart';
 import '../../../../../../core/services/generic_api_service.dart';
 
 class ManageReminderTypesApiProvider {
-  final GenericApiService _genericApiService = GenericApiService();
+  final GenericApiService _genericApiService;
 
-  Future<Response> addReminderType(String title) async {
+  ManageReminderTypesApiProvider(this._genericApiService);
+
+  Future<dynamic> addReminderType(String title) async {
     return await _genericApiService.post("/reminder-types/add", {'title': title});
   }
 
-  Future<Response> editReminderType(String id, String title) async {
+  Future<dynamic> editReminderType(String id, String title) async {
     return await _genericApiService.put("/reminder-types/edit/$id", {'title': title});
   }
 
-  Future<Response> deleteReminderType(String id) async {
+  Future<dynamic> deleteReminderType(String id) async {
     return await _genericApiService.delete("/reminder-types/delete/$id");
   }
 
-  Future<Response> getReminderType(String id) async {
+  Future<dynamic> getReminderType(String id) async {
     return await _genericApiService.get("/reminder-types/get/$id");
   }
 
-  Future<Response> changeStatus(String id) async {
+  Future<dynamic> changeStatus(String id) async {
     return await _genericApiService.patch("/reminder-types/change-status/$id", {});
   }
 
-  Future<Response> listReminderTypes({
+  Future<dynamic> listReminderTypes({
     String? title,
     bool isPaginate = false,
     int countItem = 10,
@@ -38,7 +39,7 @@ class ManageReminderTypesApiProvider {
     });
   }
 
-  Future<Response> listActiveReminderTypes({
+  Future<dynamic> listActiveReminderTypes({
     String? title,
     bool isPaginate = false,
     int countItem = 10,
