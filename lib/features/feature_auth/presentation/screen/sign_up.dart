@@ -306,19 +306,55 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDynamicUploadGroup('تصاویر هویتی (کارت ملی / شناسنامه)*', _identityImageIds, 'profile_image'),
+        _buildDynamicUploadGroup(
+          'تصاویر هویتی (کارت ملی / شناسنامه)*',
+          _identityImageIds,
+          'profile_image',
+          subtitle: 'لطفاً تصویر کارت ملی یا شناسنامه خود را برای احراز هویت آپلود کنید',
+          uploadHintText: 'آپلود کارت ملی',
+        ),
         SizedBox(height: 24.h),
-        _buildDynamicUploadGroup('تصاویر فروشگاه / کارگاه', _shopImageIds, 'profile_image'),
+        _buildDynamicUploadGroup(
+          'تصاویر فروشگاه / کارگاه',
+          _shopImageIds,
+          'profile_image',
+          subtitle: 'لطفاً تصویر محل کار، فروشگاه یا کارگاه خود را آپلود کنید',
+          uploadHintText: 'آپلود عکس فروشگاه',
+        ),
       ],
     );
   }
 
-  Widget _buildDynamicUploadGroup(String label, List<String> ids, String type) {
+  Widget _buildDynamicUploadGroup(
+    String label,
+    List<String> ids,
+    String type, {
+    String? subtitle,
+    String? uploadHintText,
+  }) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface.withValues(alpha: 0.87))),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.87),
+          ),
+        ),
+        if (subtitle != null) ...[
+          SizedBox(height: 4.h),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: theme.colorScheme.primary.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
         SizedBox(height: 12.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -332,6 +368,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                     index: entry.key,
                     imageType: type,
                     initialImageId: entry.value,
+                    uploadText: uploadHintText,
                     onUploadSuccess: (id) {
                       if (id == null) {
                         setState(() {
@@ -349,6 +386,7 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
                     key: const ValueKey('plus_box'),
                     index: ids.length,
                     imageType: type,
+                    uploadText: uploadHintText,
                     onUploadSuccess: (id) {
                       if (id != null) {
                         setState(() {
@@ -563,14 +601,18 @@ class _SignUpPageState extends BaseAuthStatefulWidgetState<SignUpPage, Authentic
   }
 
   void _registerRepairman() {
+    if (_identityImageIds.isEmpty) {
+      CstmSnackBar.showError(context, 'لطفاً تصویر کارت ملی یا شناسنامه خود را آپلود کنید');
+      return;
+    }
+
     if (_repFirstNameController.text.isEmpty || 
         _repLastNameController.text.isEmpty || 
         _repBrandController.text.isEmpty || 
         _repAddressController.text.isEmpty || 
         _mobileController.text.isEmpty || 
         _selectedOccupationId == null || 
-        _selectedLocation == null ||
-        _identityImageIds.isEmpty) {
+        _selectedLocation == null) {
       CstmSnackBar.showError(context, 'لطفا تمامی موارد ستاره‌دار را تکمیل کنید');
       return;
     }

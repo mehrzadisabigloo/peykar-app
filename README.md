@@ -24,7 +24,7 @@
 
 ---
 
-## ❓ 1. The Problem & Challenge Statement (مسئله‌ای که حل شد)
+## ❓ 1. The Problem & Challenge Statement
 
 ### Market & Technical Pain Points
 1. **Commercial Fragmentation**: Consumers were forced to switch between multiple separate applications for purchasing physical products, discovering local repair technicians, booking service appointments, and tracking recurring service maintenance schedules.
@@ -34,7 +34,7 @@
 
 ---
 
-## 💡 2. The Solution & Core Value Delivered (راهکار ارائه شده)
+## 💡 2. The Solution & Core Value Delivered
 
 **Chaharmahal Shop Front** resolves these challenges by providing a 3-in-1 unified digital marketplace:
 
@@ -58,11 +58,11 @@
 
 ---
 
-## 📱 3. UI & Visual Feature Showcase (اسکرین‌شات‌ها و قابلیت‌های تصویری)
+## 📱 3. UI & Visual Feature Showcase
 
 | 🔐 **Login & Auth** | 🛍️ **Category Page** | 📅 **Appointments** | 👑 **Admin Panel** | 👤 **User Profile** |
 | :---: | :---: | :---: | :---: | :---: |
-| <img src="./screenshots/login.png" height="280" alt="Login & Auth" /> | <img src="./screenshots/category-page.png" height="280" alt="Category Page" /> | <img src="./screenshots/appoinments.png" height="280" alt="Appointments" /> | <img src="./screenshots/panel-admin.png" height="280" alt="Admin Panel" /> | <img src="./screenshots/profile.png" height="280" alt="User Profile" /> |
+| <img src="./screenshots/login.png" width="100%" alt="Login & Auth" /> | <img src="./screenshots/category-page.png" width="100%" alt="Category Page" /> | <img src="./screenshots/appoinments.png" width="100%" alt="Appointments" /> | <img src="./screenshots/panel-admin.png" width="100%" alt="Admin Panel" /> | <img src="./screenshots/profile.png" width="100%" alt="User Profile" /> |
 
 ---
 
@@ -113,7 +113,7 @@
 
 ---
 
-## 🏛️ 4. System Architecture & Engineering Principles (معماری و اصول مهندسی)
+## 🏛️ 4. System Architecture & Engineering Principles
 
 The application adheres to clean software engineering principles:
 
@@ -154,7 +154,7 @@ The application adheres to clean software engineering principles:
 
 ---
 
-## 💎 5. Core Feature Matrix (قابلیت‌های اصلی)
+## 💎 5. Core Feature Matrix
 
 | Domain | Key Capabilities |
 | :--- | :--- |
@@ -169,7 +169,7 @@ The application adheres to clean software engineering principles:
 
 ---
 
-## 🛠️ 6. Technology Stack & Dependencies (تکنولوژی‌های استفاده شده)
+## 🛠️ 6. Technology Stack & Dependencies
 
 ### Framework & State Management
 - **Framework**: Flutter `3.x` (Dart SDK `^3.12.2`)
@@ -191,7 +191,7 @@ The application adheres to clean software engineering principles:
 
 ---
 
-## 📂 7. Repository Structure (ساختار کد)
+## 📂 7. Repository Structure
 
 ```text
 .scripts/                        # Developer Automation & Feature Generator Scripts
@@ -237,7 +237,7 @@ lib/
 
 ---
 
-## 🚀 8. Quick Start & Setup Guide (نحوه اجرای پروژه)
+## 🚀 8. Quick Start & Setup Guide
 
 ### Prerequisites
 - **Flutter SDK**: `>= 3.12.2`
@@ -246,7 +246,7 @@ lib/
 
 ### 1. Repository Setup
 ```bash
-git clone  https://github.com/mehrzadisabigloo/peykar-app.git
+git clone https://github.com/mehrzadisabigloo/peykar-app.git
 ```
 
 ### 2. Install Dependencies
@@ -271,7 +271,7 @@ flutter run -d chrome
 
 ---
 
-## 🛠️ 9. Production Build Commands (دستورات خروجی گرفتن)
+## 🛠️ 9. Production Build Commands
 
 ```bash
 # Standalone APK (Android)
@@ -286,7 +286,7 @@ flutter build ios --release
 
 ---
 
-## ⚡ 10. Developer Automation & Feature Generator (`.scripts/`)
+## ⚡ 10. Developer Automation & Feature Generator (.scripts/)
 
 To maintain strict **Clean Architecture** conventions and streamline development, the project includes an automated PowerShell scaffolding script located in the `.scripts/` folder.
 

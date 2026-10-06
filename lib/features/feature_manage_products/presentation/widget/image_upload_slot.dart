@@ -20,6 +20,7 @@ class ImageUploadSlot extends StatefulWidget {
   final double? width;
   final double? height;
   final BoxFit fit;
+  final String? uploadText;
 
   const ImageUploadSlot({
     super.key,
@@ -30,6 +31,7 @@ class ImageUploadSlot extends StatefulWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
+    this.uploadText,
   });
 
   @override
@@ -236,7 +238,7 @@ class _ImageUploadSlotState extends BaseManageProductsStatefulWidgetState<ImageU
                     Icon(Icons.add_photo_alternate, color: Theme.of(context).colorScheme.outline, size: 32.sp),
                     SizedBox(height: 4.h),
                     Text(
-                      'انتخاب',
+                      widget.uploadText ?? 'آپلود تصویر',
                       style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.outline),
                     ),
                   ],
